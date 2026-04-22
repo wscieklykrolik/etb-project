@@ -1,5 +1,7 @@
-@extends('layouts.main')
+@extends('layouts.app')
 
 @section('content')
-    <h1 class="text-3xl font-bold">Witamy w ETB 🏀</h1>
+
+    @include('partials.welcome')
+
 @endsection
