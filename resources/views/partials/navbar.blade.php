@@ -44,11 +44,37 @@
 
         @auth
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2 hover:text-yellow-400 transition font-medium">
-                <i data-lucide="user"></i> Konto
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-5 h-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2">
+
+                    <!-- głowa -->
+                    <circle cx="12" cy="8" r="4" />
+
+                    <!-- ramiona -->
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                </svg> Konto
             </a>
         @else
             <a href="{{ route('login') }}" class="flex items-center gap-2 hover:text-yellow-400 transition font-medium">
-                <i data-lucide="user"></i> Zaloguj
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-5 h-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2">
+
+                    <!-- głowa -->
+                    <circle cx="12" cy="8" r="4" />
+
+                    <!-- ramiona -->
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                </svg> Zaloguj
             </a>
         @endauth
 
