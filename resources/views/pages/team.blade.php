@@ -1,5 +1,5 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
-    <h2>Drużyna</h2>
+    <h1 class="text-3xl font-bold">Drużyna</h1>
 @endsection

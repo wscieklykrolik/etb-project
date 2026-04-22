@@ -18,3 +18,8 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::view('/team', 'pages.team');
+Route::view('/schedule', 'pages.schedule');
+Route::view('/news', 'pages.news');
+Route::view('/contact', 'pages.contact');
