@@ -3,30 +3,22 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
-    }
-}
-use Illuminate\Support\Facades\Gate;
+        Gate::define('assign-roles', fn (User $user): bool => $user->isAdmin());
 
-public function boot(): void
-{
-    Gate::define('isAdmin', function ($user) {
-        return $user->is_admin;
-    });
+        Gate::define('access-admin-panel', fn (User $user): bool =>
+        $user->hasAnyRole([User::ROLE_ADMIN, User::ROLE_EMPLOYEE])
+        );
+    }
 }
