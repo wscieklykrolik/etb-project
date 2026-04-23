@@ -1,47 +1,116 @@
 diff --git a/resources/css/app.css b/resources/css/app.css
-index b5c61c956711f981a41e95f7fcf0038436cfbb22..708458d8ef322777b8a9993adabca112f4689e19 100644
+index cc8391f792a3241b9298db2dd1ee7038119f94ad..5abee7ce5437b990009316782188d076e6261cd1 100644
 --- a/resources/css/app.css
 +++ b/resources/css/app.css
-@@ -1,3 +1,28 @@
+@@ -1,53 +1,30 @@
  @tailwind base;
  @tailwind components;
  @tailwind utilities;
-+
-+.dropdown-panel {
-+    position: absolute;
-+    top: 100%;
-+    left: 0;
-+    min-width: 240px;
-+    background: #111827;
-+    border: 1px solid #3f3f46;
-+    border-radius: 0.5rem;
-+    padding: 0.5rem;
-+    display: flex;
-+    flex-direction: column;
-+    gap: 0.25rem;
-+    z-index: 40;
-+}
-+
-+.dropdown-panel a {
-+    padding: 0.5rem 0.75rem;
-+    border-radius: 0.375rem;
-+}
-+
-+.dropdown-panel a:hover {
-+    background: #facc15;
-+    color: #000;
-+}
+
+ .dropdown-panel {
+     position: absolute;
+     top: 100%;
+     left: 0;
+-    min-width: 240px;
+-    background: #111827;
+-    border: 1px solid #3f3f46;
+-    border-radius: 0.5rem;
+-    padding: 0.5rem;
+-    display: flex;
+-    flex-direction: column;
+-    gap: 0.25rem;
+-    z-index: 40;
+-}
+-
+-.dropdown-panel a {
+-    padding: 0.5rem 0.75rem;
+-    border-radius: 0.375rem;
+-}
+-
+-.dropdown-panel a:hover {
+-    background: #facc15;
+-    color: #000;
+-}
+-
+-.dropdown-panel {
+-    position: absolute;
+-    top: 100%;
+-    left: 0;
+-    min-width: 240px;
+-    background: #111827;
+-    border: 1px solid #3f3f46;
++    min-width: 250px;
++    background: #f4f4f5;
++    border: 1px solid #d4d4d8;
+     border-radius: 0.5rem;
+     padding: 0.5rem;
+     display: flex;
+     flex-direction: column;
+     gap: 0.25rem;
+     z-index: 40;
++    color: #18181b;
++    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+ }
+
+ .dropdown-panel a {
+     padding: 0.5rem 0.75rem;
+     border-radius: 0.375rem;
+ }
+
+ .dropdown-panel a:hover {
+     background: #facc15;
+     color: #000;
+ }
 diff --git a/resources/js/app.js b/resources/js/app.js
-index 7e8702e90e91aca4a71d9f65746c547a453306b3..95b28623fe3a535cdcb0652955eba223eed9a1ef 100644
+index bbd29a85c253da39aee307dd34e09aae7d65a03e..8d06dfb05d69779a9b27a2c9331f4f6d2c6bbf17 100644
 --- a/resources/js/app.js
 +++ b/resources/js/app.js
-@@ -34,25 +34,51 @@ document.addEventListener('DOMContentLoaded', () => {
+@@ -1,110 +1,128 @@
+ import './bootstrap';
+ import Alpine from 'alpinejs';
+ import { createIcons, icons } from 'lucide';
+
+ window.Alpine = Alpine;
+-
+ Alpine.start();
+
+-/*
+-|--------------------------------------------------------------------------
+-| LUCIDE ICONS
+-|--------------------------------------------------------------------------
+-*/
+-document.addEventListener('DOMContentLoaded', () => {
++window.reinitializeUi = function reinitializeUi() {
+     createIcons({ icons });
+-});
++};
+
+-/*
+-|--------------------------------------------------------------------------
+-| COUNTDOWN
+-|--------------------------------------------------------------------------
+-*/
+ document.addEventListener('DOMContentLoaded', () => {
++    window.reinitializeUi();
++});
+
++document.addEventListener('DOMContentLoaded', () => {
+     const el = document.getElementById('countdown');
+-
+     if (!el) return;
+
+     const matchDate = el.dataset.date;
+     if (!matchDate) return;
+
+     const target = new Date(matchDate).getTime();
+
      function updateCountdown() {
          const now = new Date().getTime();
          const diff = target - now;
 
          if (diff <= 0) {
-             el.innerHTML = "Mecz trwa 🔥";
+-            el.innerHTML = "Mecz trwa 🔥";
++            el.innerHTML = 'Mecz trwa 🔥';
              return;
          }
 
@@ -50,1175 +119,660 @@ index 7e8702e90e91aca4a71d9f65746c547a453306b3..95b28623fe3a535cdcb0652955eba223
          const minutes = Math.floor((diff / (1000 * 60)) % 60);
          const seconds = Math.floor((diff / 1000) % 60);
 
-         el.innerHTML = `
-             <span>${days} dni</span> :
-             <span>${hours} godz</span> :
-             <span>${minutes} min</span> :
-             <span>${seconds} sek</span>
-         `;
+-        el.innerHTML = `
+-            <span>${days} dni</span> :
+-            <span>${hours} godz</span> :
+-            <span>${minutes} min</span> :
+-            <span>${seconds} sek</span>
+-        `;
++        el.innerHTML = `<span>${days} dni</span> : <span>${hours} godz</span> : <span>${minutes} min</span> : <span>${seconds} sek</span>`;
      }
 
      updateCountdown();
      setInterval(updateCountdown, 1000);
  });
+
+ window.adjustFontSize = function adjustFontSize(change) {
+     const root = document.documentElement;
+     const current = parseFloat(getComputedStyle(root).fontSize);
+     const next = Math.min(22, Math.max(14, current + change * 16));
+     root.style.fontSize = `${next}px`;
+ };
+
++const searchIndex = [
++    { label: 'Aktualności', url: '/news', keywords: ['aktualnosci', 'news'] },
++    { label: 'Klub', url: '/club', keywords: ['klub'] },
++    { label: 'Rozgrywki', url: '/schedule', keywords: ['rozgrywki', 'liga', 'terminarz'] },
++    { label: 'Kontakt', url: '/contact', keywords: ['kontakt', 'email', 'telefon'] },
++    { label: 'Drużyna', url: '/team', keywords: ['druzyna', 'zawodnicy'] },
++    { label: 'Zawodnicy 3x3', url: '/team-3x3/players', keywords: ['3x3', 'trzy na trzy', 'zawodnicy 3x3', 'druzyna 3x3'] },
++    { label: 'Tabela', url: '/schedule/table', keywords: ['tabela'] },
++    { label: 'Terminarz EŁZKosz', url: '/schedule/mzkosz', keywords: ['ełzkosz', 'elzkosz', 'terminarz ełzkosz'] },
++    { label: 'III liga mężczyzn EŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'ezkosz', 'e-zkosz'] },
++];
 +
-+window.adjustFontSize = function adjustFontSize(change) {
-+    const root = document.documentElement;
-+    const current = parseFloat(getComputedStyle(root).fontSize);
-+    const next = Math.min(22, Math.max(14, current + change * 16));
-+    root.style.fontSize = `${next}px`;
++function populateSearchSuggestions() {
++    const datalist = document.getElementById('etb-search-suggestions');
++    if (!datalist) return;
++
++    datalist.innerHTML = searchIndex
++        .map((item) => `<option value="${item.label}"></option>`)
++        .join('');
++}
++
++document.addEventListener('DOMContentLoaded', populateSearchSuggestions);
++
+ window.etbSearch = function etbSearch() {
+     const input = document.getElementById('etb-search');
+     if (!input) return;
+
+     const query = input.value.trim().toLowerCase();
+     if (!query) return;
+
+-    const main = document.getElementById('app-main');
+-    if (!main) return;
++    const directMatch = searchIndex.find((item) => item.label.toLowerCase() === query);
++    const partialMatch = searchIndex.find((item) => item.label.toLowerCase().includes(query)
++        || item.keywords.some((keyword) => keyword.includes(query) || query.includes(keyword)));
++
++    const result = directMatch || partialMatch;
+
+-    const text = main.innerText.toLowerCase();
+-    if (!text.includes(query)) {
+-        alert('Brak wyników dla podanej frazy.');
++    if (result) {
++        window.location.href = result.url;
+         return;
+     }
+
+-    window.find(input.value);
+-};
+-
+-window.adjustFontSize = function adjustFontSize(change) {
+-    const root = document.documentElement;
+-    const current = parseFloat(getComputedStyle(root).fontSize);
+-    const next = Math.min(22, Math.max(14, current + change * 16));
+-    root.style.fontSize = `${next}px`;
+-};
+-
+-window.etbSearch = function etbSearch() {
+-    const input = document.getElementById('etb-search');
+-    if (!input) return;
+-
+-    const query = input.value.trim().toLowerCase();
+-    if (!query) return;
+-
+     const main = document.getElementById('app-main');
+-    if (!main) return;
+-
+-    const text = main.innerText.toLowerCase();
+-    if (!text.includes(query)) {
+-        alert('Brak wyników dla podanej frazy.');
++    if (main && main.innerText.toLowerCase().includes(query)) {
++        window.find(input.value);
+         return;
+     }
+
+-    window.find(input.value);
++    alert('Brak wyników dla podanej frazy.');
 +};
 +
-+window.etbSearch = function etbSearch() {
-+    const input = document.getElementById('etb-search');
-+    if (!input) return;
-+
-+    const query = input.value.trim().toLowerCase();
-+    if (!query) return;
-+
-+    const main = document.getElementById('app-main');
-+    if (!main) return;
-+
-+    const text = main.innerText.toLowerCase();
-+    if (!text.includes(query)) {
-+        alert('Brak wyników dla podanej frazy.');
-+        return;
-+    }
-+
-+    window.find(input.value);
-+};
++window.materialsCarousel = function materialsCarousel(items) {
++    return {
++        items,
++        page: 0,
++        timer: null,
++        get chunks() {
++            const result = [];
++            for (let i = 0; i < this.items.length; i += 4) {
++                result.push(this.items.slice(i, i + 4));
++            }
++            return result;
++        },
++        get visibleItems() {
++            return this.chunks[this.page] ?? [];
++        },
++        goTo(index) {
++            this.page = index;
++        },
++        start() {
++            if (this.chunks.length <= 1) return;
++            this.timer = setInterval(() => {
++                this.page = (this.page + 1) % this.chunks.length;
++            }, 5000);
++        },
++    };
+ };
 diff --git a/resources/views/layouts/app.blade.php b/resources/views/layouts/app.blade.php
-index 865c63ab8485d06aaec3624eb156ebf719c92ed2..01dbd773385b00c8c1bf6fae96c78552f1802588 100644
+index 01dbd773385b00c8c1bf6fae96c78552f1802588..8fd12d63d508f61bda6326ac5a292f9cccf238e6 100644
 --- a/resources/views/layouts/app.blade.php
 +++ b/resources/views/layouts/app.blade.php
-@@ -1,50 +1,52 @@
- <!DOCTYPE html>
- <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
- <head>
-     <meta charset="utf-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-     <title>{{ config('app.name', 'Laravel') }}</title>
-
-     <!-- Fonts -->
-     <link rel="preconnect" href="https://fonts.bunny.net">
-     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-     <!-- Styles & Scripts -->
-     @vite(['resources/css/app.css', 'resources/js/app.js'])
- </head>
-
- <body class="bg-black text-white">
-
- @include('partials.navbar')
-
- <main id="app-main">
-     @yield('content')
- </main>
-
-+@include('partials.footer')
-+
- <!-- Simple AJAX navigation: ładuje tylko zawartość main, zachowuje statyczny navbar -->
- <script>
- document.addEventListener('DOMContentLoaded', function() {
-     // Inicjalizuje handlery dla linków z klasą .ajax-link
-     function initAjaxLinks() {
-         document.querySelectorAll('a.ajax-link').forEach(link => {
-             // unikaj wielokrotnego przypięcia
-             if (link.dataset.ajaxAttached) return;
-             link.dataset.ajaxAttached = '1';
-
-             link.addEventListener('click', async function(e) {
-                 const href = link.getAttribute('href');
-                 // pozwól normalne działanie dla zewnętrznych lub pusta href
-                 if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
-                 // jeśli link prowadzi do innego hosta, zostaw normalne przeładowanie
-                 try {
-                     const url = new URL(href, location.origin);
-                     if (url.origin !== location.origin) return;
-                 } catch (err) {
+@@ -47,66 +47,68 @@ function initAjaxLinks() {
                      // nieprawidłowy URL — fallback
                      return;
                  }
 
                  e.preventDefault();
 
-diff --git a/resources/views/pages/academy.blade.php b/resources/views/pages/academy.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..5383629fc41e3084dfe613162cac0ef4eba96288
---- /dev/null
-+++ b/resources/views/pages/academy.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Akademia</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-board.blade.php b/resources/views/pages/club-board.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..1b712074c5182a19580e20433b63b4b91e88fc55
---- /dev/null
-+++ b/resources/views/pages/club-board.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Władze klubu</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-business.blade.php b/resources/views/pages/club-business.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..bde47b619054c96e518f48b717d7c5377bc3b324
---- /dev/null
-+++ b/resources/views/pages/club-business.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Oferta biznesowa</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-history.blade.php b/resources/views/pages/club-history.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..4e9a6b267d9fc46602eab5814d77f8f2f8dcab50
---- /dev/null
-+++ b/resources/views/pages/club-history.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Historia</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-investors.blade.php b/resources/views/pages/club-investors.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..fc127517de966a8e55f22f0f6bf8c4dabdc06969
---- /dev/null
-+++ b/resources/views/pages/club-investors.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Inwestorzy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-sponsors.blade.php b/resources/views/pages/club-sponsors.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..b079f4c933d8a9568dfb7021530181f56185ecf3
---- /dev/null
-+++ b/resources/views/pages/club-sponsors.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Sponsorzy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-success.blade.php b/resources/views/pages/club-success.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..7b7c6adddf01ba3c7ef266a11e1c86c232a8a1ff
---- /dev/null
-+++ b/resources/views/pages/club-success.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Sukcesy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club-venue.blade.php b/resources/views/pages/club-venue.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..e4bbfcb2a7a96420ca44c28a627ff66ab3db987c
---- /dev/null
-+++ b/resources/views/pages/club-venue.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub / Obiekt</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/club.blade.php b/resources/views/pages/club.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..ce6793ef32cc70a485bdd3c67f114b8390c480b6
---- /dev/null
-+++ b/resources/views/pages/club.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Klub</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/contact.blade.php b/resources/views/pages/contact.blade.php
-index 05c6dde156dcba0658f8c5be251bbe2413280489..00150162e475a68e4e09f95dfb3af5891627a1c3 100644
---- a/resources/views/pages/contact.blade.php
-+++ b/resources/views/pages/contact.blade.php
-@@ -1,5 +1,13 @@
- @extends('layouts.app')
+                 try {
+                     const res = await fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                     if (!res.ok) throw new Error('Network response was not ok');
 
- @section('content')
--    <h2>Kontakt</h2>
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Kontakt</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
- @endsection
+                     const text = await res.text();
+                     const parser = new DOMParser();
+                     const doc = parser.parseFromString(text, 'text/html');
+
+                     // szukamy nowej zawartości main (najpierw #app-main, potem main)
+                     const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
+                     const curMain = document.querySelector('#app-main') || document.querySelector('main');
+
+                     if (newMain && curMain) {
+                         curMain.innerHTML = newMain.innerHTML;
+                         // zaktualizuj URL i historię
+                         history.pushState({ ajax: true }, '', href);
+                         window.scrollTo(0,0);
+                         // ponownie przypnij handlery (np. linki wewnątrz nowo załadowanej zawartości)
+                         initAjaxLinks();
++                        if (window.reinitializeUi) window.reinitializeUi();
+                     } else {
+                         // fallback — pełne przeładowanie
+                         location.href = href;
+                     }
+                 } catch (err) {
+                     console.error('AJAX navigation failed:', err);
+                     location.href = href;
+                 }
+             });
+         });
+     }
+
+     initAjaxLinks();
+
+     // Obsługa back/forward
+     window.addEventListener('popstate', function(e) {
+         const href = location.href;
+         fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+             .then(r => {
+                 if (!r.ok) throw new Error('Network response not ok');
+                 return r.text();
+             })
+             .then(text => {
+                 const parser = new DOMParser();
+                 const doc = parser.parseFromString(text, 'text/html');
+                 const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
+                 const curMain = document.querySelector('#app-main') || document.querySelector('main');
+                 if (newMain && curMain) {
+                     curMain.innerHTML = newMain.innerHTML;
+                     initAjaxLinks();
++                    if (window.reinitializeUi) window.reinitializeUi();
+                 } else {
+                     location.reload();
+                 }
+             })
+             .catch(() => { location.reload(); });
+     });
+ });
+ </script>
+
+ </body>
+ </html>
 diff --git a/resources/views/pages/home.blade.php b/resources/views/pages/home.blade.php
-index 8a0079e05f9ca3631dc587141dd5267c5ff61cfe..19548f63f52b2a84a40cfa3e585fefb0abf1d825 100644
+index fb9556cb895ae4628e78aef0b86292439d272f4f..65d6a0a0c205d6ae4558dfe256680c62e28b78bc 100644
 --- a/resources/views/pages/home.blade.php
 +++ b/resources/views/pages/home.blade.php
-@@ -1,7 +1,42 @@
+@@ -1,43 +1,54 @@
  @extends('layouts.app')
 
  @section('content')
--
      @include('partials.welcome')
 
-+    <section class="max-w-7xl mx-auto px-6 py-10 space-y-10">
-+        <div>
-+            <h2 class="text-2xl font-bold mb-4">4 najnowsze materiały</h2>
-+            <div class="grid md:grid-cols-4 gap-4">
-+                @foreach($latestArticles as $item)
-+                    <article class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
-+                        <span class="text-xs uppercase tracking-wider text-yellow-400">{{ $item['category'] }}</span>
-+                        <h3 class="font-semibold mt-2 mb-2">{{ $item['title'] }}</h3>
-+                        <p class="text-sm text-zinc-400 mb-2">{{ $item['excerpt'] }}</p>
-+                        <p class="text-xs text-zinc-500">{{ $item['date'] }}</p>
-+                    </article>
-+                @endforeach
+     <section class="max-w-7xl mx-auto px-6 py-10 space-y-10">
+-        <div>
+-            <h2 class="text-2xl font-bold mb-4">4 najnowsze materiały</h2>
++        <div x-data="materialsCarousel(@js($latestArticles))" x-init="start()">
++            <div class="flex items-center justify-between mb-4">
++                <h2 class="text-2xl font-bold">Najnowsze materiały</h2>
++                <div class="flex gap-2">
++                    <template x-for="(chunk, index) in chunks" :key="index">
++                        <button @click="goTo(index)" class="w-2.5 h-2.5 rounded-full transition"
++                                :class="index === page ? 'bg-yellow-400' : 'bg-zinc-500'"
++                                :aria-label="`Przejdź do strony ${index + 1}`"></button>
++                    </template>
++                </div>
 +            </div>
-+        </div>
-+
-+        <div>
-+            <h2 class="text-2xl font-bold mb-4">Terminarz przyszły (5x5)</h2>
-+            <div class="grid md:grid-cols-3 gap-4">
-+                @forelse($upcomingGames as $game)
-+                    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
-+                        <h3 class="font-semibold">ETB vs {{ $game->opponent }}</h3>
-+                        <p class="text-sm text-zinc-400">{{ \Carbon\Carbon::parse($game->match_date)->format('d.m.Y H:i') }}</p>
-+                        <p class="text-sm text-zinc-300">{{ $game->location }}</p>
-+                    </div>
-+                @empty
-+                    <p class="text-zinc-400">Brak zaplanowanych meczów.</p>
-+                @endforelse
-+            </div>
-+        </div>
-+
-+        <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6">
-+            <h2 class="text-2xl font-bold mb-2">Następny turniej 3x3</h2>
-+            <p class="text-yellow-400 font-semibold">{{ $next3x3Tournament['name'] }}</p>
-+            <p class="text-zinc-300">{{ $next3x3Tournament['date'] }} • {{ $next3x3Tournament['place'] }}</p>
-+        </div>
-+    </section>
- @endsection
-diff --git a/resources/views/pages/news-articles.blade.php b/resources/views/pages/news-articles.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..555950f0f35a9a883ee5439c6656302ddafe7fe6
---- /dev/null
-+++ b/resources/views/pages/news-articles.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Aktualności / Artykuły</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/news-galleries.blade.php b/resources/views/pages/news-galleries.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..2dde6748131dcc9946f2af0149aa5a7456cd9ef8
---- /dev/null
-+++ b/resources/views/pages/news-galleries.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Aktualności / Galerie</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/news-videos.blade.php b/resources/views/pages/news-videos.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..d9d06496854642f8a33d2db2e3e91e5f73b67bfd
---- /dev/null
-+++ b/resources/views/pages/news-videos.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Aktualności / Wideo</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/news.blade.php b/resources/views/pages/news.blade.php
-index 336a8ae3b5a17748a7215df7e6fc7ecf93e7524a..d7ef16d788aa71732c76ace3a893684195484ea7 100644
---- a/resources/views/pages/news.blade.php
-+++ b/resources/views/pages/news.blade.php
-@@ -1,5 +1,13 @@
- @extends('layouts.app')
+             <div class="grid md:grid-cols-4 gap-4">
+-                @foreach($latestArticles as $item)
++                <template x-for="item in visibleItems" :key="item.title + item.date">
+                     <article class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+-                        <span class="text-xs uppercase tracking-wider text-yellow-400">{{ $item['category'] }}</span>
+-                        <h3 class="font-semibold mt-2 mb-2">{{ $item['title'] }}</h3>
+-                        <p class="text-sm text-zinc-400 mb-2">{{ $item['excerpt'] }}</p>
+-                        <p class="text-xs text-zinc-500">{{ $item['date'] }}</p>
++                        <span class="text-xs uppercase tracking-wider text-yellow-400" x-text="item.category"></span>
++                        <h3 class="font-semibold mt-2 mb-2" x-text="item.title"></h3>
++                        <p class="text-sm text-zinc-400 mb-2" x-text="item.excerpt"></p>
++                        <p class="text-xs text-zinc-500" x-text="item.date"></p>
+                     </article>
+-                @endforeach
++                </template>
+             </div>
+         </div>
 
- @section('content')
--    <h2>Aktualności</h2>
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Aktualności</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
+         <div>
+             <h2 class="text-2xl font-bold mb-4">Terminarz przyszły (5x5)</h2>
+             <div class="grid md:grid-cols-3 gap-4">
+-                @forelse($upcomingGames as $game)
+-                    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
++                @forelse($upcomingGames as $index => $game)
++                    <div class="rounded-lg p-4 border {{ $index === 0 ? 'bg-yellow-400 text-black border-yellow-300' : 'bg-zinc-900 border-zinc-700' }}">
++                        <p class="text-xs font-semibold uppercase mb-1 {{ $index === 0 ? 'text-black' : 'text-yellow-400' }}">
++                            {{ $index === 0 ? 'Najbliższy mecz' : 'Mecz' }}
++                        </p>
+                         <h3 class="font-semibold">ETB vs {{ $game->opponent }}</h3>
+-                        <p class="text-sm text-zinc-400">{{ \Carbon\Carbon::parse($game->match_date)->format('d.m.Y H:i') }}</p>
+-                        <p class="text-sm text-zinc-300">{{ $game->location }}</p>
++                        <p class="text-sm {{ $index === 0 ? 'text-black/80' : 'text-zinc-400' }}">{{ \Carbon\Carbon::parse($game->match_date)->format('d.m.Y H:i') }}</p>
++                        <p class="text-sm {{ $index === 0 ? 'text-black/80' : 'text-zinc-300' }}">{{ $game->location }}</p>
+                     </div>
+                 @empty
+                     <p class="text-zinc-400">Brak zaplanowanych meczów.</p>
+                 @endforelse
+             </div>
+         </div>
+
+         <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6">
+             <h2 class="text-2xl font-bold mb-2">Następny turniej 3x3</h2>
+             <p class="text-yellow-400 font-semibold">{{ $next3x3Tournament['name'] }}</p>
+             <p class="text-zinc-300">{{ $next3x3Tournament['date'] }} • {{ $next3x3Tournament['place'] }}</p>
+         </div>
+     </section>
  @endsection
-diff --git a/resources/views/pages/schedule-3x3-team.blade.php b/resources/views/pages/schedule-3x3-team.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..70b769cff637b790d69884fe51070ec541a356bb
---- /dev/null
-+++ b/resources/views/pages/schedule-3x3-team.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Drużyna 3x3</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/schedule-3x3-tournaments.blade.php b/resources/views/pages/schedule-3x3-tournaments.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..d86bb9e3d5a58bf8544053c8ad5ad91d2d4da792
---- /dev/null
-+++ b/resources/views/pages/schedule-3x3-tournaments.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Turnieje 3x3</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/schedule-3x3.blade.php b/resources/views/pages/schedule-3x3.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..4b4e5c196d5ab65815f47c0b11a58fea787da9c5
---- /dev/null
-+++ b/resources/views/pages/schedule-3x3.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz 3x3</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
+-
 diff --git a/resources/views/pages/schedule-mzkosz.blade.php b/resources/views/pages/schedule-mzkosz.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..80b6b5c71922910e213b4b0c07cb105ca8fc8e27
---- /dev/null
+index 80b6b5c71922910e213b4b0c07cb105ca8fc8e27..63abf303ac1b9692a2da8cbb847a88c3138484b5 100644
+--- a/resources/views/pages/schedule-mzkosz.blade.php
 +++ b/resources/views/pages/schedule-mzkosz.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz MZKosz</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/schedule-table.blade.php b/resources/views/pages/schedule-table.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..ef7c843b38de1e191628bb6aa242f149f5a04eea
---- /dev/null
-+++ b/resources/views/pages/schedule-table.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Tabela</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
+@@ -1,13 +1,13 @@
+ @extends('layouts.app')
+
+ @section('content')
+ <section class="max-w-7xl mx-auto px-6 py-12">
+-    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz MZKosz</h1>
++    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz EŁZKosz</h1>
+     <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
+
+     <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
+         <h2 class="font-semibold mb-2">Panel treści</h2>
+         <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
+     </div>
+ </section>
+ @endsection
 diff --git a/resources/views/pages/schedule-third-league.blade.php b/resources/views/pages/schedule-third-league.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..054cbe098d63c4d8025e53b671814fcbdceb0c13
---- /dev/null
+index 054cbe098d63c4d8025e53b671814fcbdceb0c13..f148809e3cfdcbf437ff607c07ce6f121dc30f48 100644
+--- a/resources/views/pages/schedule-third-league.blade.php
 +++ b/resources/views/pages/schedule-third-league.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn MZKosz</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/schedule.blade.php b/resources/views/pages/schedule.blade.php
-index c935e2332c6ae28156fb5f909325e80f79769816..00428bc72ad01f7db268e4fdd2ccbb270d6b0f46 100644
---- a/resources/views/pages/schedule.blade.php
-+++ b/resources/views/pages/schedule.blade.php
-@@ -1,5 +1,13 @@
+@@ -1,13 +1,13 @@
  @extends('layouts.app')
 
  @section('content')
--    <h2>Terminarz</h2>
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
+ <section class="max-w-7xl mx-auto px-6 py-12">
+-    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn MZKosz</h1>
++    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn EŁZKosz</h1>
+     <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
+
+     <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
+         <h2 class="font-semibold mb-2">Panel treści</h2>
+         <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
+     </div>
+ </section>
  @endsection
-diff --git a/resources/views/pages/shop.blade.php b/resources/views/pages/shop.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..c38ecde73d587ad257c07fc1ff9e57b9cce77d59
---- /dev/null
-+++ b/resources/views/pages/shop.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Sklep</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
 diff --git a/resources/views/pages/team-3x3-players.blade.php b/resources/views/pages/team-3x3-players.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..dea01decf4e0fc212e7070aee53beccb4f11b7c0
---- /dev/null
+index dea01decf4e0fc212e7070aee53beccb4f11b7c0..396d933c382f4d7aed96f3f551211ac5b106661d 100644
+--- a/resources/views/pages/team-3x3-players.blade.php
 +++ b/resources/views/pages/team-3x3-players.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna 3x3 / Zawodnicy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/team-players.blade.php b/resources/views/pages/team-players.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..5f3aac61ebcd1036468778c53ebfb2c17db91f56
---- /dev/null
-+++ b/resources/views/pages/team-players.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna / Zawodnicy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/team-staff.blade.php b/resources/views/pages/team-staff.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..bf10cd04b6415dcdac537f1028771aa97a7a7a7d
---- /dev/null
-+++ b/resources/views/pages/team-staff.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna / Sztab szkoleniowy</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/pages/team.blade.php b/resources/views/pages/team.blade.php
-index eeaa7a9633073d97d743d45c939d736080908578..7154c1c2b7355d67629eeedd93f6c60ddaee67c6 100644
---- a/resources/views/pages/team.blade.php
-+++ b/resources/views/pages/team.blade.php
-@@ -1,5 +1,13 @@
+@@ -1,13 +1,13 @@
  @extends('layouts.app')
 
  @section('content')
--    <h1 class="text-3xl font-bold">Drużyna</h1>
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
+ <section class="max-w-7xl mx-auto px-6 py-12">
+-    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna 3x3 / Zawodnicy</h1>
++    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Zawodnicy 3x3</h1>
+     <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
+
+     <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
+         <h2 class="font-semibold mb-2">Panel treści</h2>
+         <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
+     </div>
+ </section>
  @endsection
-diff --git a/resources/views/pages/tickets.blade.php b/resources/views/pages/tickets.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..5a79ed43a0aa6dbb4a0d634f979c938daa5d6138
---- /dev/null
-+++ b/resources/views/pages/tickets.blade.php
-@@ -0,0 +1,13 @@
-+@extends('layouts.app')
-+
-+@section('content')
-+<section class="max-w-7xl mx-auto px-6 py-12">
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Bilety</h1>
-+    <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-+
-+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-+        <h2 class="font-semibold mb-2">Panel treści</h2>
-+        <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-+    </div>
-+</section>
-+@endsection
-diff --git a/resources/views/partials/footer.blade.php b/resources/views/partials/footer.blade.php
-new file mode 100644
-index 0000000000000000000000000000000000000000..d911c3624d82d88eaff4c3a795445bd880f8b122
---- /dev/null
-+++ b/resources/views/partials/footer.blade.php
-@@ -0,0 +1,34 @@
-+<footer class="mt-16">
-+    <section class="bg-yellow-400 text-black py-8">
-+        <div class="max-w-7xl mx-auto px-6">
-+            <h3 class="text-2xl font-extrabold mb-4">Partnerzy</h3>
-+            <div class="grid md:grid-cols-3 gap-4 text-sm font-semibold">
-+                <div class="bg-yellow-300 p-4 rounded">Partner strategiczny</div>
-+                <div class="bg-yellow-300 p-4 rounded">Partnerzy klubu</div>
-+                <div class="bg-yellow-300 p-4 rounded">Sponsorzy</div>
-+            </div>
-+        </div>
-+    </section>
-+
-+    <section class="bg-zinc-900 text-zinc-200 py-10 border-t border-zinc-700">
-+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-5 gap-6 text-sm">
-+            <div><h4 class="font-bold text-white mb-3">ETB Łódź</h4><p>Oficjalna strona klubu ETB Łódź.</p></div>
-+            <div><h4 class="font-bold text-white mb-3">Biuro</h4><p>biuro@etb-lodz.pl</p></div>
-+            <div><h4 class="font-bold text-white mb-3">Marketing i media</h4><p>media@etb-lodz.pl</p></div>
-+            <div><h4 class="font-bold text-white mb-3">Bilety i Akademia</h4><p><a href="{{ route('tickets') }}" class="hover:text-yellow-400">Bilety</a><br><a href="{{ route('academy') }}" class="hover:text-yellow-400">Akademia</a></p></div>
-+            <div>
-+                <h4 class="font-bold text-white mb-3">Ważne linki</h4>
-+                <ul class="space-y-1">
-+                    <li><a href="#" class="hover:text-yellow-400">Polityka prywatności</a></li>
-+                    <li><a href="#" class="hover:text-yellow-400">Regulamin sklepu</a></li>
-+                    <li><a href="#" class="hover:text-yellow-400">Biuro prasowe</a></li>
-+                    <li><a href="#" class="hover:text-yellow-400">Regulamin zwrotów</a></li>
-+                </ul>
-+            </div>
-+        </div>
-+    </section>
-+
-+    <section class="bg-black text-center text-zinc-400 text-xs py-3 border-t border-zinc-800">
-+        © {{ now()->year }} ETB Łódź. Wszelkie prawa zastrzeżone.
-+    </section>
-+</footer>
 diff --git a/resources/views/partials/navbar.blade.php b/resources/views/partials/navbar.blade.php
-index 713dca0edf97099fcddba442c206c2eec735d25d..d078d5d3c20089abce63131946fd2d0729845a19 100644
+index d078d5d3c20089abce63131946fd2d0729845a19..2bb52d4f2e4bd0d2a2f513063a4ff01eac73974a 100644
 --- a/resources/views/partials/navbar.blade.php
 +++ b/resources/views/partials/navbar.blade.php
-@@ -1,138 +1,93 @@
--<!-- GÓRNY PASEK -->
- <div class="bg-black text-white text-sm py-2 px-6 flex justify-between items-center border-b border-yellow-500 shadow-sm">
--
--    <div class="font-semibold text-yellow-400">
--        ETB - OFICJALNA STRONA
--    </div>
-+    <div class="font-semibold text-yellow-400">ETB - OFICJALNA STRONA</div>
+@@ -1,93 +1,109 @@
+-<div class="bg-black text-white text-sm py-2 px-6 flex justify-between items-center border-b border-yellow-500 shadow-sm">
+-    <div class="font-semibold text-yellow-400">ETB - OFICJALNA STRONA</div>
++<div class="bg-zinc-200 text-zinc-900 text-sm py-2 px-6 flex justify-between items-center border-b border-zinc-300 shadow-sm">
++    <div class="font-semibold text-zinc-800">ETB - OFICJALNA STRONA</div>
 
      <div class="flex items-center space-x-4">
--
--        <!-- FACEBOOK -->
--        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank"
--           class="hover:text-yellow-400 transition transform hover:scale-110">
--            <svg xmlns="http://www.w3.org/2000/svg"
--                 class="w-5 h-5 fill-current"
--                 viewBox="0 0 24 24">
--                <path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.845c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.955.926-1.955 1.874v2.249h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.063 24 12.073z"/>
--            </svg>
--        </a>
--
--        <!-- INSTAGRAM -->
--        <a href="https://www.instagram.com/eat_the_ball/" target="_blank"
--           class="hover:text-yellow-400 transition transform hover:scale-110">
--            <svg xmlns="http://www.w3.org/2000/svg"
--                 class="w-5 h-5 fill-current"
--                 viewBox="0 0 24 24">
--                <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5c3.176 0 5.75-2.574 5.75-5.75v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 2h8.5c2.071 0 3.75 1.679 3.75 3.75v8.5c0 2.071-1.679 3.75-3.75 3.75h-8.5C5.679 20 4 18.321 4 16.25v-8.5C4 5.679 5.679 4 7.75 4zm4.25 2.5a5.75 5.75 0 100 11.5 5.75 5.75 0 000-11.5zm0 2a3.75 3.75 0 110 7.5 3.75 3.75 0 010-7.5zm5.25-.75a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"/>
--            </svg>
--        </a>
--
--        <!-- YOUTUBE -->
--        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank"
--           class="hover:text-yellow-400 transition transform hover:scale-110">
--            <svg xmlns="http://www.w3.org/2000/svg"
--                 class="w-6 h-6 fill-current"
--                 viewBox="0 0 24 24">
--                <path d="M23.498 6.186a2.997 2.997 0 00-2.11-2.12C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.388.566a2.997 2.997 0 00-2.11 2.12C0 8.04 0 12 0 12s0 3.96.502 5.814a2.997 2.997 0 002.11 2.12C4.46 20.5 12 20.5 12 20.5s7.54 0 9.388-.566a2.997 2.997 0 002.11-2.12C24 15.96 24 12 24 12s0-3.96-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
--            </svg>
--        </a>
--
--        <!-- TIKTOK -->
--        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank"
--           class="hover:text-yellow-400 transition transform hover:scale-110">
--            <svg xmlns="http://www.w3.org/2000/svg"
--                 class="w-5 h-5 fill-current"
--                 viewBox="0 0 24 24">
--                <path d="M12.75 2h2.25c.2 1.7 1.5 3 3.25 3.25v2.25c-1.3-.05-2.5-.4-3.5-1v7.75a5.5 5.5 0 11-5.5-5.5c.3 0 .6.03.9.08v2.3a3.25 3.25 0 102.65 3.17V2z"/>
--            </svg>
--        </a>
--
-+        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-400">FB</a>
-+        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-400">IG</a>
-+        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-400">YT</a>
-+        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-400">TT</a>
-         <div class="w-px h-5 bg-yellow-400 opacity-50"></div>
+-        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-400">FB</a>
+-        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-400">IG</a>
+-        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-400">YT</a>
+-        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-400">TT</a>
+-        <div class="w-px h-5 bg-yellow-400 opacity-50"></div>
++        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
++            <i data-lucide="facebook" class="w-4 h-4"></i><span>FB</span>
++        </a>
++        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
++            <i data-lucide="instagram" class="w-4 h-4"></i><span>IG</span>
++        </a>
++        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
++            <i data-lucide="youtube" class="w-4 h-4"></i><span>YT</span>
++        </a>
++        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
++            <i data-lucide="music-2" class="w-4 h-4"></i><span>TT</span>
++        </a>
++
++        <div class="w-px h-5 bg-zinc-400"></div>
++
++        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(0.1)">A+</button>
++        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(-0.1)">A-</button>
++
++        <div class="w-px h-5 bg-zinc-400"></div>
 
          @auth
--            <div class="flex items-center gap-4">
--
--                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 hover:text-yellow-400">
--                    <i data-lucide="user"></i>
--                    Konto
--                </a>
--
--                <form method="POST" action="{{ route('logout') }}">
--                    @csrf
--                    <button class="hover:text-red-400 text-sm">
--                        Wyloguj
--                    </button>
--                </form>
--
--            </div>
-+            <a href="{{ route('dashboard') }}" class="hover:text-yellow-400">Konto</a>
-+            <form method="POST" action="{{ route('logout') }}">
-+                @csrf
-+                <button class="hover:text-red-400 text-sm">Wyloguj</button>
-+            </form>
+-            <a href="{{ route('dashboard') }}" class="hover:text-yellow-400">Konto</a>
++            <a href="{{ route('dashboard') }}" class="hover:text-yellow-500">Konto</a>
+             <form method="POST" action="{{ route('logout') }}">
+                 @csrf
+-                <button class="hover:text-red-400 text-sm">Wyloguj</button>
++                <button class="hover:text-red-500 text-sm">Wyloguj</button>
+             </form>
          @else
--            <a href="{{ route('login') }}" class="flex items-center gap-2 hover:text-yellow-400">
--                <i data-lucide="user"></i>
--                Zaloguj
--            </a>
-+            <a href="{{ route('login') }}" class="hover:text-yellow-400">Zaloguj</a>
+-            <a href="{{ route('login') }}" class="hover:text-yellow-400">Zaloguj</a>
++            <a href="{{ route('login') }}" class="hover:text-yellow-500">Zaloguj</a>
          @endauth
--
      </div>
  </div>
 
--<!-- NAVBAR -->
--<nav class="bg-black text-white shadow-md">
--    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+-<nav class="bg-black text-white shadow-md border-b border-zinc-800" x-data="{ open: null }">
++<nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
+     <div class="max-w-7xl mx-auto px-6 py-4">
+         <div class="flex items-center justify-between gap-4 flex-wrap">
+-            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-yellow-400 ajax-link">ETB</a>
 -
--        <div class="text-3xl font-extrabold text-yellow-400">
--            ETB
--        </div>
-+<nav class="bg-black text-white shadow-md border-b border-zinc-800" x-data="{ open: null }">
-+    <div class="max-w-7xl mx-auto px-6 py-4">
-+        <div class="flex items-center justify-between gap-4 flex-wrap">
-+            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-yellow-400 ajax-link">ETB</a>
+-            <div class="flex items-center gap-2">
+-                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(0.1)">A+</button>
+-                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(-0.1)">A-</button>
+-            </div>
++            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
 
--        <div class="space-x-8 hidden md:flex text-lg">
--
--            <a href="{{ route('home') }}"
--               class="{{ request()->routeIs('home') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
--                Aktualności
--            </a>
--
--            <a href="{{ route('team') }}"
--               class="{{ request()->routeIs('team') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
--                Drużyna
--            </a>
--
--            <a href="{{ route('schedule') }}"
--               class="{{ request()->routeIs('schedule') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
--                Rozgrywki
--            </a>
--
--            <a href="{{ route('news') }}"
--               class="{{ request()->routeIs('news') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
--                Klub
--            </a>
--
--            <a href="{{ route('contact') }}"
--               class="{{ request()->routeIs('contact') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
--                Kontakt
--            </a>
-+            <div class="flex items-center gap-2">
-+                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(0.1)">A+</button>
-+                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(-0.1)">A-</button>
-+            </div>
-
-+            <form class="flex items-center gap-2" role="search" onsubmit="event.preventDefault(); etbSearch()">
-+                <input id="etb-search" type="search" placeholder="Szukaj na stronie..." class="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm w-56">
-+                <button class="bg-yellow-400 text-black px-3 py-2 rounded font-semibold">Szukaj</button>
-+            </form>
+-            <form class="flex items-center gap-2" role="search" onsubmit="event.preventDefault(); etbSearch()">
+-                <input id="etb-search" type="search" placeholder="Szukaj na stronie..." class="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm w-56">
++            <form class="flex items-center gap-2 relative" role="search" onsubmit="event.preventDefault(); etbSearch()">
++                <input id="etb-search" list="etb-search-suggestions" type="search" placeholder="Szukaj na stronie..." class="bg-white border border-zinc-300 rounded px-3 py-2 text-sm w-64">
++                <datalist id="etb-search-suggestions"></datalist>
+                 <button class="bg-yellow-400 text-black px-3 py-2 rounded font-semibold">Szukaj</button>
+             </form>
          </div>
 
--        <div class="flex space-x-3">
-+        <div class="mt-4 flex flex-wrap gap-6 text-lg">
-+            <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-+                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
-+                <div x-show="open==='news'" x-transition class="dropdown-panel">
-+                    <a class="ajax-link" href="{{ route('news.articles') }}">Artykuły</a>
-+                    <a class="ajax-link" href="{{ route('news.videos') }}">Wideo</a>
-+                    <a class="ajax-link" href="{{ route('news.galleries') }}">Galerie</a>
-+                </div>
-+            </div>
+-        <div class="mt-4 flex flex-wrap gap-6 text-lg">
++        <div class="mt-4 flex flex-wrap gap-6 text-lg items-center">
+             <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
+-                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
++                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-500">Aktualności</a>
+                 <div x-show="open==='news'" x-transition class="dropdown-panel">
+                     <a class="ajax-link" href="{{ route('news.articles') }}">Artykuły</a>
+                     <a class="ajax-link" href="{{ route('news.videos') }}">Wideo</a>
+                     <a class="ajax-link" href="{{ route('news.galleries') }}">Galerie</a>
+                 </div>
+             </div>
 
--            <a href="{{ route('tickets') }}"
--               class="bg-yellow-400 text-black px-4 py-2 rounded font-semibold hover:bg-yellow-300 transition flex items-center gap-2">
--                <i data-lucide="ticket"></i>
--                Bilety
--            </a>
-+            <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
-+                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-400">Klub</a>
-+                <div x-show="open==='club'" x-transition class="dropdown-panel">
-+                    <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
-+                    <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
-+                    <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
-+                    <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
-+                    <a class="ajax-link" href="{{ route('club.investors') }}">Inwestorzy</a>
-+                    <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
-+                    <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
-+                    <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
-+                </div>
-+            </div>
-+
-+            <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
-+                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-400">Rozgrywki</a>
-+                <div x-show="open==='schedule'" x-transition class="dropdown-panel">
-+                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz MZKosz</a>
-+                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn MZKosz</a>
-+                    <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
-+                    <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
-+                    <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
-+                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Drużyna 3x3</a>
-+                </div>
-+            </div>
+             <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
+-                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-400">Klub</a>
++                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-500">Klub</a>
+                 <div x-show="open==='club'" x-transition class="dropdown-panel">
+                     <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
+                     <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
+                     <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
+                     <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
+                     <a class="ajax-link" href="{{ route('club.investors') }}">Inwestorzy</a>
+                     <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
+                     <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
+                     <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
+                 </div>
+             </div>
 
--            <a href="{{ route('shop') }}"
--               class="border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center gap-2">
--                <i data-lucide="shopping-cart"></i>
--                Sklep
--            </a>
-+            <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-+                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-400">Drużyna</a>
-+                <div x-show="open==='team'" x-transition class="dropdown-panel">
-+                    <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
-+                    <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
-+                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Drużyna 3x3 - zawodnicy</a>
-+                </div>
-+            </div>
+             <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
+-                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-400">Rozgrywki</a>
++                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-500">Rozgrywki</a>
+                 <div x-show="open==='schedule'" x-transition class="dropdown-panel">
+-                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz MZKosz</a>
+-                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn MZKosz</a>
++                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn EŁZKosz</a>
++                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz EŁZKosz</a>
+                     <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
+                     <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
+                     <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
+-                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Drużyna 3x3</a>
++                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
+                 </div>
+             </div>
 
--            <a href="{{ route('academy') }}"
--               class="border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center gap-2">
--                <i data-lucide="graduation-cap"></i>
--                Akademia
--            </a>
-+            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-400">Kontakt</a>
+             <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
+-                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-400">Drużyna</a>
++                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-500">Drużyna</a>
+                 <div x-show="open==='team'" x-transition class="dropdown-panel">
+                     <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
+                     <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
+-                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Drużyna 3x3 - zawodnicy</a>
++                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Zawodnicy 3x3</a>
+                 </div>
+             </div>
 
-+            <div class="ml-auto flex gap-2">
-+                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold">Bilety</a>
-+                <a href="{{ route('shop') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Sklep</a>
-+                <a href="{{ route('academy') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Akademia</a>
-+            </div>
+-            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-400">Kontakt</a>
++            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-500">Kontakt</a>
+
+             <div class="ml-auto flex gap-2">
+-                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold">Bilety</a>
+-                <a href="{{ route('shop') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Sklep</a>
+-                <a href="{{ route('academy') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Akademia</a>
++                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
++                    <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
++                </a>
++                <a href="{{ route('shop') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
++                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> Sklep
++                </a>
++                <a href="{{ route('academy') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
++                    <i data-lucide="graduation-cap" class="w-4 h-4"></i> Akademia
++                </a>
+             </div>
          </div>
--
      </div>
  </nav>
-diff --git a/resources/views/partials/welcome.blade.php b/resources/views/partials/welcome.blade.php
-index c205a70e7b55b0eeea7160fdd3df3fd9e757ce28..4e09e9fdcd0d5edbf082ef8798f6f8b750e4b35e 100644
---- a/resources/views/partials/welcome.blade.php
-+++ b/resources/views/partials/welcome.blade.php
-@@ -46,48 +46,42 @@ class="w-full h-full object-cover opacity-40">
-                 ETB <span class="text-yellow-400">vs</span>
-                 {{ $nextMatch->opponent }}
-             </h1>
-
-             <!-- INFO -->
-             <div class="text-lg mb-4 text-gray-300">
-                 {{ \Carbon\Carbon::parse($nextMatch->match_date)->format('d.m.Y H:i') }}
-                 • {{ $nextMatch->location }}
-             </div>
-
-             <!-- COUNTDOWN -->
-             <div id="countdown"
-                  data-date="{{ $nextMatch->match_date }}"
-                  class="text-xl font-bold text-yellow-400 mb-6">
-             </div>
-
-             <!-- BUTTONY -->
-             <div class="flex gap-4">
-
-                 @if($isLive && $nextMatch->stream_link)
-                     <a href="{{ $nextMatch->stream_link }}" target="_blank"
-                        class="bg-red-600 text-white px-6 py-3 font-bold rounded hover:bg-red-500 transition">
-                         🔴 Oglądaj mecz
-                     </a>
-                 @else
--                    <a href="#"
--                       class="bg-yellow-400 text-black px-6 py-3 font-bold rounded hover:bg-yellow-300 transition">
--                        Kup bilety
--                    </a>
-+                    <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-6 py-3 font-bold rounded hover:bg-yellow-300 transition">Kup bilety</a>
-                 @endif
-
--                <a href="#"
--                   class="border border-white px-6 py-3 rounded hover:bg-yellow-400 hover:text-black transition">
--                    Zobacz więcej
--                </a>
-+                <a href="{{ route('schedule') }}" class="ajax-link border border-white px-6 py-3 rounded hover:bg-yellow-400 hover:text-black transition">Zobacz więcej</a>
-
-             </div>
-
-         </div>
-     </section>
-
- @else
-
-     <div class="h-[60vh] flex items-center justify-center text-white text-2xl">
-         Brak zaplanowanych meczów
-     </div>
-
- @endif
 diff --git a/routes/web.php b/routes/web.php
-index d0b195c6e77af8c726180fb87b1ea10496a609b1..096584b00f59a586387d89ceda8186670282845a 100644
+index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2f91115f7 100644
 --- a/routes/web.php
 +++ b/routes/web.php
-@@ -1,128 +1,162 @@
- <?php
-
--use App\Http\Controllers\ProfileController;
- use App\Http\Controllers\Admin\UserRoleController;
--use Illuminate\Support\Facades\Route;
-+use App\Http\Controllers\ProfileController;
- use App\Models\Game;
--use Illuminate\Http\Request;
- use App\Models\User;
--
--/*
--|--------------------------------------------------------------------------
--| STRONA GŁÓWNA
--|--------------------------------------------------------------------------
--*/
-+use Illuminate\Http\Request;
-+use Illuminate\Support\Facades\Route;
-
- Route::get('/', function () {
-     $nextMatch = Game::where('match_date', '>=', now())
+@@ -15,106 +15,178 @@
+     $upcomingGames = Game::where('match_date', '>=', now())
          ->orderBy('match_date')
-         ->first();
+         ->take(3)
+         ->get();
 
--    return view('pages.home', compact('nextMatch'));
-+    $upcomingGames = Game::where('match_date', '>=', now())
-+        ->orderBy('match_date')
-+        ->take(3)
-+        ->get();
-+
-+    $latestArticles = collect([
+     $latestArticles = collect([
+         [
+             'title' => 'ETB wygrywa po dogrywce',
+             'category' => 'Artykuł',
+             'date' => '22.04.2026',
+             'excerpt' => 'Mocny finisz w ostatnich minutach i cenne zwycięstwo na własnym parkiecie.',
+         ],
+         [
+             'title' => 'Kulisy meczu z ŁKS',
+             'category' => 'Wideo',
+             'date' => '21.04.2026',
+             'excerpt' => 'Zobacz materiały zza kulis i reakcje zespołu po spotkaniu.',
+         ],
+         [
+             'title' => 'Galeria zdjęć: derby Łodzi',
+             'category' => 'Galeria',
+             'date' => '20.04.2026',
+             'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
+         ],
+         [
+-            'title' => 'Zapowiedź kolejki MZKosz',
++            'title' => 'Zapowiedź kolejki EŁZKosz',
+             'category' => 'Artykuł',
+             'date' => '19.04.2026',
+             'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
+         ],
 +        [
-+            'title' => 'ETB wygrywa po dogrywce',
-+            'category' => 'Artykuł',
-+            'date' => '22.04.2026',
-+            'excerpt' => 'Mocny finisz w ostatnich minutach i cenne zwycięstwo na własnym parkiecie.',
-+        ],
-+        [
-+            'title' => 'Kulisy meczu z ŁKS',
++            'title' => 'Skrót meczu ETB - Start',
 +            'category' => 'Wideo',
-+            'date' => '21.04.2026',
-+            'excerpt' => 'Zobacz materiały zza kulis i reakcje zespołu po spotkaniu.',
++            'date' => '18.04.2026',
++            'excerpt' => 'Najciekawsze akcje i podsumowanie spotkania.',
 +        ],
 +        [
-+            'title' => 'Galeria zdjęć: derby Łodzi',
-+            'category' => 'Galeria',
-+            'date' => '20.04.2026',
-+            'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
-+        ],
-+        [
-+            'title' => 'Zapowiedź kolejki MZKosz',
++            'title' => 'Młodzież ETB na turnieju',
 +            'category' => 'Artykuł',
-+            'date' => '19.04.2026',
-+            'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
++            'date' => '17.04.2026',
++            'excerpt' => 'Relacja z występu młodych zawodników.',
 +        ],
-+    ]);
-+
-+    $next3x3Tournament = [
-+        'name' => '3x3 Quest Łódź',
-+        'date' => '30.04.2026 16:00',
-+        'place' => 'Atlas Arena, Łódź',
-+    ];
-+
-+    return view('pages.home', compact('nextMatch', 'upcomingGames', 'latestArticles', 'next3x3Tournament'));
++        [
++            'title' => 'Galeria: trening otwarty',
++            'category' => 'Galeria',
++            'date' => '16.04.2026',
++            'excerpt' => 'Zdjęcia z otwartego treningu dla kibiców.',
++        ],
++        [
++            'title' => 'Wywiad z trenerem',
++            'category' => 'Wideo',
++            'date' => '15.04.2026',
++            'excerpt' => 'Plany zespołu na końcówkę sezonu.',
++        ],
++        [
++            'title' => 'Transfer do ETB',
++            'category' => 'Artykuł',
++            'date' => '14.04.2026',
++            'excerpt' => 'Nowy zawodnik dołącza do składu.',
++        ],
++        [
++            'title' => 'Galeria: ETB vs AZS',
++            'category' => 'Galeria',
++            'date' => '13.04.2026',
++            'excerpt' => 'Galeria meczowa z ostatniego pojedynku.',
++        ],
++        [
++            'title' => 'Konferencja pomeczowa',
++            'category' => 'Wideo',
++            'date' => '12.04.2026',
++            'excerpt' => 'Komentarze zawodników i sztabu.',
++        ],
++        [
++            'title' => 'Współpraca z partnerem',
++            'category' => 'Artykuł',
++            'date' => '11.04.2026',
++            'excerpt' => 'Nowe partnerstwo dla rozwoju klubu.',
++        ],
++        [
++            'title' => 'Galeria: dzień meczowy',
++            'category' => 'Galeria',
++            'date' => '10.04.2026',
++            'excerpt' => 'Kibice, emocje i atmosfera hali.',
++        ],
++        [
++            'title' => 'Top akcje tygodnia',
++            'category' => 'Wideo',
++            'date' => '09.04.2026',
++            'excerpt' => 'Najlepsze zagrania ostatnich spotkań.',
++        ],
++        [
++            'title' => 'Raport medyczny',
++            'category' => 'Artykuł',
++            'date' => '08.04.2026',
++            'excerpt' => 'Aktualizacja statusu zdrowotnego zawodników.',
++        ],
++        [
++            'title' => 'Galeria: ETB Family Day',
++            'category' => 'Galeria',
++            'date' => '07.04.2026',
++            'excerpt' => 'Zdjęcia z klubowego spotkania z fanami.',
++        ],
+     ]);
+
+     $next3x3Tournament = [
+         'name' => '3x3 Quest Łódź',
+         'date' => '30.04.2026 16:00',
+         'place' => 'Atlas Arena, Łódź',
+     ];
+
+     return view('pages.home', compact('nextMatch', 'upcomingGames', 'latestArticles', 'next3x3Tournament'));
  })->name('home');
 
--/*
--|--------------------------------------------------------------------------
--| DASHBOARD
--|--------------------------------------------------------------------------
--*/
--
  Route::get('/dashboard', function () {
      return view('dashboard');
  })->middleware(['auth', 'verified'])->name('dashboard');
 
--/*
--|--------------------------------------------------------------------------
--| PROFILE
--|--------------------------------------------------------------------------
--*/
--
  Route::middleware('auth')->group(function () {
      Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
      Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
      Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
  });
 
--/*
--|--------------------------------------------------------------------------
--| AUTH
--|--------------------------------------------------------------------------
--*/
--
  require __DIR__.'/auth.php';
 
  /*
  |--------------------------------------------------------------------------
--| STRONY
-+| Strony główne menu
+ | Strony główne menu
  |--------------------------------------------------------------------------
  */
--
--Route::view('/team', 'pages.team')->name('team');
--Route::view('/schedule', 'pages.schedule')->name('schedule');
  Route::view('/news', 'pages.news')->name('news');
-+Route::view('/club', 'pages.club')->name('club');
-+Route::view('/schedule', 'pages.schedule')->name('schedule');
-+Route::view('/team', 'pages.team')->name('team');
+ Route::view('/club', 'pages.club')->name('club');
+ Route::view('/schedule', 'pages.schedule')->name('schedule');
+ Route::view('/team', 'pages.team')->name('team');
  Route::view('/contact', 'pages.contact')->name('contact');
-+
-+/* Aktualności */
-+Route::view('/news/articles', 'pages.news-articles')->name('news.articles');
-+Route::view('/news/videos', 'pages.news-videos')->name('news.videos');
-+Route::view('/news/galleries', 'pages.news-galleries')->name('news.galleries');
-+
-+/* Klub */
-+Route::view('/club/history', 'pages.club-history')->name('club.history');
-+Route::view('/club/board', 'pages.club-board')->name('club.board');
-+Route::view('/club/venue', 'pages.club-venue')->name('club.venue');
-+Route::view('/club/business', 'pages.club-business')->name('club.business');
-+Route::view('/club/investors', 'pages.club-investors')->name('club.investors');
-+Route::view('/club/success', 'pages.club-success')->name('club.success');
-+Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
-+
-+/* Rozgrywki */
-+Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
-+Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
-+Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
-+Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
-+Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
-+Route::view('/schedule/3x3/team', 'pages.schedule-3x3-team')->name('schedule.3x3.team');
-+
-+/* Drużyna */
-+Route::view('/team/players', 'pages.team-players')->name('team.players');
-+Route::view('/team/staff', 'pages.team-staff')->name('team.staff');
-+Route::view('/team-3x3/players', 'pages.team-3x3-players')->name('team3x3.players');
-+
-+/* CTA */
+
+ /* Aktualności */
+ Route::view('/news/articles', 'pages.news-articles')->name('news.articles');
+ Route::view('/news/videos', 'pages.news-videos')->name('news.videos');
+ Route::view('/news/galleries', 'pages.news-galleries')->name('news.galleries');
+
+ /* Klub */
+ Route::view('/club/history', 'pages.club-history')->name('club.history');
+ Route::view('/club/board', 'pages.club-board')->name('club.board');
+ Route::view('/club/venue', 'pages.club-venue')->name('club.venue');
+ Route::view('/club/business', 'pages.club-business')->name('club.business');
+ Route::view('/club/investors', 'pages.club-investors')->name('club.investors');
+ Route::view('/club/success', 'pages.club-success')->name('club.success');
+ Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
+
+ /* Rozgrywki */
+ Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
+-Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
++Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
+ Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
+ Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
+ Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
+ Route::view('/schedule/3x3/team', 'pages.schedule-3x3-team')->name('schedule.3x3.team');
+
+ /* Drużyna */
+ Route::view('/team/players', 'pages.team-players')->name('team.players');
+ Route::view('/team/staff', 'pages.team-staff')->name('team.staff');
+ Route::view('/team-3x3/players', 'pages.team-3x3-players')->name('team3x3.players');
+
+ /* CTA */
  Route::view('/tickets', 'pages.tickets')->name('tickets');
  Route::view('/shop', 'pages.shop')->name('shop');
  Route::view('/academy', 'pages.academy')->name('academy');
 
--/*
--|--------------------------------------------------------------------------
--| ADMIN
--|--------------------------------------------------------------------------
--*/
--
  Route::middleware(['auth', 'role:admin,employee'])->group(function () {
--
      Route::get('/admin/matches/create', function () {
          return view('admin.create-match');
      })->name('admin.matches.create');
 
      Route::post('/admin/matches', function (Request $request) {
--
          $data = $request->all();
 
          if ($request->hasFile('image')) {
              $data['image'] = $request->file('image')->store('matches', 'public');
-         }
-
-         if ($request->hasFile('home_logo')) {
-             $data['home_logo'] = $request->file('home_logo')->store('logos', 'public');
-         }
-
-         if ($request->hasFile('away_logo')) {
-             $data['away_logo'] = $request->file('away_logo')->store('logos', 'public');
-         }
-
-         Game::create($data);
-
-         return redirect('/')->with('status', 'Mecz został zapisany.');
-     })->name('admin.matches.store');
- });
-
- Route::middleware(['auth', 'role:admin'])->group(function () {
-     Route::patch('/admin/users/{user}/role', [UserRoleController::class, 'update'])->name('admin.users.role.update');
- });
-
- Route::middleware('auth')->group(function () {
-     Route::get('/athlete/data', function () {
-         $user = request()->user();
-         abort_if($user->role !== User::ROLE_ATHLETE, 403);
-
-         return response()->json($user->athleteProfile);
-     })->name('athlete.data');
-
-     Route::get('/fan/data', function () {
-         $user = request()->user();
-         abort_if($user->role !== User::ROLE_FAN, 403);
-
-         return response()->json($user->fanProfile);
-     })->name('fan.data');
-
-     Route::get('/employee/data', function () {
-         $user = request()->user();
-         abort_if($user->role !== User::ROLE_EMPLOYEE, 403);
-
-         return response()->json($user->employeeProfile);
-     })->name('employee.data');
- });
--
