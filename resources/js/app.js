@@ -58,8 +58,8 @@ const searchIndex = [
     { label: 'Drużyna', url: '/team', keywords: ['druzyna', 'zawodnicy'] },
     { label: 'Zawodnicy 3x3', url: '/team-3x3/players', keywords: ['3x3', 'trzy na trzy', 'zawodnicy 3x3', 'druzyna 3x3'] },
     { label: 'Tabela', url: '/schedule/table', keywords: ['tabela'] },
-    { label: 'Terminarz EŁZKosz', url: '/schedule/mzkosz', keywords: ['ełzkosz', 'elzkosz', 'terminarz ełzkosz'] },
-    { label: 'III liga mężczyzn EŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'ezkosz', 'e-zkosz'] },
+    { label: 'Terminarz EŁZKosz', url: '/schedule/lzkosz', keywords: ['łzkosz', 'lzkosz', 'terminarz łzkosz'] },
+    { label: 'III liga mężczyzn ŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'elkosz', 'lzkosz'] },
 ];
 
 function populateSearchSuggestions() {

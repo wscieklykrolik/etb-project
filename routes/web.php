@@ -163,8 +163,8 @@ Route::view('/club/success', 'pages.club-success')->name('club.success');
 Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
 
 /* Rozgrywki */
-Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
-Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
+Route::view('/schedule/lzkosz', 'pages.schedule-mzkosz')->name('schedule.lzkosz');
+Route::redirect('/schedule/third-league', 'https://www.lzkosz.pl/liga/215.html')->name('schedule.third-league');
 Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
 Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
 Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
