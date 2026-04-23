@@ -10,6 +10,7 @@ class Game extends Model
         'opponent',
         'match_date',
         'location',
+        'exact_address',
         'is_home',
         'image',
         'home_logo',

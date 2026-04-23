@@ -6,35 +6,11 @@
     </x-slot>
 
     <div class="py-12 bg-black min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-
-                <p class="mb-6 text-gray-700">
-                    Jesteś zalogowany.
-                </p>
-
-                @if(auth()->user()->is_admin)
-
-                    <div class="grid md:grid-cols-2 gap-6">
-
-                        <a href="/admin/matches/create"
-                           class="bg-yellow-400 text-black p-6 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow">
-                            ➕ Dodaj nowy mecz
-                        </a>
-
-                    </div>
-
-                @else
-
-                    <p class="text-red-500 font-semibold">
-                        Brak uprawnień administratora.
-                    </p>
-
-                @endif
-
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-zinc-900 border border-zinc-800 overflow-hidden shadow-sm sm:rounded-lg p-6 text-zinc-200">
+                <p class="mb-4">Dashboard został uproszczony — główne zarządzanie kontem znajduje się teraz w zakładce <strong>Konto</strong>.</p>
+                <a href="{{ route('profile.edit') }}" class="inline-flex bg-yellow-400 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-300 transition">Przejdź do konta</a>
             </div>
-
         </div>
     </div>
 </x-app-layout>

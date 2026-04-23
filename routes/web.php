@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
+use App\Models\AppSetting;
 use App\Models\Game;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -182,27 +183,44 @@ Route::view('/academy', 'pages.academy')->name('academy');
 
 Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::get('/admin/matches/create', function () {
-        return view('admin.create-match');
+        $defaultHomeLogo = AppSetting::getValue('default_home_logo');
+
+        return view('admin.create-match', compact('defaultHomeLogo'));
     })->name('admin.matches.create');
 
     Route::post('/admin/matches', function (Request $request) {
-        $data = $request->all();
+        $validated = $request->validate([
+            'opponent' => ['required', 'string', 'max:255'],
+            'match_date' => ['required', 'date'],
+            'location' => ['required', 'string', 'max:255'],
+            'exact_address' => ['nullable', 'string', 'max:500'],
+            'is_home' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'max:5120'],
+            'away_logo' => ['nullable', 'image', 'max:5120'],
+            'default_home_logo' => ['nullable', 'image', 'max:5120'],
+        ]);
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('matches', 'public');
+        $defaultHomeLogo = AppSetting::getValue('default_home_logo');
+
+        if ($request->hasFile('default_home_logo')) {
+            $defaultHomeLogo = $request->file('default_home_logo')->store('logos', 'public');
+            AppSetting::setValue('default_home_logo', $defaultHomeLogo);
         }
 
-        if ($request->hasFile('home_logo')) {
-            $data['home_logo'] = $request->file('home_logo')->store('logos', 'public');
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('matches', 'public');
         }
 
         if ($request->hasFile('away_logo')) {
-            $data['away_logo'] = $request->file('away_logo')->store('logos', 'public');
+            $validated['away_logo'] = $request->file('away_logo')->store('logos', 'public');
         }
 
-        Game::create($data);
+        $validated['home_logo'] = $defaultHomeLogo;
+        $validated['is_home'] = $request->boolean('is_home');
 
-        return redirect('/')->with('status', 'Mecz został zapisany.');
+        Game::create($validated);
+
+        return redirect()->route('admin.matches.create')->with('status', 'Mecz został zapisany.');
     })->name('admin.matches.store');
 });
 
