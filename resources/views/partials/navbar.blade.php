@@ -17,8 +17,8 @@
 
         <div class="w-px h-5 bg-zinc-400"></div>
 
-        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(0.1)">A+</button>
-        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(-0.1)">A-</button>
+        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-500" onclick="adjustFontSize(0.1)">A+</button>
+        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-500" onclick="adjustFontSize(-0.1)">A-</button>
 
         <div class="w-px h-5 bg-zinc-400"></div>
 
@@ -42,8 +42,10 @@
             <form class="flex items-center gap-2 relative" role="search" onsubmit="event.preventDefault(); etbSearch()">
                 <input id="etb-search" list="etb-search-suggestions" type="search" placeholder="Szukaj na stronie..." class="bg-white border border-zinc-300 rounded px-3 py-2 text-sm w-64">
                 <datalist id="etb-search-suggestions"></datalist>
-                <button class="bg-yellow-400 text-black px-3 py-2 rounded font-semibold">Szukaj</button>
-            </form>
+                <button type="submit" class="border border-zinc-500 text-black px-3 py-1.5 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-500">
+                    <i data-lucide="search" class="w-4 h-4"></i> Szukaj
+                </button>
+                </form>
         </div>
 
         <div class="mt-4 flex flex-wrap gap-6 text-lg items-center">
@@ -73,8 +75,8 @@
             <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
                 <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-500">Rozgrywki</a>
                 <div x-show="open==='schedule'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn EŁZKosz</a>
-                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz EŁZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz ŁZKosz</a>
                     <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
                     <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
                     <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
@@ -94,13 +96,13 @@
             <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-500">Kontakt</a>
 
             <div class="ml-auto flex gap-2">
-                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
+                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-500 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
                     <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
                 </a>
-                <a href="{{ route('shop') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
+                <a href="{{ route('shop') }}" class="ajax-link border border-zinc-500 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-500">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i> Sklep
                 </a>
-                <a href="{{ route('academy') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
+                <a href="{{ route('academy') }}" class="ajax-link border border-zinc-500 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-500">
                     <i data-lucide="graduation-cap" class="w-4 h-4"></i> Akademia
                 </a>
             </div>
