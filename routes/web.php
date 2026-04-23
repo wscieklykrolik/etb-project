@@ -1,41 +1,61 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserRoleController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 use App\Models\Game;
-use Illuminate\Http\Request;
 use App\Models\User;
-
-/*
-|--------------------------------------------------------------------------
-| STRONA GŁÓWNA
-|--------------------------------------------------------------------------
-*/
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $nextMatch = Game::where('match_date', '>=', now())
         ->orderBy('match_date')
         ->first();
 
-    return view('pages.home', compact('nextMatch'));
-})->name('home');
+    $upcomingGames = Game::where('match_date', '>=', now())
+        ->orderBy('match_date')
+        ->take(3)
+        ->get();
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD
-|--------------------------------------------------------------------------
-*/
+    $latestArticles = collect([
+        [
+            'title' => 'ETB wygrywa po dogrywce',
+            'category' => 'Artykuł',
+            'date' => '22.04.2026',
+            'excerpt' => 'Mocny finisz w ostatnich minutach i cenne zwycięstwo na własnym parkiecie.',
+        ],
+        [
+            'title' => 'Kulisy meczu z ŁKS',
+            'category' => 'Wideo',
+            'date' => '21.04.2026',
+            'excerpt' => 'Zobacz materiały zza kulis i reakcje zespołu po spotkaniu.',
+        ],
+        [
+            'title' => 'Galeria zdjęć: derby Łodzi',
+            'category' => 'Galeria',
+            'date' => '20.04.2026',
+            'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
+        ],
+        [
+            'title' => 'Zapowiedź kolejki MZKosz',
+            'category' => 'Artykuł',
+            'date' => '19.04.2026',
+            'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
+        ],
+    ]);
+
+    $next3x3Tournament = [
+        'name' => '3x3 Quest Łódź',
+        'date' => '30.04.2026 16:00',
+        'place' => 'Atlas Arena, Łódź',
+    ];
+
+    return view('pages.home', compact('nextMatch', 'upcomingGames', 'latestArticles', 'next3x3Tournament'));
+})->name('home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-/*
-|--------------------------------------------------------------------------
-| PROFILE
-|--------------------------------------------------------------------------
-*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -43,42 +63,57 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/*
-|--------------------------------------------------------------------------
-| AUTH
-|--------------------------------------------------------------------------
-*/
-
 require __DIR__.'/auth.php';
 
 /*
 |--------------------------------------------------------------------------
-| STRONY
+| Strony główne menu
 |--------------------------------------------------------------------------
 */
-
-Route::view('/team', 'pages.team')->name('team');
-Route::view('/schedule', 'pages.schedule')->name('schedule');
 Route::view('/news', 'pages.news')->name('news');
+Route::view('/club', 'pages.club')->name('club');
+Route::view('/schedule', 'pages.schedule')->name('schedule');
+Route::view('/team', 'pages.team')->name('team');
 Route::view('/contact', 'pages.contact')->name('contact');
+
+/* Aktualności */
+Route::view('/news/articles', 'pages.news-articles')->name('news.articles');
+Route::view('/news/videos', 'pages.news-videos')->name('news.videos');
+Route::view('/news/galleries', 'pages.news-galleries')->name('news.galleries');
+
+/* Klub */
+Route::view('/club/history', 'pages.club-history')->name('club.history');
+Route::view('/club/board', 'pages.club-board')->name('club.board');
+Route::view('/club/venue', 'pages.club-venue')->name('club.venue');
+Route::view('/club/business', 'pages.club-business')->name('club.business');
+Route::view('/club/investors', 'pages.club-investors')->name('club.investors');
+Route::view('/club/success', 'pages.club-success')->name('club.success');
+Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
+
+/* Rozgrywki */
+Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
+Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
+Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
+Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
+Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
+Route::view('/schedule/3x3/team', 'pages.schedule-3x3-team')->name('schedule.3x3.team');
+
+/* Drużyna */
+Route::view('/team/players', 'pages.team-players')->name('team.players');
+Route::view('/team/staff', 'pages.team-staff')->name('team.staff');
+Route::view('/team-3x3/players', 'pages.team-3x3-players')->name('team3x3.players');
+
+/* CTA */
 Route::view('/tickets', 'pages.tickets')->name('tickets');
 Route::view('/shop', 'pages.shop')->name('shop');
 Route::view('/academy', 'pages.academy')->name('academy');
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN
-|--------------------------------------------------------------------------
-*/
-
 Route::middleware(['auth', 'role:admin,employee'])->group(function () {
-
     Route::get('/admin/matches/create', function () {
         return view('admin.create-match');
     })->name('admin.matches.create');
 
     Route::post('/admin/matches', function (Request $request) {
-
         $data = $request->all();
 
         if ($request->hasFile('image')) {
@@ -125,4 +160,3 @@ Route::middleware('auth')->group(function () {
         return response()->json($user->employeeProfile);
     })->name('employee.data');
 });
-

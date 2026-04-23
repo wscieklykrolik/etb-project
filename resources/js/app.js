@@ -56,3 +56,29 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCountdown();
     setInterval(updateCountdown, 1000);
 });
+
+window.adjustFontSize = function adjustFontSize(change) {
+    const root = document.documentElement;
+    const current = parseFloat(getComputedStyle(root).fontSize);
+    const next = Math.min(22, Math.max(14, current + change * 16));
+    root.style.fontSize = `${next}px`;
+};
+
+window.etbSearch = function etbSearch() {
+    const input = document.getElementById('etb-search');
+    if (!input) return;
+
+    const query = input.value.trim().toLowerCase();
+    if (!query) return;
+
+    const main = document.getElementById('app-main');
+    if (!main) return;
+
+    const text = main.innerText.toLowerCase();
+    if (!text.includes(query)) {
+        alert('Brak wyników dla podanej frazy.');
+        return;
+    }
+
+    window.find(input.value);
+};

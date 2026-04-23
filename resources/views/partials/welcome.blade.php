@@ -68,16 +68,10 @@
                         🔴 Oglądaj mecz
                     </a>
                 @else
-                    <a href="#"
-                       class="bg-yellow-400 text-black px-6 py-3 font-bold rounded hover:bg-yellow-300 transition">
-                        Kup bilety
-                    </a>
+                    <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-6 py-3 font-bold rounded hover:bg-yellow-300 transition">Kup bilety</a>
                 @endif
 
-                <a href="#"
-                   class="border border-white px-6 py-3 rounded hover:bg-yellow-400 hover:text-black transition">
-                    Zobacz więcej
-                </a>
+                <a href="{{ route('schedule') }}" class="ajax-link border border-white px-6 py-3 rounded hover:bg-yellow-400 hover:text-black transition">Zobacz więcej</a>
 
             </div>
 

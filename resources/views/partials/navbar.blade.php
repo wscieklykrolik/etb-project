@@ -1,138 +1,93 @@
-<!-- GÓRNY PASEK -->
 <div class="bg-black text-white text-sm py-2 px-6 flex justify-between items-center border-b border-yellow-500 shadow-sm">
-
-    <div class="font-semibold text-yellow-400">
-        ETB - OFICJALNA STRONA
-    </div>
+    <div class="font-semibold text-yellow-400">ETB - OFICJALNA STRONA</div>
 
     <div class="flex items-center space-x-4">
-
-        <!-- FACEBOOK -->
-        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank"
-           class="hover:text-yellow-400 transition transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-5 h-5 fill-current"
-                 viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.845c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.955.926-1.955 1.874v2.249h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.063 24 12.073z"/>
-            </svg>
-        </a>
-
-        <!-- INSTAGRAM -->
-        <a href="https://www.instagram.com/eat_the_ball/" target="_blank"
-           class="hover:text-yellow-400 transition transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-5 h-5 fill-current"
-                 viewBox="0 0 24 24">
-                <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5c3.176 0 5.75-2.574 5.75-5.75v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 2h8.5c2.071 0 3.75 1.679 3.75 3.75v8.5c0 2.071-1.679 3.75-3.75 3.75h-8.5C5.679 20 4 18.321 4 16.25v-8.5C4 5.679 5.679 4 7.75 4zm4.25 2.5a5.75 5.75 0 100 11.5 5.75 5.75 0 000-11.5zm0 2a3.75 3.75 0 110 7.5 3.75 3.75 0 010-7.5zm5.25-.75a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"/>
-            </svg>
-        </a>
-
-        <!-- YOUTUBE -->
-        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank"
-           class="hover:text-yellow-400 transition transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-6 h-6 fill-current"
-                 viewBox="0 0 24 24">
-                <path d="M23.498 6.186a2.997 2.997 0 00-2.11-2.12C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.388.566a2.997 2.997 0 00-2.11 2.12C0 8.04 0 12 0 12s0 3.96.502 5.814a2.997 2.997 0 002.11 2.12C4.46 20.5 12 20.5 12 20.5s7.54 0 9.388-.566a2.997 2.997 0 002.11-2.12C24 15.96 24 12 24 12s0-3.96-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-        </a>
-
-        <!-- TIKTOK -->
-        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank"
-           class="hover:text-yellow-400 transition transform hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="w-5 h-5 fill-current"
-                 viewBox="0 0 24 24">
-                <path d="M12.75 2h2.25c.2 1.7 1.5 3 3.25 3.25v2.25c-1.3-.05-2.5-.4-3.5-1v7.75a5.5 5.5 0 11-5.5-5.5c.3 0 .6.03.9.08v2.3a3.25 3.25 0 102.65 3.17V2z"/>
-            </svg>
-        </a>
-
+        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-400">FB</a>
+        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-400">IG</a>
+        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-400">YT</a>
+        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-400">TT</a>
         <div class="w-px h-5 bg-yellow-400 opacity-50"></div>
 
         @auth
-            <div class="flex items-center gap-4">
-
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 hover:text-yellow-400">
-                    <i data-lucide="user"></i>
-                    Konto
-                </a>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="hover:text-red-400 text-sm">
-                        Wyloguj
-                    </button>
-                </form>
-
-            </div>
+            <a href="{{ route('dashboard') }}" class="hover:text-yellow-400">Konto</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button class="hover:text-red-400 text-sm">Wyloguj</button>
+            </form>
         @else
-            <a href="{{ route('login') }}" class="flex items-center gap-2 hover:text-yellow-400">
-                <i data-lucide="user"></i>
-                Zaloguj
-            </a>
+            <a href="{{ route('login') }}" class="hover:text-yellow-400">Zaloguj</a>
         @endauth
-
     </div>
 </div>
 
-<!-- NAVBAR -->
-<nav class="bg-black text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<nav class="bg-black text-white shadow-md border-b border-zinc-800" x-data="{ open: null }">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-yellow-400 ajax-link">ETB</a>
 
-        <div class="text-3xl font-extrabold text-yellow-400">
-            ETB
+            <div class="flex items-center gap-2">
+                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(0.1)">A+</button>
+                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(-0.1)">A-</button>
+            </div>
+
+            <form class="flex items-center gap-2" role="search" onsubmit="event.preventDefault(); etbSearch()">
+                <input id="etb-search" type="search" placeholder="Szukaj na stronie..." class="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm w-56">
+                <button class="bg-yellow-400 text-black px-3 py-2 rounded font-semibold">Szukaj</button>
+            </form>
         </div>
 
-        <div class="space-x-8 hidden md:flex text-lg">
+        <div class="mt-4 flex flex-wrap gap-6 text-lg">
+            <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
+                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
+                <div x-show="open==='news'" x-transition class="dropdown-panel">
+                    <a class="ajax-link" href="{{ route('news.articles') }}">Artykuły</a>
+                    <a class="ajax-link" href="{{ route('news.videos') }}">Wideo</a>
+                    <a class="ajax-link" href="{{ route('news.galleries') }}">Galerie</a>
+                </div>
+            </div>
 
-            <a href="{{ route('home') }}"
-               class="{{ request()->routeIs('home') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
-                Aktualności
-            </a>
+            <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
+                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-400">Klub</a>
+                <div x-show="open==='club'" x-transition class="dropdown-panel">
+                    <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
+                    <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
+                    <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
+                    <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
+                    <a class="ajax-link" href="{{ route('club.investors') }}">Inwestorzy</a>
+                    <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
+                    <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
+                    <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
+                </div>
+            </div>
 
-            <a href="{{ route('team') }}"
-               class="{{ request()->routeIs('team') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
-                Drużyna
-            </a>
+            <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
+                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-400">Rozgrywki</a>
+                <div x-show="open==='schedule'" x-transition class="dropdown-panel">
+                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz MZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn MZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
+                    <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
+                    <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
+                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Drużyna 3x3</a>
+                </div>
+            </div>
 
-            <a href="{{ route('schedule') }}"
-               class="{{ request()->routeIs('schedule') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
-                Rozgrywki
-            </a>
+            <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
+                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-400">Drużyna</a>
+                <div x-show="open==='team'" x-transition class="dropdown-panel">
+                    <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
+                    <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
+                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Drużyna 3x3 - zawodnicy</a>
+                </div>
+            </div>
 
-            <a href="{{ route('news') }}"
-               class="{{ request()->routeIs('news') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
-                Klub
-            </a>
+            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-400">Kontakt</a>
 
-            <a href="{{ route('contact') }}"
-               class="{{ request()->routeIs('contact') ? 'text-yellow-400' : 'hover:text-yellow-400' }}">
-                Kontakt
-            </a>
-
+            <div class="ml-auto flex gap-2">
+                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold">Bilety</a>
+                <a href="{{ route('shop') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Sklep</a>
+                <a href="{{ route('academy') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Akademia</a>
+            </div>
         </div>
-
-        <div class="flex space-x-3">
-
-            <a href="{{ route('tickets') }}"
-               class="bg-yellow-400 text-black px-4 py-2 rounded font-semibold hover:bg-yellow-300 transition flex items-center gap-2">
-                <i data-lucide="ticket"></i>
-                Bilety
-            </a>
-
-            <a href="{{ route('shop') }}"
-               class="border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center gap-2">
-                <i data-lucide="shopping-cart"></i>
-                Sklep
-            </a>
-
-            <a href="{{ route('academy') }}"
-               class="border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold hover:bg-yellow-400 hover:text-black transition flex items-center gap-2">
-                <i data-lucide="graduation-cap"></i>
-                Akademia
-            </a>
-
-        </div>
-
     </div>
 </nav>
