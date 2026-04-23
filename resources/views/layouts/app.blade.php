@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.scrollTo(0,0);
                         // ponownie przypnij handlery (np. linki wewnątrz nowo załadowanej zawartości)
                         initAjaxLinks();
+                        if (window.reinitializeUi) window.reinitializeUi();
                     } else {
                         // fallback — pełne przeładowanie
                         location.href = href;
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (newMain && curMain) {
                     curMain.innerHTML = newMain.innerHTML;
                     initAjaxLinks();
+                    if (window.reinitializeUi) window.reinitializeUi();
                 } else {
                     location.reload();
                 }
