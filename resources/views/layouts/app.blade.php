@@ -23,6 +23,8 @@
     @yield('content')
 </main>
 
+@include('partials.footer')
+
 <!-- Simple AJAX navigation: ładuje tylko zawartość main, zachowuje statyczny navbar -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
