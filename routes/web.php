@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\UserRoleController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Game;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,11 +71,11 @@ Route::view('/academy', 'pages.academy')->name('academy');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin,employee'])->group(function () {
 
     Route::get('/admin/matches/create', function () {
         return view('admin.create-match');
-    });
+    })->name('admin.matches.create');
 
     Route::post('/admin/matches', function (Request $request) {
 
@@ -93,7 +95,33 @@ Route::middleware('auth')->group(function () {
 
         Game::create($data);
 
-        return redirect('/');
-    });
+        return redirect('/')->with('status', 'Mecz został zapisany.');
+    })->name('admin.matches.store');
+});
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::patch('/admin/users/{user}/role', [UserRoleController::class, 'update'])->name('admin.users.role.update');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/athlete/data', function () {
+        $user = request()->user();
+        abort_if($user->role !== User::ROLE_ATHLETE, 403);
+
+        return response()->json($user->athleteProfile);
+    })->name('athlete.data');
+
+    Route::get('/fan/data', function () {
+        $user = request()->user();
+        abort_if($user->role !== User::ROLE_FAN, 403);
+
+        return response()->json($user->fanProfile);
+    })->name('fan.data');
+
+    Route::get('/employee/data', function () {
+        $user = request()->user();
+        abort_if($user->role !== User::ROLE_EMPLOYEE, 403);
+
+        return response()->json($user->employeeProfile);
+    })->name('employee.data');
 });

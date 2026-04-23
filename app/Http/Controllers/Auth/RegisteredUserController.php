@@ -40,6 +40,12 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => User::ROLE_FAN,
+        ]);
+
+        $user->fanProfile()->create([
+            'can_buy_tickets' => true,
+            'can_buy_merch' => true,
         ]);
 
         event(new Registered($user));
