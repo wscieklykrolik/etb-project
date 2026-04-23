@@ -37,10 +37,82 @@ Route::get('/', function () {
             'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
         ],
         [
-            'title' => 'Zapowiedź kolejki MZKosz',
+            'title' => 'Zapowiedź kolejki EŁZKosz',
             'category' => 'Artykuł',
             'date' => '19.04.2026',
             'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
+        ],
+        [
+            'title' => 'Skrót meczu ETB - Start',
+            'category' => 'Wideo',
+            'date' => '18.04.2026',
+            'excerpt' => 'Najciekawsze akcje i podsumowanie spotkania.',
+        ],
+        [
+            'title' => 'Młodzież ETB na turnieju',
+            'category' => 'Artykuł',
+            'date' => '17.04.2026',
+            'excerpt' => 'Relacja z występu młodych zawodników.',
+        ],
+        [
+            'title' => 'Galeria: trening otwarty',
+            'category' => 'Galeria',
+            'date' => '16.04.2026',
+            'excerpt' => 'Zdjęcia z otwartego treningu dla kibiców.',
+        ],
+        [
+            'title' => 'Wywiad z trenerem',
+            'category' => 'Wideo',
+            'date' => '15.04.2026',
+            'excerpt' => 'Plany zespołu na końcówkę sezonu.',
+        ],
+        [
+            'title' => 'Transfer do ETB',
+            'category' => 'Artykuł',
+            'date' => '14.04.2026',
+            'excerpt' => 'Nowy zawodnik dołącza do składu.',
+        ],
+        [
+            'title' => 'Galeria: ETB vs AZS',
+            'category' => 'Galeria',
+            'date' => '13.04.2026',
+            'excerpt' => 'Galeria meczowa z ostatniego pojedynku.',
+        ],
+        [
+            'title' => 'Konferencja pomeczowa',
+            'category' => 'Wideo',
+            'date' => '12.04.2026',
+            'excerpt' => 'Komentarze zawodników i sztabu.',
+        ],
+        [
+            'title' => 'Współpraca z partnerem',
+            'category' => 'Artykuł',
+            'date' => '11.04.2026',
+            'excerpt' => 'Nowe partnerstwo dla rozwoju klubu.',
+        ],
+        [
+            'title' => 'Galeria: dzień meczowy',
+            'category' => 'Galeria',
+            'date' => '10.04.2026',
+            'excerpt' => 'Kibice, emocje i atmosfera hali.',
+        ],
+        [
+            'title' => 'Top akcje tygodnia',
+            'category' => 'Wideo',
+            'date' => '09.04.2026',
+            'excerpt' => 'Najlepsze zagrania ostatnich spotkań.',
+        ],
+        [
+            'title' => 'Raport medyczny',
+            'category' => 'Artykuł',
+            'date' => '08.04.2026',
+            'excerpt' => 'Aktualizacja statusu zdrowotnego zawodników.',
+        ],
+        [
+            'title' => 'Galeria: ETB Family Day',
+            'category' => 'Galeria',
+            'date' => '07.04.2026',
+            'excerpt' => 'Zdjęcia z klubowego spotkania z fanami.',
         ],
     ]);
 
@@ -92,7 +164,7 @@ Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
 
 /* Rozgrywki */
 Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
-Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
+Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
 Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
 Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
 Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
