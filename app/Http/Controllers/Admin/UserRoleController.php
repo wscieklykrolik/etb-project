@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserRoleController extends Controller
 {
-    public function update(Request $request, User $user): JsonResponse
+    public function update(Request $request, User $user): JsonResponse|RedirectResponse
     {
         $this->authorize('assign-roles');
 
@@ -38,9 +39,13 @@ class UserRoleController extends Controller
             default => null,
         };
 
-        return response()->json([
-            'message' => 'Rola użytkownika została zaktualizowana.',
-            'user' => $user->fresh(),
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Rola użytkownika została zaktualizowana.',
+                'user' => $user->fresh(),
+            ]);
+        }
+
+        return back()->with('status', 'Rola użytkownika została zaktualizowana.');
     }
 }
