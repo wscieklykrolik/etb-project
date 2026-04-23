@@ -9,7 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -30,17 +30,28 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+            'accepted_store_terms' => ['accepted'],
+            'accepted_ticket_terms' => ['accepted'],
+            'accepted_privacy_policy' => ['accepted'],
+            'accepted_marketing_consent' => ['accepted'],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => trim($validated['first_name'].' '.$validated['last_name']),
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'role' => User::ROLE_FAN,
+            'accepted_store_terms' => true,
+            'accepted_ticket_terms' => true,
+            'accepted_privacy_policy' => true,
+            'accepted_marketing_consent' => true,
         ]);
 
         $user->fanProfile()->create([
@@ -53,6 +64,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('account', absolute: false));
     }
 }

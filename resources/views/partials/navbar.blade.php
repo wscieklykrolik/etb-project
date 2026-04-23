@@ -23,7 +23,7 @@
         <div class="w-px h-5 bg-zinc-400"></div>
 
         @auth
-            <a href="{{ route('dashboard') }}" class="hover:text-yellow-500">Konto</a>
+            <a href="{{ route('account') }}" class="hover:text-yellow-500">Konto</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button class="hover:text-red-500 text-sm">Wyloguj</button>
@@ -73,8 +73,8 @@
             <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
                 <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-500">Rozgrywki</a>
                 <div x-show="open==='schedule'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn EŁZKosz</a>
-                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz EŁZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
+                    <a class="ajax-link" href="{{ route('schedule.lzkosz') }}">Terminarz ŁZKosz</a>
                     <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
                     <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
                     <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>

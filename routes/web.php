@@ -37,7 +37,7 @@ Route::get('/', function () {
             'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
         ],
         [
-            'title' => 'Zapowiedź kolejki EŁZKosz',
+            'title' => 'Zapowiedź kolejki ŁZKosz',
             'category' => 'Artykuł',
             'date' => '19.04.2026',
             'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
@@ -126,8 +126,16 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return redirect()->route('account');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/account', function () {
+    $users = request()->user()->isAdmin()
+        ? User::query()->select(['id', 'email', 'first_name', 'last_name', 'role'])->orderBy('email')->get()
+        : collect();
+
+    return view('dashboard', compact('users'));
+})->middleware(['auth', 'verified'])->name('account');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -163,8 +171,9 @@ Route::view('/club/success', 'pages.club-success')->name('club.success');
 Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
 
 /* Rozgrywki */
-Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
-Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
+Route::view('/schedule/lzkosz', 'pages.schedule-mzkosz')->name('schedule.lzkosz');
+Route::redirect('/schedule/mzkosz', '/schedule/lzkosz');
+Route::redirect('/schedule/third-league', 'https://www.lzkosz.pl/')->name('schedule.third-league');
 Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
 Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
 Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
@@ -179,6 +188,11 @@ Route::view('/team-3x3/players', 'pages.team-3x3-players')->name('team3x3.player
 Route::view('/tickets', 'pages.tickets')->name('tickets');
 Route::view('/shop', 'pages.shop')->name('shop');
 Route::view('/academy', 'pages.academy')->name('academy');
+
+
+Route::middleware(['auth', 'role:admin,trainer'])->group(function () {
+    Route::view('/academy/manage', 'pages.academy')->name('academy.manage');
+});
 
 Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::get('/admin/matches/create', function () {

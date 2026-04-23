@@ -18,6 +18,7 @@ class User extends Authenticatable
     public const ROLE_ATHLETE = 'athlete';
     public const ROLE_FAN = 'fan';
     public const ROLE_EMPLOYEE = 'employee';
+    public const ROLE_TRAINER = 'trainer';
 
     /**
      * The attributes that are mass assignable.
@@ -26,9 +27,16 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'role',
+        'avatar_path',
+        'accepted_store_terms',
+        'accepted_ticket_terms',
+        'accepted_privacy_policy',
+        'accepted_marketing_consent',
     ];
 
     /**
@@ -51,6 +59,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'accepted_store_terms' => 'boolean',
+            'accepted_ticket_terms' => 'boolean',
+            'accepted_privacy_policy' => 'boolean',
+            'accepted_marketing_consent' => 'boolean',
         ];
     }
 
@@ -64,6 +76,7 @@ class User extends Authenticatable
             self::ROLE_ATHLETE,
             self::ROLE_FAN,
             self::ROLE_EMPLOYEE,
+            self::ROLE_TRAINER,
         ];
     }
 
@@ -94,5 +107,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(EmployeeProfile::class);
     }
-}
 
+    public function displayName(): string
+    {
+        $firstAndLast = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
+
+        return $firstAndLast !== '' ? $firstAndLast : $this->name;
+    }
+}
