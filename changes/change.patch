@@ -1,131 +1,438 @@
-diff --git a/resources/css/app.css b/resources/css/app.css
-index cc8391f792a3241b9298db2dd1ee7038119f94ad..5abee7ce5437b990009316782188d076e6261cd1 100644
---- a/resources/css/app.css
-+++ b/resources/css/app.css
-@@ -1,53 +1,30 @@
- @tailwind base;
- @tailwind components;
- @tailwind utilities;
+diff --git a/app/Http/Controllers/admin/UserRoleController.php b/app/Http/Controllers/Admin/UserRoleController.php
+similarity index 77%
+rename from app/Http/Controllers/admin/UserRoleController.php
+rename to app/Http/Controllers/Admin/UserRoleController.php
+index df5455f345ff2a59175d482665b04fcb914c0a50..0efd0f1fb2303fd213e1a1da8de06c959611a0cb 100644
+--- a/app/Http/Controllers/admin/UserRoleController.php
++++ b/app/Http/Controllers/Admin/UserRoleController.php
+@@ -1,46 +1,51 @@
+ <?php
 
- .dropdown-panel {
-     position: absolute;
-     top: 100%;
-     left: 0;
--    min-width: 240px;
--    background: #111827;
--    border: 1px solid #3f3f46;
--    border-radius: 0.5rem;
--    padding: 0.5rem;
--    display: flex;
--    flex-direction: column;
--    gap: 0.25rem;
--    z-index: 40;
--}
--
--.dropdown-panel a {
--    padding: 0.5rem 0.75rem;
--    border-radius: 0.375rem;
--}
--
--.dropdown-panel a:hover {
--    background: #facc15;
--    color: #000;
--}
--
--.dropdown-panel {
--    position: absolute;
--    top: 100%;
--    left: 0;
--    min-width: 240px;
--    background: #111827;
--    border: 1px solid #3f3f46;
-+    min-width: 250px;
-+    background: #f4f4f5;
-+    border: 1px solid #d4d4d8;
-     border-radius: 0.5rem;
-     padding: 0.5rem;
-     display: flex;
-     flex-direction: column;
-     gap: 0.25rem;
-     z-index: 40;
-+    color: #18181b;
-+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
- }
+ namespace App\Http\Controllers\Admin;
 
- .dropdown-panel a {
-     padding: 0.5rem 0.75rem;
-     border-radius: 0.375rem;
- }
+ use App\Http\Controllers\Controller;
+ use App\Models\User;
+ use Illuminate\Http\JsonResponse;
++use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
+ use Illuminate\Validation\Rule;
 
- .dropdown-panel a:hover {
-     background: #facc15;
-     color: #000;
+ class UserRoleController extends Controller
+ {
+-    public function update(Request $request, User $user): JsonResponse
++    public function update(Request $request, User $user): JsonResponse|RedirectResponse
+     {
+         $this->authorize('assign-roles');
+
+         $validated = $request->validate([
+             'role' => ['required', Rule::in(User::roles())],
+         ]);
+
+         $user->update(['role' => $validated['role']]);
+
+         match ($validated['role']) {
+             User::ROLE_ATHLETE => $user->athleteProfile()->firstOrCreate([], [
+                 'performance_parameters' => [],
+                 'playbook' => [],
+                 'opponents_intel' => [],
+             ]),
+             User::ROLE_FAN => $user->fanProfile()->firstOrCreate([], [
+                 'can_buy_tickets' => true,
+                 'can_buy_merch' => true,
+             ]),
+             User::ROLE_EMPLOYEE => $user->employeeProfile()->firstOrCreate([], [
+                 'can_manage_articles' => true,
+                 'can_write_database' => true,
+                 'can_read_database' => true,
+             ]),
+             default => null,
+         };
+
+-        return response()->json([
+-            'message' => 'Rola użytkownika została zaktualizowana.',
+-            'user' => $user->fresh(),
+-        ]);
++        if ($request->expectsJson()) {
++            return response()->json([
++                'message' => 'Rola użytkownika została zaktualizowana.',
++                'user' => $user->fresh(),
++            ]);
++        }
++
++        return back()->with('status', 'Rola użytkownika została zaktualizowana.');
+     }
  }
+diff --git a/app/Http/Controllers/Auth/AuthenticatedSessionController.php b/app/Http/Controllers/Auth/AuthenticatedSessionController.php
+index 613bcd9d935fca7b0e7451060d8dd640f77c2509..f331159087df8b8db7ad53b887a82df93a9074fb 100644
+--- a/app/Http/Controllers/Auth/AuthenticatedSessionController.php
++++ b/app/Http/Controllers/Auth/AuthenticatedSessionController.php
+@@ -6,42 +6,42 @@
+ use App\Http\Requests\Auth\LoginRequest;
+ use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Auth;
+ use Illuminate\View\View;
+
+ class AuthenticatedSessionController extends Controller
+ {
+     /**
+      * Display the login view.
+      */
+     public function create(): View
+     {
+         return view('auth.login');
+     }
+
+     /**
+      * Handle an incoming authentication request.
+      */
+     public function store(LoginRequest $request): RedirectResponse
+     {
+         $request->authenticate();
+
+         $request->session()->regenerate();
+
+-        return redirect()->intended(route('dashboard', absolute: false));
++        return redirect()->intended(route('account', absolute: false));
+     }
+
+     /**
+      * Destroy an authenticated session.
+      */
+     public function destroy(Request $request): RedirectResponse
+     {
+         Auth::guard('web')->logout();
+
+         $request->session()->invalidate();
+
+         $request->session()->regenerateToken();
+
+         return redirect('/');
+     }
+ }
+diff --git a/app/Http/Controllers/Auth/RegisteredUserController.php b/app/Http/Controllers/Auth/RegisteredUserController.php
+index 5f483f148736498b15632504270628249f43731a..730a0004cf1122c2e67183966fddb80e0fc5af2e 100644
+--- a/app/Http/Controllers/Auth/RegisteredUserController.php
++++ b/app/Http/Controllers/Auth/RegisteredUserController.php
+@@ -1,58 +1,69 @@
+ <?php
+
+ namespace App\Http\Controllers\Auth;
+
+ use App\Http\Controllers\Controller;
+ use App\Models\User;
+ use Illuminate\Auth\Events\Registered;
+ use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Auth;
+ use Illuminate\Support\Facades\Hash;
+-use Illuminate\Validation\Rules;
++use Illuminate\Validation\Rules\Password;
+ use Illuminate\Validation\ValidationException;
+ use Illuminate\View\View;
+
+ class RegisteredUserController extends Controller
+ {
+     /**
+      * Display the registration view.
+      */
+     public function create(): View
+     {
+         return view('auth.register');
+     }
+
+     /**
+      * Handle an incoming registration request.
+      *
+      * @throws ValidationException
+      */
+     public function store(Request $request): RedirectResponse
+     {
+-        $request->validate([
+-            'name' => ['required', 'string', 'max:255'],
++        $validated = $request->validate([
++            'first_name' => ['required', 'string', 'max:255'],
++            'last_name' => ['required', 'string', 'max:255'],
+             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
++            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
++            'accepted_store_terms' => ['accepted'],
++            'accepted_ticket_terms' => ['accepted'],
++            'accepted_privacy_policy' => ['accepted'],
++            'accepted_marketing_consent' => ['accepted'],
+         ]);
+
+         $user = User::create([
+-            'name' => $request->name,
+-            'email' => $request->email,
+-            'password' => Hash::make($request->password),
++            'name' => trim($validated['first_name'].' '.$validated['last_name']),
++            'first_name' => $validated['first_name'],
++            'last_name' => $validated['last_name'],
++            'email' => $validated['email'],
++            'password' => Hash::make($validated['password']),
+             'role' => User::ROLE_FAN,
++            'accepted_store_terms' => true,
++            'accepted_ticket_terms' => true,
++            'accepted_privacy_policy' => true,
++            'accepted_marketing_consent' => true,
+         ]);
+
+         $user->fanProfile()->create([
+             'can_buy_tickets' => true,
+             'can_buy_merch' => true,
+
+         ]);
+
+         event(new Registered($user));
+
+         Auth::login($user);
+
+-        return redirect(route('dashboard', absolute: false));
++        return redirect(route('account', absolute: false));
+     }
+ }
+diff --git a/app/Models/User.php b/app/Models/User.php
+index c184dfe3132f8ccecdb63e539db665188b3bb9df..5efa6afe6643849410155de550bba19cd807d53e 100644
+--- a/app/Models/User.php
++++ b/app/Models/User.php
+@@ -1,98 +1,117 @@
+ <?php
+
+ namespace App\Models;
+
+ // use Illuminate\Contracts\Auth\MustVerifyEmail;
+ use Database\Factories\UserFactory;
+ use Illuminate\Database\Eloquent\Factories\HasFactory;
+ use Illuminate\Database\Eloquent\Relations\HasOne;
+ use Illuminate\Foundation\Auth\User as Authenticatable;
+ use Illuminate\Notifications\Notifiable;
+
+ class User extends Authenticatable
+ {
+     /** @use HasFactory<UserFactory> */
+     use HasFactory, Notifiable;
+
+     public const ROLE_ADMIN = 'admin';
+     public const ROLE_ATHLETE = 'athlete';
+     public const ROLE_FAN = 'fan';
+     public const ROLE_EMPLOYEE = 'employee';
++    public const ROLE_TRAINER = 'trainer';
+
+     /**
+      * The attributes that are mass assignable.
+      *
+      * @var list<string>
+      */
+     protected $fillable = [
+         'name',
++        'first_name',
++        'last_name',
+         'email',
+         'password',
+         'role',
++        'avatar_path',
++        'accepted_store_terms',
++        'accepted_ticket_terms',
++        'accepted_privacy_policy',
++        'accepted_marketing_consent',
+     ];
+
+     /**
+      * The attributes that should be hidden for serialization.
+      *
+      * @var list<string>
+      */
+     protected $hidden = [
+         'password',
+         'remember_token',
+     ];
+
+     /**
+      * Get the attributes that should be cast.
+      *
+      * @return array<string, string>
+      */
+     protected function casts(): array
+     {
+         return [
+             'email_verified_at' => 'datetime',
+             'password' => 'hashed',
++            'accepted_store_terms' => 'boolean',
++            'accepted_ticket_terms' => 'boolean',
++            'accepted_privacy_policy' => 'boolean',
++            'accepted_marketing_consent' => 'boolean',
+         ];
+     }
+
+     /**
+      * @return list<string>
+      */
+     public static function roles(): array
+     {
+         return [
+             self::ROLE_ADMIN,
+             self::ROLE_ATHLETE,
+             self::ROLE_FAN,
+             self::ROLE_EMPLOYEE,
++            self::ROLE_TRAINER,
+         ];
+     }
+
+     public function isAdmin(): bool
+     {
+         return $this->role === self::ROLE_ADMIN;
+     }
+
+     /**
+      * @param list<string> $roles
+      */
+     public function hasAnyRole(array $roles): bool
+     {
+         return in_array($this->role, $roles, true);
+     }
+
+     public function athleteProfile(): HasOne
+     {
+         return $this->hasOne(AthleteProfile::class);
+     }
+
+     public function fanProfile(): HasOne
+     {
+         return $this->hasOne(FanProfile::class);
+     }
+
+     public function employeeProfile(): HasOne
+     {
+         return $this->hasOne(EmployeeProfile::class);
+     }
+-}
+
++    public function displayName(): string
++    {
++        $firstAndLast = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
++
++        return $firstAndLast !== '' ? $firstAndLast : $this->name;
++    }
++}
+diff --git a/database/factories/UserFactory.php b/database/factories/UserFactory.php
+index f78c03a01318a1215a431a564dbc570d518c7a5f..f3c9585855376dc45f0788d59b5b850dc9560a39 100644
+--- a/database/factories/UserFactory.php
++++ b/database/factories/UserFactory.php
+@@ -2,45 +2,54 @@
+
+ namespace Database\Factories;
+
+ use App\Models\User;
+ use Illuminate\Database\Eloquent\Factories\Factory;
+ use Illuminate\Support\Facades\Hash;
+ use Illuminate\Support\Str;
+
+ /**
+  * @extends Factory<User>
+  */
+ class UserFactory extends Factory
+ {
+     /**
+      * The current password being used by the factory.
+      */
+     protected static ?string $password;
+
+     /**
+      * Define the model's default state.
+      *
+      * @return array<string, mixed>
+      */
+     public function definition(): array
+     {
++        $firstName = fake()->firstName();
++        $lastName = fake()->lastName();
++
+         return [
+-            'name' => fake()->name(),
++            'name' => $firstName.' '.$lastName,
++            'first_name' => $firstName,
++            'last_name' => $lastName,
+             'email' => fake()->unique()->safeEmail(),
+             'email_verified_at' => now(),
+-            'password' => static::$password ??= Hash::make('password'),
++            'password' => static::$password ??= Hash::make('Password!123'),
+             'role' => User::ROLE_FAN,
++            'accepted_store_terms' => true,
++            'accepted_ticket_terms' => true,
++            'accepted_privacy_policy' => true,
++            'accepted_marketing_consent' => true,
+             'remember_token' => Str::random(10),
+         ];
+     }
+
+     /**
+      * Indicate that the model's email address should be unverified.
+      */
+     public function unverified(): static
+     {
+         return $this->state(fn (array $attributes) => [
+             'email_verified_at' => null,
+         ]);
+     }
+ }
+diff --git a/database/migrations/2026_04_23_120000_add_account_fields_to_users_table.php b/database/migrations/2026_04_23_120000_add_account_fields_to_users_table.php
+new file mode 100644
+index 0000000000000000000000000000000000000000..390603419e100bf2494693da41eb87ce75afce38
+--- /dev/null
++++ b/database/migrations/2026_04_23_120000_add_account_fields_to_users_table.php
+@@ -0,0 +1,42 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++return new class extends Migration
++{
++    /**
++     * Run the migrations.
++     */
++    public function up(): void
++    {
++        Schema::table('users', function (Blueprint $table) {
++            $table->string('first_name')->nullable()->after('name');
++            $table->string('last_name')->nullable()->after('first_name');
++            $table->string('avatar_path')->nullable()->after('email_verified_at');
++            $table->boolean('accepted_store_terms')->default(false)->after('role');
++            $table->boolean('accepted_ticket_terms')->default(false)->after('accepted_store_terms');
++            $table->boolean('accepted_privacy_policy')->default(false)->after('accepted_ticket_terms');
++            $table->boolean('accepted_marketing_consent')->default(false)->after('accepted_privacy_policy');
++        });
++    }
++
++    /**
++     * Reverse the migrations.
++     */
++    public function down(): void
++    {
++        Schema::table('users', function (Blueprint $table) {
++            $table->dropColumn([
++                'first_name',
++                'last_name',
++                'avatar_path',
++                'accepted_store_terms',
++                'accepted_ticket_terms',
++                'accepted_privacy_policy',
++                'accepted_marketing_consent',
++            ]);
++        });
++    }
++};
 diff --git a/resources/js/app.js b/resources/js/app.js
-index bbd29a85c253da39aee307dd34e09aae7d65a03e..8d06dfb05d69779a9b27a2c9331f4f6d2c6bbf17 100644
+index 8d06dfb05d69779a9b27a2c9331f4f6d2c6bbf17..2c21689ee6adfec52a9f9f7a5d3e611e1f89b807 100644
 --- a/resources/js/app.js
 +++ b/resources/js/app.js
-@@ -1,110 +1,128 @@
- import './bootstrap';
- import Alpine from 'alpinejs';
- import { createIcons, icons } from 'lucide';
-
- window.Alpine = Alpine;
--
- Alpine.start();
-
--/*
--|--------------------------------------------------------------------------
--| LUCIDE ICONS
--|--------------------------------------------------------------------------
--*/
--document.addEventListener('DOMContentLoaded', () => {
-+window.reinitializeUi = function reinitializeUi() {
-     createIcons({ icons });
--});
-+};
-
--/*
--|--------------------------------------------------------------------------
--| COUNTDOWN
--|--------------------------------------------------------------------------
--*/
- document.addEventListener('DOMContentLoaded', () => {
-+    window.reinitializeUi();
-+});
-
-+document.addEventListener('DOMContentLoaded', () => {
-     const el = document.getElementById('countdown');
--
-     if (!el) return;
-
-     const matchDate = el.dataset.date;
-     if (!matchDate) return;
-
-     const target = new Date(matchDate).getTime();
-
-     function updateCountdown() {
-         const now = new Date().getTime();
-         const diff = target - now;
-
-         if (diff <= 0) {
--            el.innerHTML = "Mecz trwa 🔥";
-+            el.innerHTML = 'Mecz trwa 🔥';
-             return;
-         }
-
-         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+@@ -36,52 +36,52 @@ document.addEventListener('DOMContentLoaded', () => {
          const minutes = Math.floor((diff / (1000 * 60)) % 60);
          const seconds = Math.floor((diff / 1000) % 60);
 
--        el.innerHTML = `
--            <span>${days} dni</span> :
--            <span>${hours} godz</span> :
--            <span>${minutes} min</span> :
--            <span>${seconds} sek</span>
--        `;
-+        el.innerHTML = `<span>${days} dni</span> : <span>${hours} godz</span> : <span>${minutes} min</span> : <span>${seconds} sek</span>`;
+         el.innerHTML = `<span>${days} dni</span> : <span>${hours} godz</span> : <span>${minutes} min</span> : <span>${seconds} sek</span>`;
      }
 
      updateCountdown();
@@ -139,29 +446,31 @@ index bbd29a85c253da39aee307dd34e09aae7d65a03e..8d06dfb05d69779a9b27a2c9331f4f6d
      root.style.fontSize = `${next}px`;
  };
 
-+const searchIndex = [
-+    { label: 'Aktualności', url: '/news', keywords: ['aktualnosci', 'news'] },
-+    { label: 'Klub', url: '/club', keywords: ['klub'] },
-+    { label: 'Rozgrywki', url: '/schedule', keywords: ['rozgrywki', 'liga', 'terminarz'] },
-+    { label: 'Kontakt', url: '/contact', keywords: ['kontakt', 'email', 'telefon'] },
-+    { label: 'Drużyna', url: '/team', keywords: ['druzyna', 'zawodnicy'] },
-+    { label: 'Zawodnicy 3x3', url: '/team-3x3/players', keywords: ['3x3', 'trzy na trzy', 'zawodnicy 3x3', 'druzyna 3x3'] },
-+    { label: 'Tabela', url: '/schedule/table', keywords: ['tabela'] },
-+    { label: 'Terminarz EŁZKosz', url: '/schedule/mzkosz', keywords: ['ełzkosz', 'elzkosz', 'terminarz ełzkosz'] },
-+    { label: 'III liga mężczyzn EŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'ezkosz', 'e-zkosz'] },
-+];
-+
-+function populateSearchSuggestions() {
-+    const datalist = document.getElementById('etb-search-suggestions');
-+    if (!datalist) return;
-+
-+    datalist.innerHTML = searchIndex
-+        .map((item) => `<option value="${item.label}"></option>`)
-+        .join('');
-+}
-+
-+document.addEventListener('DOMContentLoaded', populateSearchSuggestions);
-+
+ const searchIndex = [
+     { label: 'Aktualności', url: '/news', keywords: ['aktualnosci', 'news'] },
+     { label: 'Klub', url: '/club', keywords: ['klub'] },
+     { label: 'Rozgrywki', url: '/schedule', keywords: ['rozgrywki', 'liga', 'terminarz'] },
+     { label: 'Kontakt', url: '/contact', keywords: ['kontakt', 'email', 'telefon'] },
+     { label: 'Drużyna', url: '/team', keywords: ['druzyna', 'zawodnicy'] },
+     { label: 'Zawodnicy 3x3', url: '/team-3x3/players', keywords: ['3x3', 'trzy na trzy', 'zawodnicy 3x3', 'druzyna 3x3'] },
+     { label: 'Tabela', url: '/schedule/table', keywords: ['tabela'] },
+-    { label: 'Terminarz EŁZKosz', url: '/schedule/mzkosz', keywords: ['ełzkosz', 'elzkosz', 'terminarz ełzkosz'] },
+-    { label: 'III liga mężczyzn EŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'ezkosz', 'e-zkosz'] },
++    { label: 'Terminarz ŁZKosz', url: '/schedule/lzkosz', keywords: ['łzkosz', 'elzkosz', 'terminarz łzkosz'] },
++    { label: 'III liga mężczyzn ŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'ezkosz', 'e-zkosz'] },
+ ];
+
+ function populateSearchSuggestions() {
+     const datalist = document.getElementById('etb-search-suggestions');
+     if (!datalist) return;
+
+     datalist.innerHTML = searchIndex
+         .map((item) => `<option value="${item.label}"></option>`)
+         .join('');
+ }
+
+ document.addEventListener('DOMContentLoaded', populateSearchSuggestions);
+
  window.etbSearch = function etbSearch() {
      const input = document.getElementById('etb-search');
      if (!input) return;
@@ -169,227 +478,435 @@ index bbd29a85c253da39aee307dd34e09aae7d65a03e..8d06dfb05d69779a9b27a2c9331f4f6d
      const query = input.value.trim().toLowerCase();
      if (!query) return;
 
--    const main = document.getElementById('app-main');
--    if (!main) return;
-+    const directMatch = searchIndex.find((item) => item.label.toLowerCase() === query);
-+    const partialMatch = searchIndex.find((item) => item.label.toLowerCase().includes(query)
-+        || item.keywords.some((keyword) => keyword.includes(query) || query.includes(keyword)));
+     const directMatch = searchIndex.find((item) => item.label.toLowerCase() === query);
+     const partialMatch = searchIndex.find((item) => item.label.toLowerCase().includes(query)
+         || item.keywords.some((keyword) => keyword.includes(query) || query.includes(keyword)));
+
+     const result = directMatch || partialMatch;
+diff --git a/resources/views/auth/login.blade.php b/resources/views/auth/login.blade.php
+index 78b684f7d1d6c4a09434933dac3ef3ae652d85f3..228c8094f6afede4b77033da67761925fd1d8808 100644
+--- a/resources/views/auth/login.blade.php
++++ b/resources/views/auth/login.blade.php
+@@ -1,47 +1,51 @@
+ <x-guest-layout>
+-    <!-- Session Status -->
++    <h1 class="text-2xl font-bold text-center mb-2">Logowanie</h1>
++    <p class="text-sm text-gray-600 text-center mb-6">Zaloguj się lub utwórz konto, aby przejść do panelu /account.</p>
 +
-+    const result = directMatch || partialMatch;
+     <x-auth-session-status class="mb-4" :status="session('status')" />
 
--    const text = main.innerText.toLowerCase();
--    if (!text.includes(query)) {
--        alert('Brak wyników dla podanej frazy.');
-+    if (result) {
-+        window.location.href = result.url;
-         return;
-     }
+     <form method="POST" action="{{ route('login') }}">
+         @csrf
 
--    window.find(input.value);
--};
--
--window.adjustFontSize = function adjustFontSize(change) {
--    const root = document.documentElement;
--    const current = parseFloat(getComputedStyle(root).fontSize);
--    const next = Math.min(22, Math.max(14, current + change * 16));
--    root.style.fontSize = `${next}px`;
--};
--
--window.etbSearch = function etbSearch() {
--    const input = document.getElementById('etb-search');
--    if (!input) return;
--
--    const query = input.value.trim().toLowerCase();
--    if (!query) return;
--
-     const main = document.getElementById('app-main');
--    if (!main) return;
--
--    const text = main.innerText.toLowerCase();
--    if (!text.includes(query)) {
--        alert('Brak wyników dla podanej frazy.');
-+    if (main && main.innerText.toLowerCase().includes(query)) {
-+        window.find(input.value);
-         return;
-     }
-
--    window.find(input.value);
-+    alert('Brak wyników dla podanej frazy.');
-+};
-+
-+window.materialsCarousel = function materialsCarousel(items) {
-+    return {
-+        items,
-+        page: 0,
-+        timer: null,
-+        get chunks() {
-+            const result = [];
-+            for (let i = 0; i < this.items.length; i += 4) {
-+                result.push(this.items.slice(i, i + 4));
-+            }
-+            return result;
-+        },
-+        get visibleItems() {
-+            return this.chunks[this.page] ?? [];
-+        },
-+        goTo(index) {
-+            this.page = index;
-+        },
-+        start() {
-+            if (this.chunks.length <= 1) return;
-+            this.timer = setInterval(() => {
-+                this.page = (this.page + 1) % this.chunks.length;
-+            }, 5000);
-+        },
-+    };
- };
-diff --git a/resources/views/layouts/app.blade.php b/resources/views/layouts/app.blade.php
-index 01dbd773385b00c8c1bf6fae96c78552f1802588..8fd12d63d508f61bda6326ac5a292f9cccf238e6 100644
---- a/resources/views/layouts/app.blade.php
-+++ b/resources/views/layouts/app.blade.php
-@@ -47,66 +47,68 @@ function initAjaxLinks() {
-                     // nieprawidłowy URL — fallback
-                     return;
-                 }
-
-                 e.preventDefault();
-
-                 try {
-                     const res = await fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                     if (!res.ok) throw new Error('Network response was not ok');
-
-                     const text = await res.text();
-                     const parser = new DOMParser();
-                     const doc = parser.parseFromString(text, 'text/html');
-
-                     // szukamy nowej zawartości main (najpierw #app-main, potem main)
-                     const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
-                     const curMain = document.querySelector('#app-main') || document.querySelector('main');
-
-                     if (newMain && curMain) {
-                         curMain.innerHTML = newMain.innerHTML;
-                         // zaktualizuj URL i historię
-                         history.pushState({ ajax: true }, '', href);
-                         window.scrollTo(0,0);
-                         // ponownie przypnij handlery (np. linki wewnątrz nowo załadowanej zawartości)
-                         initAjaxLinks();
-+                        if (window.reinitializeUi) window.reinitializeUi();
-                     } else {
-                         // fallback — pełne przeładowanie
-                         location.href = href;
-                     }
-                 } catch (err) {
-                     console.error('AJAX navigation failed:', err);
-                     location.href = href;
-                 }
-             });
-         });
-     }
-
-     initAjaxLinks();
-
-     // Obsługa back/forward
-     window.addEventListener('popstate', function(e) {
-         const href = location.href;
-         fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-             .then(r => {
-                 if (!r.ok) throw new Error('Network response not ok');
-                 return r.text();
-             })
-             .then(text => {
-                 const parser = new DOMParser();
-                 const doc = parser.parseFromString(text, 'text/html');
-                 const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
-                 const curMain = document.querySelector('#app-main') || document.querySelector('main');
-                 if (newMain && curMain) {
-                     curMain.innerHTML = newMain.innerHTML;
-                     initAjaxLinks();
-+                    if (window.reinitializeUi) window.reinitializeUi();
-                 } else {
-                     location.reload();
-                 }
-             })
-             .catch(() => { location.reload(); });
-     });
- });
- </script>
-
- </body>
- </html>
-diff --git a/resources/views/pages/home.blade.php b/resources/views/pages/home.blade.php
-index fb9556cb895ae4628e78aef0b86292439d272f4f..65d6a0a0c205d6ae4558dfe256680c62e28b78bc 100644
---- a/resources/views/pages/home.blade.php
-+++ b/resources/views/pages/home.blade.php
-@@ -1,43 +1,54 @@
- @extends('layouts.app')
-
- @section('content')
-     @include('partials.welcome')
-
-     <section class="max-w-7xl mx-auto px-6 py-10 space-y-10">
--        <div>
--            <h2 class="text-2xl font-bold mb-4">4 najnowsze materiały</h2>
-+        <div x-data="materialsCarousel(@js($latestArticles))" x-init="start()">
-+            <div class="flex items-center justify-between mb-4">
-+                <h2 class="text-2xl font-bold">Najnowsze materiały</h2>
-+                <div class="flex gap-2">
-+                    <template x-for="(chunk, index) in chunks" :key="index">
-+                        <button @click="goTo(index)" class="w-2.5 h-2.5 rounded-full transition"
-+                                :class="index === page ? 'bg-yellow-400' : 'bg-zinc-500'"
-+                                :aria-label="`Przejdź do strony ${index + 1}`"></button>
-+                    </template>
-+                </div>
-+            </div>
-             <div class="grid md:grid-cols-4 gap-4">
--                @foreach($latestArticles as $item)
-+                <template x-for="item in visibleItems" :key="item.title + item.date">
-                     <article class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
--                        <span class="text-xs uppercase tracking-wider text-yellow-400">{{ $item['category'] }}</span>
--                        <h3 class="font-semibold mt-2 mb-2">{{ $item['title'] }}</h3>
--                        <p class="text-sm text-zinc-400 mb-2">{{ $item['excerpt'] }}</p>
--                        <p class="text-xs text-zinc-500">{{ $item['date'] }}</p>
-+                        <span class="text-xs uppercase tracking-wider text-yellow-400" x-text="item.category"></span>
-+                        <h3 class="font-semibold mt-2 mb-2" x-text="item.title"></h3>
-+                        <p class="text-sm text-zinc-400 mb-2" x-text="item.excerpt"></p>
-+                        <p class="text-xs text-zinc-500" x-text="item.date"></p>
-                     </article>
--                @endforeach
-+                </template>
-             </div>
-         </div>
-
+-        <!-- Email Address -->
          <div>
-             <h2 class="text-2xl font-bold mb-4">Terminarz przyszły (5x5)</h2>
-             <div class="grid md:grid-cols-3 gap-4">
--                @forelse($upcomingGames as $game)
--                    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
-+                @forelse($upcomingGames as $index => $game)
-+                    <div class="rounded-lg p-4 border {{ $index === 0 ? 'bg-yellow-400 text-black border-yellow-300' : 'bg-zinc-900 border-zinc-700' }}">
-+                        <p class="text-xs font-semibold uppercase mb-1 {{ $index === 0 ? 'text-black' : 'text-yellow-400' }}">
-+                            {{ $index === 0 ? 'Najbliższy mecz' : 'Mecz' }}
-+                        </p>
-                         <h3 class="font-semibold">ETB vs {{ $game->opponent }}</h3>
--                        <p class="text-sm text-zinc-400">{{ \Carbon\Carbon::parse($game->match_date)->format('d.m.Y H:i') }}</p>
--                        <p class="text-sm text-zinc-300">{{ $game->location }}</p>
-+                        <p class="text-sm {{ $index === 0 ? 'text-black/80' : 'text-zinc-400' }}">{{ \Carbon\Carbon::parse($game->match_date)->format('d.m.Y H:i') }}</p>
-+                        <p class="text-sm {{ $index === 0 ? 'text-black/80' : 'text-zinc-300' }}">{{ $game->location }}</p>
-                     </div>
-                 @empty
-                     <p class="text-zinc-400">Brak zaplanowanych meczów.</p>
-                 @endforelse
-             </div>
+-            <x-input-label for="email" :value="__('Email')" />
++            <x-input-label for="email" value="E-mail" />
+             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+             <x-input-error :messages="$errors->get('email')" class="mt-2" />
          </div>
 
-         <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6">
-             <h2 class="text-2xl font-bold mb-2">Następny turniej 3x3</h2>
-             <p class="text-yellow-400 font-semibold">{{ $next3x3Tournament['name'] }}</p>
-             <p class="text-zinc-300">{{ $next3x3Tournament['date'] }} • {{ $next3x3Tournament['place'] }}</p>
+-        <!-- Password -->
+         <div class="mt-4">
+-            <x-input-label for="password" :value="__('Password')" />
++            <x-input-label for="password" value="Hasło" />
+
+             <x-text-input id="password" class="block mt-1 w-full"
+                             type="password"
+                             name="password"
+                             required autocomplete="current-password" />
+
+             <x-input-error :messages="$errors->get('password')" class="mt-2" />
          </div>
-     </section>
- @endsection
+
+-        <!-- Remember Me -->
+         <div class="block mt-4">
+             <label for="remember_me" class="inline-flex items-center">
+                 <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
+-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
++                <span class="ms-2 text-sm text-gray-600">Zapamiętaj mnie</span>
+             </label>
+         </div>
+
+-        <div class="flex items-center justify-end mt-4">
++        <div class="flex items-center justify-between mt-4">
+             @if (Route::has('password.request'))
+                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+-                    {{ __('Forgot your password?') }}
++                    Nie pamiętasz hasła?
+                 </a>
+             @endif
+
+             <x-primary-button class="ms-3">
+-                {{ __('Log in') }}
++                Zaloguj
+             </x-primary-button>
+         </div>
++
++        <p class="text-center text-sm text-gray-600 mt-4">
++            Nie masz konta?
++            <a href="{{ route('register') }}" class="underline hover:text-gray-900">Zarejestruj się</a>
++        </p>
+     </form>
+ </x-guest-layout>
+diff --git a/resources/views/auth/register.blade.php b/resources/views/auth/register.blade.php
+index a857242c86e14410e1302e5e2071cb8c2a85b33b..49248d101e948d26fffe281ad5e604f2478f7ed0 100644
+--- a/resources/views/auth/register.blade.php
++++ b/resources/views/auth/register.blade.php
+@@ -1,52 +1,79 @@
+ <x-guest-layout>
+-    <form method="POST" action="{{ route('register') }}">
++    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+         @csrf
+
+-        <!-- Name -->
+-        <div>
+-            <x-input-label for="name" :value="__('Name')" />
+-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
++        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
++            <div>
++                <x-input-label for="first_name" value="Imię" />
++                <x-text-input id="first_name" class="block mt-1 w-full" type="text" name="first_name" :value="old('first_name')" required autofocus autocomplete="given-name" />
++                <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
++            </div>
++
++            <div>
++                <x-input-label for="last_name" value="Nazwisko" />
++                <x-text-input id="last_name" class="block mt-1 w-full" type="text" name="last_name" :value="old('last_name')" required autocomplete="family-name" />
++                <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
++            </div>
+         </div>
+
+-        <!-- Email Address -->
+-        <div class="mt-4">
+-            <x-input-label for="email" :value="__('Email')" />
++        <div>
++            <x-input-label for="email" value="E-mail" />
+             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+         </div>
+
+-        <!-- Password -->
+-        <div class="mt-4">
+-            <x-input-label for="password" :value="__('Password')" />
 -
++        <div>
++            <x-input-label for="password" value="Hasło" />
+             <x-text-input id="password" class="block mt-1 w-full"
+                             type="password"
+                             name="password"
+                             required autocomplete="new-password" />
+-
++            <p class="mt-1 text-xs text-gray-500">Minimum 8 znaków, 1 duża litera, 1 cyfra i 1 znak specjalny.</p>
+             <x-input-error :messages="$errors->get('password')" class="mt-2" />
+         </div>
+
+-        <!-- Confirm Password -->
+-        <div class="mt-4">
+-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+-
++        <div>
++            <x-input-label for="password_confirmation" value="Powtórz hasło" />
+             <x-text-input id="password_confirmation" class="block mt-1 w-full"
+                             type="password"
+                             name="password_confirmation" required autocomplete="new-password" />
+-
+             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+         </div>
+
++        <div class="bg-gray-50 rounded-lg p-3 border space-y-2 text-sm">
++            <label class="flex items-start gap-2">
++                <input type="checkbox" name="accepted_store_terms" class="mt-1" value="1" {{ old('accepted_store_terms') ? 'checked' : '' }} required>
++                <span>Akceptuję regulamin sklepu.</span>
++            </label>
++            <x-input-error :messages="$errors->get('accepted_store_terms')" class="mt-1" />
++
++            <label class="flex items-start gap-2">
++                <input type="checkbox" name="accepted_ticket_terms" class="mt-1" value="1" {{ old('accepted_ticket_terms') ? 'checked' : '' }} required>
++                <span>Akceptuję regulamin zakupu biletów.</span>
++            </label>
++            <x-input-error :messages="$errors->get('accepted_ticket_terms')" class="mt-1" />
++
++            <label class="flex items-start gap-2">
++                <input type="checkbox" name="accepted_privacy_policy" class="mt-1" value="1" {{ old('accepted_privacy_policy') ? 'checked' : '' }} required>
++                <span>Akceptuję politykę prywatności i przetwarzanie danych (RODO).</span>
++            </label>
++            <x-input-error :messages="$errors->get('accepted_privacy_policy')" class="mt-1" />
++
++            <label class="flex items-start gap-2">
++                <input type="checkbox" name="accepted_marketing_consent" class="mt-1" value="1" {{ old('accepted_marketing_consent') ? 'checked' : '' }} required>
++                <span>Wyrażam zgodę marketingową.</span>
++            </label>
++            <x-input-error :messages="$errors->get('accepted_marketing_consent')" class="mt-1" />
++        </div>
++
+         <div class="flex items-center justify-end mt-4">
+             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+-                {{ __('Already registered?') }}
++                Mam już konto
+             </a>
+
+             <x-primary-button class="ms-4">
+-                {{ __('Register') }}
++                Zarejestruj
+             </x-primary-button>
+         </div>
+     </form>
+ </x-guest-layout>
+diff --git a/resources/views/dashboard.blade.php b/resources/views/dashboard.blade.php
+index 56e6ec2e350a62c8e248826b76b11e2277940c0e..c2983c4ae841a2470a354bda4c00c63af090aa72 100644
+--- a/resources/views/dashboard.blade.php
++++ b/resources/views/dashboard.blade.php
+@@ -1,40 +1,120 @@
+ <x-app-layout>
+     <x-slot name="header">
+         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+-            Panel użytkownika
++            Konto użytkownika
+         </h2>
+     </x-slot>
+
+-    <div class="py-12 bg-black min-h-screen">
+-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
++    @php
++        $roleLabels = [
++            \App\Models\User::ROLE_FAN => 'Fan',
++            \App\Models\User::ROLE_ADMIN => 'Admin',
++            \App\Models\User::ROLE_EMPLOYEE => 'Pracownik',
++            \App\Models\User::ROLE_ATHLETE => 'Zawodnik',
++            \App\Models\User::ROLE_TRAINER => 'Trener',
++        ];
+
+-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
++        $currentUser = auth()->user();
++    @endphp
+
+-                <p class="mb-6 text-gray-700">
+-                    Jesteś zalogowany.
+-                </p>
++    <div class="py-10 bg-black min-h-screen">
++        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-4 gap-6">
++            <aside class="bg-zinc-900 text-white rounded-2xl border border-zinc-800 p-5 lg:col-span-1 h-fit">
++                <h3 class="text-xl font-bold mb-4">Konto</h3>
++                <ul class="space-y-2 text-sm text-zinc-300">
++                    <li class="bg-zinc-800 rounded px-3 py-2">Ustawienia</li>
++                    <li class="px-3 py-2">Bezpieczeństwo</li>
++                    <li class="px-3 py-2">Historia zgód</li>
++                </ul>
++            </aside>
+
+-                @if(auth()->user()->is_admin)
+-
+-                    <div class="grid md:grid-cols-2 gap-6">
+-
+-                        <a href="/admin/matches/create"
+-                           class="bg-yellow-400 text-black p-6 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow">
+-                            ➕ Dodaj nowy mecz
+-                        </a>
++            <section class="lg:col-span-3 space-y-6">
++                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-white">
++                    <h1 class="text-3xl font-bold mb-2">Ustawienia konta</h1>
++                    <p class="text-zinc-300">Zarządzaj danymi konta, uprawnieniami i bezpieczeństwem.</p>
++                </div>
+
++                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-white grid md:grid-cols-3 gap-6">
++                    <div class="md:col-span-1">
++                        <div class="h-56 bg-white text-zinc-500 border-2 border-dashed border-zinc-300 rounded-xl flex items-center justify-center text-center px-4">
++                            Tu trzeba wstawić zdjęcie.<br>Tu będzie zdjęcie drużyny.
++                        </div>
+                     </div>
+
+-                @else
++                    <div class="md:col-span-2 space-y-4">
++                        <div>
++                            <p class="text-xs uppercase tracking-wide text-zinc-400">Rola w zespole</p>
++                            <p class="text-lg font-semibold">{{ $roleLabels[$currentUser->role] ?? $currentUser->role }}</p>
++                        </div>
++                        <div class="grid md:grid-cols-2 gap-4 text-sm">
++                            <div>
++                                <p class="text-zinc-400">Imię</p>
++                                <p>{{ $currentUser->first_name ?: 'Brak danych' }}</p>
++                            </div>
++                            <div>
++                                <p class="text-zinc-400">Nazwisko</p>
++                                <p>{{ $currentUser->last_name ?: 'Brak danych' }}</p>
++                            </div>
++                            <div class="md:col-span-2">
++                                <p class="text-zinc-400">Adres e-mail</p>
++                                <p>{{ $currentUser->email }}</p>
++                            </div>
++                        </div>
++                    </div>
++                </div>
+
+-                    <p class="text-red-500 font-semibold">
+-                        Brak uprawnień administratora.
+-                    </p>
++                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-white">
++                    <h3 class="text-xl font-bold mb-4">Dozwolone akcje dla Twojej roli</h3>
++                    @if(in_array($currentUser->role, [\App\Models\User::ROLE_FAN, \App\Models\User::ROLE_ATHLETE], true))
++                        <ul class="list-disc ml-6 text-zinc-300 space-y-1">
++                            <li>Podgląd danych konta i e-maila.</li>
++                            <li>Edycja hasła oraz podstawowych danych profilu.</li>
++                            <li>Tylko odczyt aktualności, galerii i treści klubowych.</li>
++                            @if($currentUser->role === \App\Models\User::ROLE_ATHLETE)
++                                <li>Dodatkowy dostęp do informacji akademii dedykowanych zawodnikom.</li>
++                            @endif
++                        </ul>
++                    @elseif($currentUser->role === \App\Models\User::ROLE_TRAINER)
++                        <ul class="list-disc ml-6 text-zinc-300 space-y-1">
++                            <li>Dostęp do panelu akademii i treści szkoleniowych.</li>
++                            <li>Podgląd danych konta i bezpieczeństwa.</li>
++                        </ul>
++                    @else
++                        <ul class="list-disc ml-6 text-zinc-300 space-y-1">
++                            <li>Zarządzanie treściami: aktualności, wideo, galerie, historia, władze klubu, obiekt i pozostałe sekcje.</li>
++                            <li>Przygotowanie panelu sklepu pod zarządzanie produktami (ubrania i merchandising).</li>
++                            <li>Pełny dostęp edycyjny do modułów administracyjnych zgodnie z rolą.</li>
++                        </ul>
++                    @endif
++                </div>
+
++                @if($currentUser->isAdmin())
++                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-white">
++                        <h3 class="text-xl font-bold mb-4">Administracja rolami (po e-mailu)</h3>
++                        <p class="text-zinc-300 mb-4">Admin może nadawać role użytkownikom. W tym: fan, admin, pracownik, zawodnik, trener.</p>
++                        <div class="space-y-3">
++                            @foreach($users as $user)
++                                <form method="POST" action="{{ route('admin.users.role.update', $user) }}" class="grid md:grid-cols-5 gap-3 items-center bg-zinc-800 rounded-lg p-3">
++                                    @csrf
++                                    @method('PATCH')
++                                    <div class="md:col-span-2">
++                                        <p class="font-semibold">{{ $user->email }}</p>
++                                        <p class="text-xs text-zinc-400">{{ trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: 'Brak imienia i nazwiska' }}</p>
++                                    </div>
++                                    <div class="md:col-span-2">
++                                        <select name="role" class="w-full rounded-md border-zinc-600 bg-zinc-900 text-white">
++                                            @foreach(\App\Models\User::roles() as $role)
++                                                <option value="{{ $role }}" @selected($user->role === $role)>{{ ucfirst($role) }}</option>
++                                            @endforeach
++                                        </select>
++                                    </div>
++                                    <button class="bg-yellow-400 text-black rounded-md px-3 py-2 font-semibold">Zapisz</button>
++                                </form>
++                            @endforeach
++                        </div>
++                    </div>
+                 @endif
+-
+-            </div>
+-
++            </section>
+         </div>
+     </div>
+ </x-app-layout>
+diff --git a/resources/views/layouts/navigation.blade.php b/resources/views/layouts/navigation.blade.php
+index c2d3a659117a26a67360b1f02e649cd98bb436b4..46d6bedd48d00e3ae829785a774ffaaf0356dbfe 100644
+--- a/resources/views/layouts/navigation.blade.php
++++ b/resources/views/layouts/navigation.blade.php
+@@ -1,41 +1,41 @@
+ <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+     <!-- Primary Navigation Menu -->
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div class="flex justify-between h-16">
+             <div class="flex">
+                 <!-- Logo -->
+                 <div class="shrink-0 flex items-center">
+-                    <a href="{{ route('dashboard') }}">
++                    <a href="{{ route('account') }}">
+                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                     </a>
+                 </div>
+
+                 <!-- Navigation Links -->
+                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+-                        {{ __('Dashboard') }}
++                    <x-nav-link :href="route('account')" :active="request()->routeIs('account')">
++                        {{ __('Konto') }}
+                     </x-nav-link>
+                 </div>
+             </div>
+
+             <!-- Settings Dropdown -->
+             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                 <x-dropdown align="right" width="48">
+                     <x-slot name="trigger">
+                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                             <div>{{ Auth::user()->name }}</div>
+
+                             <div class="ms-1">
+                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                 </svg>
+                             </div>
+                         </button>
+                     </x-slot>
+
+                     <x-slot name="content">
+                         <x-dropdown-link :href="route('profile.edit')">
+                             {{ __('Profile') }}
+                         </x-dropdown-link>
+
+                         <!-- Authentication -->
+@@ -45,52 +45,52 @@
+                             <x-dropdown-link :href="route('logout')"
+                                     onclick="event.preventDefault();
+                                                 this.closest('form').submit();">
+                                 {{ __('Log Out') }}
+                             </x-dropdown-link>
+                         </form>
+                     </x-slot>
+                 </x-dropdown>
+             </div>
+
+             <!-- Hamburger -->
+             <div class="-me-2 flex items-center sm:hidden">
+                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                     </svg>
+                 </button>
+             </div>
+         </div>
+     </div>
+
+     <!-- Responsive Navigation Menu -->
+     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+         <div class="pt-2 pb-3 space-y-1">
+-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+-                {{ __('Dashboard') }}
++            <x-responsive-nav-link :href="route('account')" :active="request()->routeIs('account')">
++                {{ __('Konto') }}
+             </x-responsive-nav-link>
+         </div>
+
+         <!-- Responsive Settings Options -->
+         <div class="pt-4 pb-1 border-t border-gray-200">
+             <div class="px-4">
+                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+             </div>
+
+             <div class="mt-3 space-y-1">
+                 <x-responsive-nav-link :href="route('profile.edit')">
+                     {{ __('Profile') }}
+                 </x-responsive-nav-link>
+
+                 <!-- Authentication -->
+                 <form method="POST" action="{{ route('logout') }}">
+                     @csrf
+
+                     <x-responsive-nav-link :href="route('logout')"
+                             onclick="event.preventDefault();
+                                         this.closest('form').submit();">
+                         {{ __('Log Out') }}
+                     </x-responsive-nav-link>
+                 </form>
 diff --git a/resources/views/pages/schedule-mzkosz.blade.php b/resources/views/pages/schedule-mzkosz.blade.php
-index 80b6b5c71922910e213b4b0c07cb105ca8fc8e27..63abf303ac1b9692a2da8cbb847a88c3138484b5 100644
+index 63abf303ac1b9692a2da8cbb847a88c3138484b5..e205925e9a8d5eea6ab3be593e9ff2f36f04689f 100644
 --- a/resources/views/pages/schedule-mzkosz.blade.php
 +++ b/resources/views/pages/schedule-mzkosz.blade.php
 @@ -1,13 +1,13 @@
@@ -397,8 +914,8 @@ index 80b6b5c71922910e213b4b0c07cb105ca8fc8e27..63abf303ac1b9692a2da8cbb847a88c3
 
  @section('content')
  <section class="max-w-7xl mx-auto px-6 py-12">
--    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz MZKosz</h1>
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz EŁZKosz</h1>
+-    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz EŁZKosz</h1>
++    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / Terminarz ŁZKosz</h1>
      <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
 
      <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
@@ -408,7 +925,7 @@ index 80b6b5c71922910e213b4b0c07cb105ca8fc8e27..63abf303ac1b9692a2da8cbb847a88c3
  </section>
  @endsection
 diff --git a/resources/views/pages/schedule-third-league.blade.php b/resources/views/pages/schedule-third-league.blade.php
-index 054cbe098d63c4d8025e53b671814fcbdceb0c13..f148809e3cfdcbf437ff607c07ce6f121dc30f48 100644
+index f148809e3cfdcbf437ff607c07ce6f121dc30f48..58bceb10ad54a4482e002673e8c9d10050f17231 100644
 --- a/resources/views/pages/schedule-third-league.blade.php
 +++ b/resources/views/pages/schedule-third-league.blade.php
 @@ -1,13 +1,13 @@
@@ -416,27 +933,8 @@ index 054cbe098d63c4d8025e53b671814fcbdceb0c13..f148809e3cfdcbf437ff607c07ce6f12
 
  @section('content')
  <section class="max-w-7xl mx-auto px-6 py-12">
--    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn MZKosz</h1>
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn EŁZKosz</h1>
-     <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
-
-     <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
-         <h2 class="font-semibold mb-2">Panel treści</h2>
-         <p class="text-sm text-zinc-400">Tutaj można osadzać artykuły, galerie, listy zawodników i inne moduły.</p>
-     </div>
- </section>
- @endsection
-diff --git a/resources/views/pages/team-3x3-players.blade.php b/resources/views/pages/team-3x3-players.blade.php
-index dea01decf4e0fc212e7070aee53beccb4f11b7c0..396d933c382f4d7aed96f3f551211ac5b106661d 100644
---- a/resources/views/pages/team-3x3-players.blade.php
-+++ b/resources/views/pages/team-3x3-players.blade.php
-@@ -1,13 +1,13 @@
- @extends('layouts.app')
-
- @section('content')
- <section class="max-w-7xl mx-auto px-6 py-12">
--    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Drużyna 3x3 / Zawodnicy</h1>
-+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Zawodnicy 3x3</h1>
+-    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn EŁZKosz</h1>
++    <h1 class="text-3xl font-bold text-yellow-400 mb-4">Rozgrywki / III liga mężczyzn ŁZKosz</h1>
      <p class="text-zinc-300 mb-6">Sekcja gotowa do dodawania treści, tekstu, zdjęć i materiałów wideo.</p>
 
      <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-6 min-h-[220px]">
@@ -446,82 +944,62 @@ index dea01decf4e0fc212e7070aee53beccb4f11b7c0..396d933c382f4d7aed96f3f551211ac5
  </section>
  @endsection
 diff --git a/resources/views/partials/navbar.blade.php b/resources/views/partials/navbar.blade.php
-index d078d5d3c20089abce63131946fd2d0729845a19..2bb52d4f2e4bd0d2a2f513063a4ff01eac73974a 100644
+index 2bb52d4f2e4bd0d2a2f513063a4ff01eac73974a..d30f2c46953c8d927fb75a0e2d334eb3af3f5eee 100644
 --- a/resources/views/partials/navbar.blade.php
 +++ b/resources/views/partials/navbar.blade.php
-@@ -1,93 +1,109 @@
--<div class="bg-black text-white text-sm py-2 px-6 flex justify-between items-center border-b border-yellow-500 shadow-sm">
--    <div class="font-semibold text-yellow-400">ETB - OFICJALNA STRONA</div>
-+<div class="bg-zinc-200 text-zinc-900 text-sm py-2 px-6 flex justify-between items-center border-b border-zinc-300 shadow-sm">
-+    <div class="font-semibold text-zinc-800">ETB - OFICJALNA STRONA</div>
+@@ -1,102 +1,102 @@
+ <div class="bg-zinc-200 text-zinc-900 text-sm py-2 px-6 flex justify-between items-center border-b border-zinc-300 shadow-sm">
+     <div class="font-semibold text-zinc-800">ETB - OFICJALNA STRONA</div>
 
      <div class="flex items-center space-x-4">
--        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-400">FB</a>
--        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-400">IG</a>
--        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-400">YT</a>
--        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-400">TT</a>
--        <div class="w-px h-5 bg-yellow-400 opacity-50"></div>
-+        <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
-+            <i data-lucide="facebook" class="w-4 h-4"></i><span>FB</span>
-+        </a>
-+        <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
-+            <i data-lucide="instagram" class="w-4 h-4"></i><span>IG</span>
-+        </a>
-+        <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
-+            <i data-lucide="youtube" class="w-4 h-4"></i><span>YT</span>
-+        </a>
-+        <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
-+            <i data-lucide="music-2" class="w-4 h-4"></i><span>TT</span>
-+        </a>
-+
-+        <div class="w-px h-5 bg-zinc-400"></div>
-+
-+        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(0.1)">A+</button>
-+        <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(-0.1)">A-</button>
-+
-+        <div class="w-px h-5 bg-zinc-400"></div>
+         <a href="https://www.facebook.com/p/Eat-The-Ball-61572240317030/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
+             <i data-lucide="facebook" class="w-4 h-4"></i><span>FB</span>
+         </a>
+         <a href="https://www.instagram.com/eat_the_ball/" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
+             <i data-lucide="instagram" class="w-4 h-4"></i><span>IG</span>
+         </a>
+         <a href="https://www.youtube.com/@EatTheBall3x3" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
+             <i data-lucide="youtube" class="w-4 h-4"></i><span>YT</span>
+         </a>
+         <a href="https://www.tiktok.com/@eattheball_lodz" target="_blank" class="hover:text-yellow-500 flex items-center gap-1">
+             <i data-lucide="music-2" class="w-4 h-4"></i><span>TT</span>
+         </a>
+
+         <div class="w-px h-5 bg-zinc-400"></div>
+
+         <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(0.1)">A+</button>
+         <button class="px-2 py-1 border border-zinc-500 rounded text-zinc-700 hover:bg-yellow-300" onclick="adjustFontSize(-0.1)">A-</button>
+
+         <div class="w-px h-5 bg-zinc-400"></div>
 
          @auth
--            <a href="{{ route('dashboard') }}" class="hover:text-yellow-400">Konto</a>
-+            <a href="{{ route('dashboard') }}" class="hover:text-yellow-500">Konto</a>
+-            <a href="{{ route('dashboard') }}" class="hover:text-yellow-500">Konto</a>
++            <a href="{{ route('account') }}" class="hover:text-yellow-500">Konto</a>
              <form method="POST" action="{{ route('logout') }}">
                  @csrf
--                <button class="hover:text-red-400 text-sm">Wyloguj</button>
-+                <button class="hover:text-red-500 text-sm">Wyloguj</button>
+                 <button class="hover:text-red-500 text-sm">Wyloguj</button>
              </form>
          @else
--            <a href="{{ route('login') }}" class="hover:text-yellow-400">Zaloguj</a>
-+            <a href="{{ route('login') }}" class="hover:text-yellow-500">Zaloguj</a>
+             <a href="{{ route('login') }}" class="hover:text-yellow-500">Zaloguj</a>
          @endauth
      </div>
  </div>
 
--<nav class="bg-black text-white shadow-md border-b border-zinc-800" x-data="{ open: null }">
-+<nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
+ <nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
      <div class="max-w-7xl mx-auto px-6 py-4">
          <div class="flex items-center justify-between gap-4 flex-wrap">
--            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-yellow-400 ajax-link">ETB</a>
--
--            <div class="flex items-center gap-2">
--                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(0.1)">A+</button>
--                <button class="px-2 py-1 border border-yellow-400 rounded text-yellow-400" onclick="adjustFontSize(-0.1)">A-</button>
--            </div>
-+            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
+             <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
 
--            <form class="flex items-center gap-2" role="search" onsubmit="event.preventDefault(); etbSearch()">
--                <input id="etb-search" type="search" placeholder="Szukaj na stronie..." class="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm w-56">
-+            <form class="flex items-center gap-2 relative" role="search" onsubmit="event.preventDefault(); etbSearch()">
-+                <input id="etb-search" list="etb-search-suggestions" type="search" placeholder="Szukaj na stronie..." class="bg-white border border-zinc-300 rounded px-3 py-2 text-sm w-64">
-+                <datalist id="etb-search-suggestions"></datalist>
+             <form class="flex items-center gap-2 relative" role="search" onsubmit="event.preventDefault(); etbSearch()">
+                 <input id="etb-search" list="etb-search-suggestions" type="search" placeholder="Szukaj na stronie..." class="bg-white border border-zinc-300 rounded px-3 py-2 text-sm w-64">
+                 <datalist id="etb-search-suggestions"></datalist>
                  <button class="bg-yellow-400 text-black px-3 py-2 rounded font-semibold">Szukaj</button>
              </form>
          </div>
 
--        <div class="mt-4 flex flex-wrap gap-6 text-lg">
-+        <div class="mt-4 flex flex-wrap gap-6 text-lg items-center">
+         <div class="mt-4 flex flex-wrap gap-6 text-lg items-center">
              <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
--                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
-+                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-500">Aktualności</a>
+                 <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-500">Aktualności</a>
                  <div x-show="open==='news'" x-transition class="dropdown-panel">
                      <a class="ajax-link" href="{{ route('news.articles') }}">Artykuły</a>
                      <a class="ajax-link" href="{{ route('news.videos') }}">Wideo</a>
@@ -530,8 +1008,7 @@ index d078d5d3c20089abce63131946fd2d0729845a19..2bb52d4f2e4bd0d2a2f513063a4ff01e
              </div>
 
              <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
--                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-400">Klub</a>
-+                <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-500">Klub</a>
+                 <a href="{{ route('club') }}" class="ajax-link hover:text-yellow-500">Klub</a>
                  <div x-show="open==='club'" x-transition class="dropdown-panel">
                      <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
                      <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
@@ -545,57 +1022,42 @@ index d078d5d3c20089abce63131946fd2d0729845a19..2bb52d4f2e4bd0d2a2f513063a4ff01e
              </div>
 
              <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
--                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-400">Rozgrywki</a>
-+                <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-500">Rozgrywki</a>
+                 <a href="{{ route('schedule') }}" class="ajax-link hover:text-yellow-500">Rozgrywki</a>
                  <div x-show="open==='schedule'" x-transition class="dropdown-panel">
--                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz MZKosz</a>
--                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn MZKosz</a>
-+                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn EŁZKosz</a>
-+                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz EŁZKosz</a>
+-                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn EŁZKosz</a>
+-                    <a class="ajax-link" href="{{ route('schedule.mzkosz') }}">Terminarz EŁZKosz</a>
++                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
++                    <a class="ajax-link" href="{{ route('schedule.lzkosz') }}">Terminarz ŁZKosz</a>
                      <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
                      <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
                      <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
--                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Drużyna 3x3</a>
-+                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
+                     <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
                  </div>
              </div>
 
              <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
--                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-400">Drużyna</a>
-+                <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-500">Drużyna</a>
+                 <a href="{{ route('team') }}" class="ajax-link hover:text-yellow-500">Drużyna</a>
                  <div x-show="open==='team'" x-transition class="dropdown-panel">
                      <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
                      <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
--                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Drużyna 3x3 - zawodnicy</a>
-+                    <a class="ajax-link" href="{{ route('team3x3.players') }}">Zawodnicy 3x3</a>
+                     <a class="ajax-link" href="{{ route('team3x3.players') }}">Zawodnicy 3x3</a>
                  </div>
              </div>
 
--            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-400">Kontakt</a>
-+            <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-500">Kontakt</a>
+             <a href="{{ route('contact') }}" class="ajax-link hover:text-yellow-500">Kontakt</a>
 
              <div class="ml-auto flex gap-2">
--                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold">Bilety</a>
--                <a href="{{ route('shop') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Sklep</a>
--                <a href="{{ route('academy') }}" class="ajax-link border border-yellow-400 text-yellow-400 px-4 py-2 rounded font-semibold">Akademia</a>
-+                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
-+                    <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
-+                </a>
-+                <a href="{{ route('shop') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
-+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> Sklep
-+                </a>
-+                <a href="{{ route('academy') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
-+                    <i data-lucide="graduation-cap" class="w-4 h-4"></i> Akademia
-+                </a>
-             </div>
-         </div>
-     </div>
- </nav>
+                 <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
+                     <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
+                 </a>
+                 <a href="{{ route('shop') }}" class="ajax-link border border-zinc-500 text-zinc-700 px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-300">
+                     <i data-lucide="shopping-bag" class="w-4 h-4"></i> Sklep
+                 </a>
 diff --git a/routes/web.php b/routes/web.php
-index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2f91115f7 100644
+index 11d8317bb35cfe5af1d886d40a93b0c2f91115f7..732380bf127d75dcfbf9c68dace4ba5bf46f552b 100644
 --- a/routes/web.php
 +++ b/routes/web.php
-@@ -15,106 +15,178 @@
+@@ -15,51 +15,51 @@
      $upcomingGames = Game::where('match_date', '>=', now())
          ->orderBy('match_date')
          ->take(3)
@@ -621,84 +1083,47 @@ index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2
              'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
          ],
          [
--            'title' => 'Zapowiedź kolejki MZKosz',
-+            'title' => 'Zapowiedź kolejki EŁZKosz',
+-            'title' => 'Zapowiedź kolejki EŁZKosz',
++            'title' => 'Zapowiedź kolejki ŁZKosz',
              'category' => 'Artykuł',
              'date' => '19.04.2026',
              'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
          ],
-+        [
-+            'title' => 'Skrót meczu ETB - Start',
-+            'category' => 'Wideo',
-+            'date' => '18.04.2026',
-+            'excerpt' => 'Najciekawsze akcje i podsumowanie spotkania.',
-+        ],
-+        [
-+            'title' => 'Młodzież ETB na turnieju',
-+            'category' => 'Artykuł',
-+            'date' => '17.04.2026',
-+            'excerpt' => 'Relacja z występu młodych zawodników.',
-+        ],
-+        [
-+            'title' => 'Galeria: trening otwarty',
-+            'category' => 'Galeria',
-+            'date' => '16.04.2026',
-+            'excerpt' => 'Zdjęcia z otwartego treningu dla kibiców.',
-+        ],
-+        [
-+            'title' => 'Wywiad z trenerem',
-+            'category' => 'Wideo',
-+            'date' => '15.04.2026',
-+            'excerpt' => 'Plany zespołu na końcówkę sezonu.',
-+        ],
-+        [
-+            'title' => 'Transfer do ETB',
-+            'category' => 'Artykuł',
-+            'date' => '14.04.2026',
-+            'excerpt' => 'Nowy zawodnik dołącza do składu.',
-+        ],
-+        [
-+            'title' => 'Galeria: ETB vs AZS',
-+            'category' => 'Galeria',
-+            'date' => '13.04.2026',
-+            'excerpt' => 'Galeria meczowa z ostatniego pojedynku.',
-+        ],
-+        [
-+            'title' => 'Konferencja pomeczowa',
-+            'category' => 'Wideo',
-+            'date' => '12.04.2026',
-+            'excerpt' => 'Komentarze zawodników i sztabu.',
-+        ],
-+        [
-+            'title' => 'Współpraca z partnerem',
-+            'category' => 'Artykuł',
-+            'date' => '11.04.2026',
-+            'excerpt' => 'Nowe partnerstwo dla rozwoju klubu.',
-+        ],
-+        [
-+            'title' => 'Galeria: dzień meczowy',
-+            'category' => 'Galeria',
-+            'date' => '10.04.2026',
-+            'excerpt' => 'Kibice, emocje i atmosfera hali.',
-+        ],
-+        [
-+            'title' => 'Top akcje tygodnia',
-+            'category' => 'Wideo',
-+            'date' => '09.04.2026',
-+            'excerpt' => 'Najlepsze zagrania ostatnich spotkań.',
-+        ],
-+        [
-+            'title' => 'Raport medyczny',
-+            'category' => 'Artykuł',
-+            'date' => '08.04.2026',
-+            'excerpt' => 'Aktualizacja statusu zdrowotnego zawodników.',
-+        ],
-+        [
-+            'title' => 'Galeria: ETB Family Day',
-+            'category' => 'Galeria',
-+            'date' => '07.04.2026',
-+            'excerpt' => 'Zdjęcia z klubowego spotkania z fanami.',
-+        ],
+         [
+             'title' => 'Skrót meczu ETB - Start',
+             'category' => 'Wideo',
+             'date' => '18.04.2026',
+             'excerpt' => 'Najciekawsze akcje i podsumowanie spotkania.',
+         ],
+         [
+             'title' => 'Młodzież ETB na turnieju',
+             'category' => 'Artykuł',
+             'date' => '17.04.2026',
+             'excerpt' => 'Relacja z występu młodych zawodników.',
+         ],
+         [
+             'title' => 'Galeria: trening otwarty',
+             'category' => 'Galeria',
+             'date' => '16.04.2026',
+             'excerpt' => 'Zdjęcia z otwartego treningu dla kibiców.',
+         ],
+         [
+             'title' => 'Wywiad z trenerem',
+             'category' => 'Wideo',
+@@ -104,104 +104,118 @@
+         ],
+         [
+             'title' => 'Raport medyczny',
+             'category' => 'Artykuł',
+             'date' => '08.04.2026',
+             'excerpt' => 'Aktualizacja statusu zdrowotnego zawodników.',
+         ],
+         [
+             'title' => 'Galeria: ETB Family Day',
+             'category' => 'Galeria',
+             'date' => '07.04.2026',
+             'excerpt' => 'Zdjęcia z klubowego spotkania z fanami.',
+         ],
      ]);
 
      $next3x3Tournament = [
@@ -711,9 +1136,18 @@ index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2
  })->name('home');
 
  Route::get('/dashboard', function () {
-     return view('dashboard');
+-    return view('dashboard');
++    return redirect()->route('account');
  })->middleware(['auth', 'verified'])->name('dashboard');
 
++Route::get('/account', function () {
++    $users = request()->user()->isAdmin()
++        ? User::query()->select(['id', 'email', 'first_name', 'last_name', 'role'])->orderBy('email')->get()
++        : collect();
++
++    return view('dashboard', compact('users'));
++})->middleware(['auth', 'verified'])->name('account');
++
  Route::middleware('auth')->group(function () {
      Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
      Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -748,9 +1182,11 @@ index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2
  Route::view('/club/sponsors', 'pages.club-sponsors')->name('club.sponsors');
 
  /* Rozgrywki */
- Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
--Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
-+Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
+-Route::view('/schedule/mzkosz', 'pages.schedule-mzkosz')->name('schedule.mzkosz');
+-Route::redirect('/schedule/third-league', 'https://rozgrywki.e-zkosz.pl/')->name('schedule.third-league');
++Route::view('/schedule/lzkosz', 'pages.schedule-mzkosz')->name('schedule.lzkosz');
++Route::redirect('/schedule/mzkosz', '/schedule/lzkosz');
++Route::redirect('/schedule/third-league', 'https://www.lzkosz.pl/')->name('schedule.third-league');
  Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
  Route::view('/schedule/3x3', 'pages.schedule-3x3')->name('schedule.3x3');
  Route::view('/schedule/3x3/tournaments', 'pages.schedule-3x3-tournaments')->name('schedule.3x3.tournaments');
@@ -766,6 +1202,11 @@ index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2
  Route::view('/shop', 'pages.shop')->name('shop');
  Route::view('/academy', 'pages.academy')->name('academy');
 
++
++Route::middleware(['auth', 'role:admin,trainer'])->group(function () {
++    Route::view('/academy/manage', 'pages.academy')->name('academy.manage');
++});
++
  Route::middleware(['auth', 'role:admin,employee'])->group(function () {
      Route::get('/admin/matches/create', function () {
          return view('admin.create-match');
@@ -776,3 +1217,18 @@ index 096584b00f59a586387d89ceda8186670282845a..11d8317bb35cfe5af1d886d40a93b0c2
 
          if ($request->hasFile('image')) {
              $data['image'] = $request->file('image')->store('matches', 'public');
+         }
+
+         if ($request->hasFile('home_logo')) {
+             $data['home_logo'] = $request->file('home_logo')->store('logos', 'public');
+         }
+
+         if ($request->hasFile('away_logo')) {
+             $data['away_logo'] = $request->file('away_logo')->store('logos', 'public');
+         }
+
+         Game::create($data);
+
+         return redirect('/')->with('status', 'Mecz został zapisany.');
+     })->name('admin.matches.store');
+ });
