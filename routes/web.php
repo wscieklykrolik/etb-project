@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PlayerController;
 use App\Models\AppSetting;
 use App\Models\Game;
 use App\Models\User;
@@ -137,6 +138,12 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::resource('players', PlayerController::class)->only(['index', 'show']);
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('players', PlayerController::class)->except(['index', 'show']);
+});
 
 /*
 |--------------------------------------------------------------------------
