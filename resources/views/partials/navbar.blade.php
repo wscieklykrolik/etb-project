@@ -62,12 +62,7 @@
 
         <div class="mt-4 flex flex-wrap gap-6 text-lg items-center">
             <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-                <a href="{{ route('news') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
-                <div x-show="open==='news'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('news.articles') }}">Artykuły</a>
-                    <a class="ajax-link" href="{{ route('news.videos') }}">Wideo</a>
-                    <a class="ajax-link" href="{{ route('news.galleries') }}">Galerie</a>
-                </div>
+                <a href="{{ route('news.index') }}" class="ajax-link hover:text-yellow-400">Aktualności</a>
             </div>
 
             <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
