@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Match;
+use App\Models\MatchModel;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMatchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', Match::class) ?? false;
+        return $this->user()?->can('create', MatchModel::class) ?? false;
     }
 
     /**

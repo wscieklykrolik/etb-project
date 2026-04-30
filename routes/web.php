@@ -138,18 +138,16 @@ Route::middleware(['auth', 'role:athlete'])->group(function () {
     Route::get('/athlete/data', function () {
         return response()->json(request()->user()->athleteProfile);
     })->name('athlete.data');
+});
 
+Route::middleware(['auth', 'role:fan'])->group(function () {
     Route::get('/fan/data', function () {
-        $user = request()->user();
-        abort_if($user->role !== User::ROLE_FAN, 403);
-
-        return response()->json($user->fanProfile);
+        return response()->json(request()->user()->fanProfile);
     })->name('fan.data');
+});
 
+Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/employee/data', function () {
-        $user = request()->user();
-        abort_if($user->role !== User::ROLE_EMPLOYEE, 403);
-
-        return response()->json($user->employeeProfile);
+        return response()->json(request()->user()->employeeProfile);
     })->name('employee.data');
 });

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Match;
+use App\Models\MatchModel;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateMatchRequest extends FormRequest
@@ -11,7 +11,7 @@ class UpdateMatchRequest extends FormRequest
     {
         $match = $this->route('match');
 
-        return $this->user()?->can('update', $match instanceof Match ? $match : Match::class) ?? false;
+        return $this->user()?->can('update', $match instanceof MatchModel ? $match : MatchModel::class) ?? false;
     }
 
     /**

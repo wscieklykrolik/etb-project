@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMatchRequest;
 use App\Http\Requests\UpdateMatchRequest;
-use App\Models\Match;
+use App\Models\MatchModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -12,53 +12,53 @@ class MatchController extends Controller
 {
     public function index(): View
     {
-        $this->authorize('viewAny', Match::class);
+        $this->authorize('viewAny', MatchModel::class);
 
-        $matches = Match::query()->orderBy('match_date')->get();
+        $matches = MatchModel::query()->orderBy('match_date')->get();
 
         return view('matches.index', compact('matches'));
     }
 
-    public function show(Match $match): View
+    public function show(MatchModel $gameMatch): View
     {
-        $this->authorize('view', $match);
+        $this->authorize('view', $gameMatch);
 
-        return view('matches.show', compact('match'));
+        return view('matches.show', ['match' => $gameMatch]);
     }
 
     public function create(): View
     {
-        $this->authorize('create', Match::class);
+        $this->authorize('create', MatchModel::class);
 
         return view('matches.create');
     }
 
     public function store(StoreMatchRequest $request): RedirectResponse
     {
-        $match = Match::query()->create($request->validated());
+        $gameMatch = MatchModel::query()->create($request->validated());
 
-        return redirect()->route('matches.show', $match);
+        return redirect()->route('matches.show', $gameMatch);
     }
 
-    public function edit(Match $match): View
+    public function edit(MatchModel $gameMatch): View
     {
-        $this->authorize('update', $match);
+        $this->authorize('update', $gameMatch);
 
-        return view('matches.edit', compact('match'));
+        return view('matches.edit', ['match' => $gameMatch]);
     }
 
-    public function update(UpdateMatchRequest $request, Match $match): RedirectResponse
+    public function update(UpdateMatchRequest $request, MatchModel $gameMatch): RedirectResponse
     {
-        $match->update($request->validated());
+        $gameMatch->update($request->validated());
 
-        return redirect()->route('matches.show', $match);
+        return redirect()->route('matches.show', $gameMatch);
     }
 
-    public function destroy(Match $match): RedirectResponse
+    public function destroy(MatchModel $gameMatch): RedirectResponse
     {
-        $this->authorize('delete', $match);
+        $this->authorize('delete', $gameMatch);
 
-        $match->delete();
+        $gameMatch->delete();
 
         return redirect()->route('matches.index');
     }
