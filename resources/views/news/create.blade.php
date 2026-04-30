@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('content')
+<div class="py-6"><div class="max-w-4xl mx-auto sm:px-6 lg:px-8"><div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6"><h1 class="text-2xl font-semibold mb-4">Create news</h1><form action="{{ route('news.store') }}" method="POST" class="space-y-4">@csrf<div><label for="title">Title</label><input id="title" name="title" type="text" value="{{ old('title') }}" class="w-full border rounded p-2">@error('title')<p class="text-red-600 text-sm">{{ $message }}</p>@enderror</div><div><label for="content">Content</label><textarea id="content" name="content" rows="8" class="w-full border rounded p-2">{{ old('content') }}</textarea>@error('content')<p class="text-red-600 text-sm">{{ $message }}</p>@enderror</div><button type="submit" class="underline">Save</button></form></div></div></div>
+@endsection

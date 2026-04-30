@@ -2,129 +2,19 @@
 
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PlayerController;
 use App\Models\AppSetting;
 use App\Models\Game;
+use App\Models\News;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $nextMatch = Game::where('match_date', '>=', now())
-        ->orderBy('match_date')
-        ->first();
+    $latestNews = News::query()->with('author')->latest()->take(5)->get();
 
-    $upcomingGames = Game::where('match_date', '>=', now())
-        ->orderBy('match_date')
-        ->take(3)
-        ->get();
-
-    $latestArticles = collect([
-        [
-            'title' => 'ETB wygrywa po dogrywce',
-            'category' => 'Artykuł',
-            'date' => '22.04.2026',
-            'excerpt' => 'Mocny finisz w ostatnich minutach i cenne zwycięstwo na własnym parkiecie.',
-        ],
-        [
-            'title' => 'Kulisy meczu z ŁKS',
-            'category' => 'Wideo',
-            'date' => '21.04.2026',
-            'excerpt' => 'Zobacz materiały zza kulis i reakcje zespołu po spotkaniu.',
-        ],
-        [
-            'title' => 'Galeria zdjęć: derby Łodzi',
-            'category' => 'Galeria',
-            'date' => '20.04.2026',
-            'excerpt' => 'Najlepsze kadry z gorącego spotkania i oprawy kibiców.',
-        ],
-        [
-            'title' => 'Zapowiedź kolejki EŁZKosz',
-            'category' => 'Artykuł',
-            'date' => '19.04.2026',
-            'excerpt' => 'Sprawdź analizę rywala i plan ETB na najbliższe spotkanie.',
-        ],
-        [
-            'title' => 'Skrót meczu ETB - Start',
-            'category' => 'Wideo',
-            'date' => '18.04.2026',
-            'excerpt' => 'Najciekawsze akcje i podsumowanie spotkania.',
-        ],
-        [
-            'title' => 'Młodzież ETB na turnieju',
-            'category' => 'Artykuł',
-            'date' => '17.04.2026',
-            'excerpt' => 'Relacja z występu młodych zawodników.',
-        ],
-        [
-            'title' => 'Galeria: trening otwarty',
-            'category' => 'Galeria',
-            'date' => '16.04.2026',
-            'excerpt' => 'Zdjęcia z otwartego treningu dla kibiców.',
-        ],
-        [
-            'title' => 'Wywiad z trenerem',
-            'category' => 'Wideo',
-            'date' => '15.04.2026',
-            'excerpt' => 'Plany zespołu na końcówkę sezonu.',
-        ],
-        [
-            'title' => 'Transfer do ETB',
-            'category' => 'Artykuł',
-            'date' => '14.04.2026',
-            'excerpt' => 'Nowy zawodnik dołącza do składu.',
-        ],
-        [
-            'title' => 'Galeria: ETB vs AZS',
-            'category' => 'Galeria',
-            'date' => '13.04.2026',
-            'excerpt' => 'Galeria meczowa z ostatniego pojedynku.',
-        ],
-        [
-            'title' => 'Konferencja pomeczowa',
-            'category' => 'Wideo',
-            'date' => '12.04.2026',
-            'excerpt' => 'Komentarze zawodników i sztabu.',
-        ],
-        [
-            'title' => 'Współpraca z partnerem',
-            'category' => 'Artykuł',
-            'date' => '11.04.2026',
-            'excerpt' => 'Nowe partnerstwo dla rozwoju klubu.',
-        ],
-        [
-            'title' => 'Galeria: dzień meczowy',
-            'category' => 'Galeria',
-            'date' => '10.04.2026',
-            'excerpt' => 'Kibice, emocje i atmosfera hali.',
-        ],
-        [
-            'title' => 'Top akcje tygodnia',
-            'category' => 'Wideo',
-            'date' => '09.04.2026',
-            'excerpt' => 'Najlepsze zagrania ostatnich spotkań.',
-        ],
-        [
-            'title' => 'Raport medyczny',
-            'category' => 'Artykuł',
-            'date' => '08.04.2026',
-            'excerpt' => 'Aktualizacja statusu zdrowotnego zawodników.',
-        ],
-        [
-            'title' => 'Galeria: ETB Family Day',
-            'category' => 'Galeria',
-            'date' => '07.04.2026',
-            'excerpt' => 'Zdjęcia z klubowego spotkania z fanami.',
-        ],
-    ]);
-
-    $next3x3Tournament = [
-        'name' => '3x3 Quest Łódź',
-        'date' => '30.04.2026 16:00',
-        'place' => 'Atlas Arena, Łódź',
-    ];
-
-    return view('pages.home', compact('nextMatch', 'upcomingGames', 'latestArticles', 'next3x3Tournament'));
+    return view('home', compact('latestNews'));
 })->name('home');
 
 Route::get('/dashboard', function () {
@@ -145,12 +35,23 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('players', PlayerController::class)->except(['index', 'show']);
 });
 
+
+Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/news/{news}', [NewsController::class, 'show'])->whereNumber('news')->name('news.show');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+    Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+    Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->whereNumber('news')->name('news.edit');
+    Route::put('/news/{news}', [NewsController::class, 'update'])->whereNumber('news')->name('news.update');
+    Route::delete('/news/{news}', [NewsController::class, 'destroy'])->whereNumber('news')->name('news.destroy');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Strony główne menu
 |--------------------------------------------------------------------------
 */
-Route::view('/news', 'pages.news')->name('news');
 Route::view('/club', 'pages.club')->name('club');
 Route::view('/schedule', 'pages.schedule')->name('schedule');
 Route::view('/team', 'pages.team')->name('team');
