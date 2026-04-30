@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Match as MatchModel;
+use App\Models\News;
+use App\Models\Player;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +21,9 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
+        $matches = MatchModel::latest()->take(5)->get();
+        $news = News::latest()->take(5)->get();
+        $players = Player::latest()->take(5)->get();
 
         return view('profile.edit', [
             'user' => $user,
@@ -31,6 +37,9 @@ class ProfileController extends Controller
                 ? $user->athleteProfile()->first()
                 : null,
             'availableRoles' => User::roles(),
+            'matches' => $matches,
+            'news' => $news,
+            'players' => $players,
         ]);
     }
 

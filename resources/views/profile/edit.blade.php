@@ -108,6 +108,51 @@
                         </div>
                     @endif
 
+
+                    @if ($isAdmin || $isEmployee)
+                        <div class="p-6 bg-white border border-gray-200 shadow rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">Latest Matches</h3>
+
+                            <div class="space-y-2 text-sm">
+                                @forelse ($matches as $match)
+                                    <div>
+                                        {{ $match->home_team }} vs {{ $match->away_team }}
+                                    </div>
+                                @empty
+                                    <div>Brak meczów.</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-white border border-gray-200 shadow rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">Latest News</h3>
+
+                            <div class="space-y-2 text-sm">
+                                @forelse ($news as $article)
+                                    <div>
+                                        {{ $article->title }}
+                                    </div>
+                                @empty
+                                    <div>Brak newsów.</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-white border border-gray-200 shadow rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">Latest Players</h3>
+
+                            <div class="space-y-2 text-sm">
+                                @forelse ($players as $player)
+                                    <div>
+                                        {{ $player->first_name }} {{ $player->last_name }}
+                                    </div>
+                                @empty
+                                    <div>Brak zawodników.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- ATHLETE -->
                     @if ($isAthlete)
                         <div class="p-6 bg-white border border-gray-200 shadow rounded-lg">
