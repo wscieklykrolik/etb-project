@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Match as MatchModel;
+use App\Models\MatchGame;
 use App\Models\News;
 use App\Models\Player;
 use App\Models\User;
@@ -21,7 +21,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
-        $matches = MatchModel::latest()->take(5)->get();
+        $matches = MatchGame::latest()->take(5)->get();
         $news = News::latest()->take(5)->get();
         $players = Player::latest()->take(5)->get();
 

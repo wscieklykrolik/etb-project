@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMatchRequest;
 use App\Http\Requests\UpdateMatchRequest;
-use App\Models\MatchModel;
+use App\Models\MatchGame;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -12,14 +12,14 @@ class MatchController extends Controller
 {
     public function index(): View
     {
-        $this->authorize('viewAny', MatchModel::class);
+        $this->authorize('viewAny', MatchGame::class);
 
-        $matches = MatchModel::query()->orderBy('match_date')->get();
+        $matches = MatchGame::query()->orderBy('match_date')->get();
 
         return view('matches.index', compact('matches'));
     }
 
-    public function show(MatchModel $gameMatch): View
+    public function show(MatchGame $gameMatch): View
     {
         $this->authorize('view', $gameMatch);
 
@@ -28,33 +28,33 @@ class MatchController extends Controller
 
     public function create(): View
     {
-        $this->authorize('create', MatchModel::class);
+        $this->authorize('create', MatchGame::class);
 
         return view('matches.create');
     }
 
     public function store(StoreMatchRequest $request): RedirectResponse
     {
-        $gameMatch = MatchModel::query()->create($request->validated());
+        $gameMatch = MatchGame::query()->create($request->validated());
 
         return redirect()->route('matches.show', $gameMatch);
     }
 
-    public function edit(MatchModel $gameMatch): View
+    public function edit(MatchGame $gameMatch): View
     {
         $this->authorize('update', $gameMatch);
 
         return view('matches.edit', ['match' => $gameMatch]);
     }
 
-    public function update(UpdateMatchRequest $request, MatchModel $gameMatch): RedirectResponse
+    public function update(UpdateMatchRequest $request, MatchGame $gameMatch): RedirectResponse
     {
         $gameMatch->update($request->validated());
 
         return redirect()->route('matches.show', $gameMatch);
     }
 
-    public function destroy(MatchModel $gameMatch): RedirectResponse
+    public function destroy(MatchGame $gameMatch): RedirectResponse
     {
         $this->authorize('delete', $gameMatch);
 

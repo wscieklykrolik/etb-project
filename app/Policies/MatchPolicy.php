@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\MatchModel;
+use App\Models\MatchGame;
 use App\Models\User;
 
 class MatchPolicy
@@ -12,7 +12,7 @@ class MatchPolicy
         return true;
     }
 
-    public function view(?User $user, MatchModel $gameMatch): bool
+    public function view(?User $user, MatchGame $gameMatch): bool
     {
         return true;
     }
@@ -22,12 +22,12 @@ class MatchPolicy
         return $user->hasAnyRole([User::ROLE_ADMIN, User::ROLE_EMPLOYEE]);
     }
 
-    public function update(User $user, MatchModel $gameMatch): bool
+    public function update(User $user, MatchGame $gameMatch): bool
     {
         return $user->hasAnyRole([User::ROLE_ADMIN, User::ROLE_EMPLOYEE]);
     }
 
-    public function delete(User $user, MatchModel $gameMatch): bool
+    public function delete(User $user, MatchGame $gameMatch): bool
     {
         return $user->role === User::ROLE_ADMIN;
     }

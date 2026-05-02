@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\MatchModel;
+use App\Models\MatchGame;
 use App\Models\News;
 use App\Models\Player;
 use App\Policies\MatchPolicy;
@@ -15,7 +15,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Player::class => PlayerPolicy::class,
         News::class => NewsPolicy::class,
-        MatchModel::class => MatchPolicy::class,
+        MatchGame::class => MatchPolicy::class,
     ];
 
     public function boot(): void
