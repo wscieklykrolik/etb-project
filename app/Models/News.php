@@ -10,14 +10,12 @@ class News extends Model
 {
     use HasFactory;
 
-    /**
-     * @var list<string>
-     */
-    protected $fillable = [
-        'title',
-        'content',
-        'author_id',
-    ];
+    protected $fillable = ['title', 'content', 'author_id', 'publish_at'];
+
+    protected function casts(): array
+    {
+        return ['publish_at' => 'datetime'];
+    }
 
     public function author(): BelongsTo
     {

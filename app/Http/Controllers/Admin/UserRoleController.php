@@ -16,12 +16,8 @@ class UserRoleController extends Controller
             'role' => ['required', 'string', Rule::in(User::roles())],
         ]);
 
-        $user->update([
-            'role' => $validated['role'],
-        ]);
+        $user->update(['role' => $validated['role']]);
 
-        return redirect()
-            ->route('profile.edit')
-            ->with('status', 'role-updated');
+        return back()->with('success', 'Changes saved successfully');
     }
 }

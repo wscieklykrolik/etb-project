@@ -4,111 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>{{ config('app.name', 'Laravel') }}</title>
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-
-<body class="bg-black text-white">
-
+<body class="bg-black text-white" x-data>
 @include('partials.navbar')
-
-<main id="app-main">
-    @yield('content')
-</main>
-
+<main id="app-main">@yield('content')</main>
 @include('partials.footer')
-
-<!-- Simple AJAX navigation: ładuje tylko zawartość main, zachowuje statyczny navbar -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicjalizuje handlery dla linków z klasą .ajax-link
-    function initAjaxLinks() {
-        document.querySelectorAll('a.ajax-link').forEach(link => {
-            // unikaj wielokrotnego przypięcia
-            if (link.dataset.ajaxAttached) return;
-            link.dataset.ajaxAttached = '1';
-
-            link.addEventListener('click', async function(e) {
-                const href = link.getAttribute('href');
-                // pozwól normalne działanie dla zewnętrznych lub pusta href
-                if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
-                // jeśli link prowadzi do innego hosta, zostaw normalne przeładowanie
-                try {
-                    const url = new URL(href, location.origin);
-                    if (url.origin !== location.origin) return;
-                } catch (err) {
-                    // nieprawidłowy URL — fallback
-                    return;
-                }
-
-                e.preventDefault();
-
-                try {
-                    const res = await fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                    if (!res.ok) throw new Error('Network response was not ok');
-
-                    const text = await res.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-
-                    // szukamy nowej zawartości main (najpierw #app-main, potem main)
-                    const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
-                    const curMain = document.querySelector('#app-main') || document.querySelector('main');
-
-                    if (newMain && curMain) {
-                        curMain.innerHTML = newMain.innerHTML;
-                        // zaktualizuj URL i historię
-                        history.pushState({ ajax: true }, '', href);
-                        window.scrollTo(0,0);
-                        // ponownie przypnij handlery (np. linki wewnątrz nowo załadowanej zawartości)
-                        initAjaxLinks();
-                        if (window.reinitializeUi) window.reinitializeUi();
-                    } else {
-                        // fallback — pełne przeładowanie
-                        location.href = href;
-                    }
-                } catch (err) {
-                    console.error('AJAX navigation failed:', err);
-                    location.href = href;
-                }
-            });
-        });
-    }
-
-    initAjaxLinks();
-
-    // Obsługa back/forward
-    window.addEventListener('popstate', function(e) {
-        const href = location.href;
-        fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(r => {
-                if (!r.ok) throw new Error('Network response not ok');
-                return r.text();
-            })
-            .then(text => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                const newMain = doc.querySelector('#app-main') || doc.querySelector('main');
-                const curMain = document.querySelector('#app-main') || document.querySelector('main');
-                if (newMain && curMain) {
-                    curMain.innerHTML = newMain.innerHTML;
-                    initAjaxLinks();
-                    if (window.reinitializeUi) window.reinitializeUi();
-                } else {
-                    location.reload();
-                }
-            })
-            .catch(() => { location.reload(); });
-    });
-});
-</script>
-
+@php
+    $flashType = collect(['success', 'error', 'warning', 'info'])->first(fn ($type) => session()->has($type));
+    $flashMessage = $flashType ? session($flashType) : null;
+    if (! $flashMessage && session('status')) { $flashType = 'success'; $flashMessage = session('status'); }
+@endphp
+@if ($flashMessage)
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.opacity.duration.300ms class="fixed top-4 right-4 z-[60]">
+    <div @class([
+        'flex items-start gap-3 rounded-lg px-4 py-3 text-white shadow-lg',
+        'bg-green-600' => $flashType === 'success',
+        'bg-red-600' => $flashType === 'error',
+        'bg-yellow-500' => $flashType === 'warning',
+        'bg-blue-600' => $flashType === 'info',
+    ])>
+        <p class="text-sm">{{ $flashMessage }}</p>
+        <button type="button" class="text-white/90 hover:text-white" @click="show = false">✕</button>
+    </div>
+</div>
+@endif
 </body>
 </html>

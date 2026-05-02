@@ -24,6 +24,7 @@ class UpdateMatchRequest extends FormRequest
             'match_date' => ['required', 'date'],
             'location' => ['required', 'string', 'max:255'],
             'result' => ['nullable', 'string', 'max:50'],
+            'publish_at' => ['nullable', 'date'],
         ];
     }
 }

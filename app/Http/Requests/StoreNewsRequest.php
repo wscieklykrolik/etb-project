@@ -20,6 +20,7 @@ class StoreNewsRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string', 'min:10'],
+            'publish_at' => ['nullable', 'date'],
         ];
     }
 }

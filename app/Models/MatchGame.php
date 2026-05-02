@@ -17,6 +17,7 @@ class MatchGame extends Model
         'match_date',
         'location',
         'result',
+        'publish_at',
     ];
 
     /**
@@ -26,6 +27,7 @@ class MatchGame extends Model
     {
         return [
             'match_date' => 'datetime',
+            'publish_at' => 'datetime',
         ];
     }
 }
