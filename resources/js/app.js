@@ -347,11 +347,28 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateCountdown, 1000);
 });
 
-window.adjustFontSize = function adjustFontSize(change) {
+const FONT_SIZE_STORAGE_KEY = 'etb.fontSize';
+const DEFAULT_FONT_SIZE = 16;
+const MIN_FONT_SIZE = 14;
+const MAX_FONT_SIZE = 22;
+
+function setRootFontSize(size) {
     const root = document.documentElement;
-    const current = parseFloat(getComputedStyle(root).fontSize);
-    const next = Math.min(22, Math.max(14, current + change * 16));
+    const next = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, size));
     root.style.fontSize = `${next}px`;
+    localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(next));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedFontSize = Number(localStorage.getItem(FONT_SIZE_STORAGE_KEY));
+    if (Number.isFinite(savedFontSize)) {
+        setRootFontSize(savedFontSize);
+    }
+});
+
+window.adjustFontSize = function adjustFontSize(change) {
+    const current = parseFloat(getComputedStyle(document.documentElement).fontSize) || DEFAULT_FONT_SIZE;
+    setRootFontSize(current + change);
 };
 
 const legacySearchIndex = [
@@ -418,12 +435,12 @@ const searchIndex = [
     { label: 'Sponsorzy', url: '/club/sponsors', keywords: ['sponsorzy', 'sponsor', 'partnerzy', 'partner', 'partner strategiczny', 'partner technologiczny'] },
     { label: 'Kontakt', url: '/contact', keywords: ['kontakt', 'email', 'telefon', 'biuro'] },
     { label: 'Rozgrywki', url: '/schedule', keywords: ['rozgrywki', 'liga', 'mecze'] },
-    { label: 'Terminarz', url: '/schedule/matches', keywords: ['terminarz', 'kalendarz', 'najblizszy mecz', 'najbliższy mecz', 'mecz'] },
+    { label: 'Terminarz', url: '/schedule', keywords: ['terminarz', 'kalendarz', 'najblizszy mecz', 'najbliższy mecz', 'mecz'] },
     { label: 'III liga mężczyzn ŁZKosz', url: '/schedule/third-league', keywords: ['iii liga', '3 liga', 'trzecia liga', 'lzkosz', 'łzkosz'] },
     { label: 'Terminarz ŁZKosz', url: '/schedule/lzkosz', keywords: ['lzkosz', 'łzkosz', 'terminarz lzkosz', 'terminarz łzkosz'] },
     { label: 'Tabela', url: '/schedule/table', keywords: ['tabela', 'ranking', 'pozycja'] },
     { label: 'Terminarz 3x3', url: '/schedule/3x3', keywords: ['3x3', 'trzy na trzy', 'koszykowka 3x3', 'koszykówka 3x3'] },
-    { label: 'Turnieje 3x3', url: '/schedule/3x3/tournaments', keywords: ['turnieje 3x3', 'turniej 3x3', 'zawody 3x3'] },
+    { label: 'Turnieje 3x3', url: '/schedule/3x3', keywords: ['turnieje 3x3', 'turniej 3x3', 'zawody 3x3'] },
     { label: 'Zespół 3x3', url: '/schedule/3x3/team', keywords: ['zespol 3x3', 'zespół 3x3', 'team 3x3'] },
     { label: 'Drużyna', url: '/team', keywords: ['druzyna', 'drużyna', 'team', 'sklad', 'skład'] },
     { label: 'Zawodnicy', url: '/team/players', keywords: ['zawodnicy', 'koszykarze', 'gracze', 'pierwsza piatka', 'pierwsza piątka'] },

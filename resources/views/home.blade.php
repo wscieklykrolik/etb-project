@@ -207,7 +207,7 @@
 
     <section class="relative overflow-hidden bg-gradient-to-br from-yellow-400 to-yellow-500 py-16 text-black">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.3)_0%,transparent_50%)]"></div>
-        <a href="{{ route('academy') }}" class="relative mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
+        <a href="{{ route('academy') }}" class="academy-cta-link group relative mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-black/60">Akademia ETB</p>
                 <h2 class="mt-2 text-4xl font-black uppercase md:text-5xl">Kochasz koszykowke? Dołącz do nas</h2>

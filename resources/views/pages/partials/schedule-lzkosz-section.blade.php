@@ -46,9 +46,9 @@
                                 <span class="block text-yellow-400">{{ $match->match_date?->format('H:i') }}</span>
                             </div>
                             <p class="text-sm text-zinc-300">{{ $match->location }}</p>
-                            <p class="text-sm font-bold uppercase tracking-wide text-zinc-300">{{ $match->status === \App\Models\MatchGame::STATUS_FINISHED ? 'Zakończony' : 'Nadchodzący' }}</p>
+                            <p class="text-sm font-bold uppercase tracking-wide text-zinc-300">{{ $match->status === \App\Models\TeamMatch::STATUS_FINISHED ? 'Zakończony' : 'Nadchodzący' }}</p>
                             <p class="text-left text-2xl font-black text-white lg:text-right">
-                                {{ $match->status === \App\Models\MatchGame::STATUS_FINISHED ? $match->our_score.' : '.$match->opponent_score : '-- : --' }}
+                                {{ $match->status === \App\Models\TeamMatch::STATUS_FINISHED ? $match->our_score.' : '.$match->opponent_score : '-- : --' }}
                             </p>
                         </a>
                     @empty

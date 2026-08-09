@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeamMatch;
+use App\Models\LeagueStanding;
+use App\Models\ThreeXThreeTournament;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -36,6 +38,45 @@ class PublicScheduleController extends Controller
             ->orderByDesc('season')
             ->pluck('season');
 
+        $lzkoszMatches = TeamMatch::query()
+            ->with(['opponent', 'sportsHall'])
+            ->where('include_in_lzkosz', true)
+            ->where(function ($query): void {
+                $query->whereNull('publish_at')->orWhere('publish_at', '<=', now());
+            })
+            ->orderBy('match_date')
+            ->get();
+
+        $leagueStandings = LeagueStanding::query()
+            ->with('opponent')
+            ->orderBy('position')
+            ->get();
+
+        $participatingUpcomingTournaments = ThreeXThreeTournament::query()
+            ->with('categories')
+            ->participating()
+            ->upcoming()
+            ->orderBy('date')
+            ->get();
+        $participatingFinishedTournaments = ThreeXThreeTournament::query()
+            ->with('categories')
+            ->participating()
+            ->finished()
+            ->orderByDesc('date')
+            ->get();
+        $organizedUpcomingTournaments = ThreeXThreeTournament::query()
+            ->with('categories')
+            ->organized()
+            ->upcoming()
+            ->orderBy('date')
+            ->get();
+        $organizedFinishedTournaments = ThreeXThreeTournament::query()
+            ->with('categories')
+            ->organized()
+            ->finished()
+            ->orderByDesc('date')
+            ->get();
+
         return view('pages.schedule', [
             'matches' => $matches,
             'upcomingMatches' => $matches->where('status', TeamMatch::STATUS_UPCOMING),
@@ -44,6 +85,13 @@ class PublicScheduleController extends Controller
             'selectedSeason' => $season,
             'selectedView' => $view,
             'selectedSort' => $sort,
+            'roundOneMatches' => $lzkoszMatches->where('lzkosz_round', TeamMatch::LZKOSZ_ROUND_ONE),
+            'roundTwoMatches' => $lzkoszMatches->where('lzkosz_round', TeamMatch::LZKOSZ_ROUND_TWO),
+            'leagueStandings' => $leagueStandings,
+            'participatingUpcomingTournaments' => $participatingUpcomingTournaments,
+            'participatingFinishedTournaments' => $participatingFinishedTournaments,
+            'organizedUpcomingTournaments' => $organizedUpcomingTournaments,
+            'organizedFinishedTournaments' => $organizedFinishedTournaments,
         ]);
     }
 

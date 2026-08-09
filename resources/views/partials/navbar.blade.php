@@ -29,8 +29,8 @@
 
         <div class="w-px h-5 bg-zinc-700"></div>
 
-        <button class="px-2 py-1 border border-zinc-600 rounded text-zinc-400 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all" onclick="adjustFontSize(0.1)">A+</button>
-        <button class="px-2 py-1 border border-zinc-600 rounded text-zinc-400 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all" onclick="adjustFontSize(-0.1)">A-</button>
+        <button type="button" class="px-2 py-1 border border-zinc-600 rounded text-zinc-700 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all" onclick="adjustFontSize(1)">A+</button>
+        <button type="button" class="px-2 py-1 border border-zinc-600 rounded text-zinc-700 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all" onclick="adjustFontSize(-1)">A-</button>
 
         <div class="w-px h-5 bg-zinc-700"></div>
 
@@ -48,10 +48,56 @@
 
 <nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
     <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-        <div class="flex items-center justify-between gap-4 flex-wrap">
-            <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div class="min-w-0">
+                <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
 
-            <form id="etb-site-search" class="relative flex w-full min-w-0 items-center gap-2 sm:w-auto" role="search" autocomplete="off" onsubmit="event.preventDefault(); etbSearch()">
+                <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
+                    <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
+                        <a href="{{ route('news.index') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Aktualności</a>
+                    </div>
+
+                    <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
+                        <a href="{{ route('club') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Klub</a>
+                        <div x-show="open==='club'" x-transition class="dropdown-panel">
+                            <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
+                            <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
+                            <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
+                            <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
+                            <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
+                            <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
+                            <a class="ajax-link" href="{{ route('club.contact') }}">Kontakt</a>
+                        </div>
+                    </div>
+
+                    <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
+                        <a href="{{ route('schedule') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Rozgrywki</a>
+                        <div x-show="open==='schedule'" x-transition class="dropdown-panel">
+                            <a class="ajax-link" href="{{ route('schedule') }}">Terminarz</a>
+                            <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
+                            <a class="ajax-link" href="{{ route('schedule.lzkosz') }}">Terminarz ŁZKosz</a>
+                            <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
+                            <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
+                            <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
+                            <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
+                        </div>
+                    </div>
+
+                    <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
+                        <a href="{{ route('team') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Drużyna</a>
+                        <div x-show="open==='team'" x-transition class="dropdown-panel">
+                            <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
+                            <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
+                            <a class="ajax-link" href="{{ route('team.3x3') }}">Zawodnicy 3x3</a>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('contact') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Kontakt</a>
+                </div>
+            </div>
+
+            <div class="flex w-full flex-col gap-3 lg:w-[27rem]">
+            <form id="etb-site-search" class="relative flex w-full min-w-0 items-stretch gap-2" role="search" autocomplete="off" onsubmit="event.preventDefault(); etbSearch()">
                 <div class="relative min-w-0 flex-1 rounded border border-zinc-300 bg-white text-sm shadow-sm transition focus-within:border-yellow-400 focus-within:ring-2 focus-within:ring-yellow-400/70 sm:w-72 sm:flex-none">
                     <div id="etb-search-ghost" class="etb-search-ghost pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre px-3 text-zinc-400" aria-hidden="true"></div>
                     <input
@@ -66,66 +112,23 @@
                     >
                 </div>
                 <div id="etb-search-panel" class="etb-search-panel absolute left-0 top-full z-50 mt-2 hidden w-full overflow-hidden rounded border border-zinc-800 bg-zinc-950 text-sm text-white shadow-xl sm:w-72" role="listbox"></div>
-                <button type="submit" class="inline-flex shrink-0 items-center gap-2 rounded border border-zinc-500 px-3 py-1.5 font-semibold text-black hover:bg-yellow-400">
+                <button type="submit" class="inline-flex shrink-0 items-center gap-2 rounded border border-zinc-500 px-3 py-2 font-semibold text-black hover:bg-yellow-400">
                     <i data-lucide="search" class="w-4 h-4"></i> Szukaj
                 </button>
             </form>
-        </div>
-
-        <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
-            <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-                <a href="{{ route('news.index') }}" class="ajax-link text-zinc-300 hover:text-yellow-400 transition-colors font-medium">Aktualności</a>
-            </div>
-
-            <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
-                <a href="{{ route('club') }}" class="ajax-link text-zinc-300 hover:text-yellow-400 transition-colors font-medium">Klub</a>
-                <div x-show="open==='club'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
-                    <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
-                    <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
-                    <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
-                    <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
-                    <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
-                    <a class="ajax-link" href="{{ route('club.contact') }}">Kontakt</a>
-                </div>
-            </div>
-
-            <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
-                <a href="{{ route('schedule') }}" class="ajax-link text-zinc-300 hover:text-yellow-400 transition-colors font-medium">Rozgrywki</a>
-                <div x-show="open==='schedule'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('schedule') }}">Terminarz</a>
-                    <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
-                    <a class="ajax-link" href="{{ route('schedule.lzkosz') }}">Terminarz ŁZKosz</a>
-                    <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
-                    <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
-                    <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
-                    <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
-                </div>
-            </div>
-
-            <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-                <a href="{{ route('team') }}" class="ajax-link text-zinc-300 hover:text-yellow-400 transition-colors font-medium">Drużyna</a>
-                <div x-show="open==='team'" x-transition class="dropdown-panel">
-                    <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
-                    <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
-                    <a class="ajax-link" href="{{ route('team.3x3') }}">Zawodnicy 3x3</a>
-                </div>
-            </div>
-
-            <a href="{{ route('contact') }}" class="ajax-link text-zinc-300 hover:text-yellow-400 transition-colors font-medium">Kontakt</a>
-
-            <div class="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
-                <a href="{{ route('tickets') }}" class="ajax-link bg-yellow-400 border border-zinc-500 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2">
+            <div class="grid w-full grid-cols-3 gap-2">
+                <a href="{{ route('tickets') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 bg-yellow-400 px-3 py-2 text-sm font-semibold text-black">
                     <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
                 </a>
-                <a href="{{ route('shop.index') }}" class="ajax-link border border-zinc-500 text-black px-4 py-2 rounded font-semibold inline-flex items-center gap-2 hover:bg-yellow-400 relative">
+                <a href="{{ route('shop.index') }}" class="ajax-link relative inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400">
                     <i data-lucide="shopping-cart" class="w-4 h-4"></i>
                     Sklep
                     <span x-data="{ count: 0 }" x-init="fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count); setInterval(()=>fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count),30000)" x-show="count > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" x-text="count"></span>
                 </a>
-                <a href="{{ route('academy') }}" class="ajax-link border border-zinc-600 text-zinc-300 px-4 py-2.5 rounded-lg font-semibold inline-flex items-center gap-2 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all">
+                <a href="{{ route('academy') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400 hover:border-yellow-400 transition-all">
                     <i data-lucide="graduation-cap" class="w-4 h-4"></i> Akademia
                 </a>
+            </div>
             </div>
         </div>
     </div>
