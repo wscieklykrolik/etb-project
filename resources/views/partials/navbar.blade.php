@@ -116,17 +116,13 @@
                     <i data-lucide="search" class="w-4 h-4"></i> Szukaj
                 </button>
             </form>
-            <div class="grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
+            <div class="grid w-full grid-cols-3 gap-2">
                 <a href="{{ route('tickets') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 bg-yellow-400 px-3 py-2 text-sm font-semibold text-black">
                     <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
                 </a>
-                <a href="{{ route('shop.index') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400">
-                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                    Sklep
-                </a>
-                <a href="{{ route('cart.index') }}" class="ajax-link relative inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400">
+                <a href="{{ route('shop.index') }}" class="ajax-link relative inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400">
                     <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                    Koszyk
+                    Sklep
                     <span x-data="{ count: 0 }" x-init="fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count); setInterval(()=>fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count),30000)" x-show="count > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" x-text="count"></span>
                 </a>
                 <a href="{{ route('academy') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400 hover:border-yellow-400 transition-all">

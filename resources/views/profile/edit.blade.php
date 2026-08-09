@@ -29,6 +29,8 @@
     $tournamentFlow = app(ThreeXThreeTournamentFlowService::class);
 @endphp
 
+@section('hide_footer', $isPanelUser ? 'true' : 'false')
+
 @section('content')
 <div class="min-h-screen bg-slate-100 text-slate-950"
      x-data="adminPanel({
@@ -37,7 +39,7 @@
      })"
      @keydown.escape.window="openModal = null">
     @if ($isPanelUser)
-        <div class="grid min-h-screen lg:grid-cols-[18rem_1fr]">
+        <div class="grid min-h-screen bg-slate-950 lg:grid-cols-[18rem_1fr]">
             <aside class="bg-slate-950 text-white">
                 <div class="sticky top-0 flex h-screen flex-col px-5 py-6">
                     <a href="{{ route('home') }}" class="flex items-center gap-3">
@@ -108,7 +110,7 @@
                 </div>
             </aside>
 
-            <div>
+            <div class="bg-slate-100">
                 <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-950 px-4 py-4 text-white shadow-sm sm:px-6 lg:px-8">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <form class="relative w-full lg:max-w-md" role="search" @submit.prevent>

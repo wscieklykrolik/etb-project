@@ -12,7 +12,9 @@
 <body class="bg-black text-white" x-data>
 @include('partials.navbar')
 <main id="app-main">@yield('content')</main>
-@include('partials.footer')
+@unless(trim($__env->yieldContent('hide_footer')) === 'true')
+    @include('partials.footer')
+@endunless
 @php
     $flashType = collect(['success', 'error', 'warning', 'info'])->first(fn ($type) => session()->has($type));
     $flashMessage = $flashType ? session($flashType) : null;

@@ -166,13 +166,31 @@
             @if($order->shipping_address)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
-                        <h3 class="text-lg font-semibold mb-3">Adres dostawy</h3>
-                        <p>{{ $order->shipping_address['street'] ?? '' }}</p>
-                        <p>{{ $order->shipping_address['postal_code'] ?? '' }} {{ $order->shipping_address['city'] ?? '' }}</p>
-                        <p>{{ $order->shipping_address['country'] ?? '' }}</p>
+                        <h3 class="text-lg font-semibold mb-3">Dane do nadania</h3>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide">Odbiorca</p>
+                                <p class="mt-1 font-semibold">{{ $order->shipping_address['recipient_name'] ?? $order->user->name }}</p>
+                                <p class="text-sm text-gray-600">{{ $order->user->email }}</p>
+                            </div>
+                            @if(! empty($order->shipping_address['locker_name']))
+                                <div class="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-yellow-800">Paczkomat do nadania</p>
+                                    <p class="mt-1 text-lg font-black text-gray-950">{{ $order->shipping_address['locker_name'] }}</p>
+                                    <p class="text-sm text-gray-700">{{ $order->shipping_address['locker_address'] ?? '' }}, {{ $order->shipping_address['locker_city'] ?? '' }}</p>
+                                </div>
+                            @else
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wide">Adres</p>
+                                    <p class="mt-1">{{ $order->shipping_address['street'] ?? '' }}</p>
+                                    <p>{{ $order->shipping_address['postal_code'] ?? '' }} {{ $order->shipping_address['city'] ?? '' }}</p>
+                                    <p>{{ $order->shipping_address['country'] ?? '' }}</p>
+                                </div>
+                            @endif
+                        </div>
                         @if($order->shipping_method)
                             @php $shippingLabel = config('shipping.methods.' . $order->shipping_method . '.label', $order->shipping_method); @endphp
-                            <p class="mt-2 text-sm text-gray-600">Metoda: {{ $shippingLabel }}</p>
+                            <p class="mt-3 inline-flex rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-900">Metoda: {{ $shippingLabel }}</p>
                         @endif
                         @if($order->tracking_number)
                             <p class="mt-1 text-sm text-gray-600">Numer przesyłki: {{ $order->tracking_number }}</p>

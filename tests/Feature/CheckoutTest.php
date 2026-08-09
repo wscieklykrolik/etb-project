@@ -43,17 +43,17 @@ it('shows shipping form with items in cart', function () {
     $response->assertSee(__('Dostawa'));
 });
 
-it('stores shipping address and method', function () {
+it('stores shipping recipient and locker method', function () {
     app(CartService::class)->addItem($this->user, $this->product->id, null, 1);
 
     $response = $this->actingAs($this->user)
         ->post(route('checkout.shipping'), [
             'shipping_method' => 'inpost_locker',
             'address' => [
-                'street' => 'Testowa 1',
-                'city' => 'Łódź',
-                'postal_code' => '90-001',
-                'country' => 'Polska',
+                'recipient_name' => 'Jan Kowalski',
+                'locker_name' => 'LOD01A',
+                'locker_address' => 'Piotrkowska 120',
+                'locker_city' => 'Łódź',
             ],
         ]);
 
@@ -61,19 +61,41 @@ it('stores shipping address and method', function () {
 
     $cart = Cart::where('user_id', $this->user->id)->first();
     expect($cart->shipping_method)->toBe('inpost_locker');
-    expect($cart->shipping_address['street'])->toBe('Testowa 1');
+    expect($cart->shipping_address['recipient_name'])->toBe('Jan Kowalski');
+    expect($cart->shipping_address['locker_name'])->toBe('LOD01A');
+});
+
+it('requires recipient name for shipping', function () {
+    app(CartService::class)->addItem($this->user, $this->product->id, null, 1);
+
+    $response = $this->actingAs($this->user)
+        ->post(route('checkout.shipping'), [
+            'shipping_method' => 'pickup',
+            'address' => [],
+        ]);
+
+    $response->assertSessionHasErrors('address.recipient_name');
 });
 
 it('shows payment page with items', function () {
     app(CartService::class)->addItem($this->user, $this->product->id, null, 1);
     $cart = Cart::firstOrCreate(['user_id' => $this->user->id]);
-    $cart->update(['shipping_method' => 'inpost_locker', 'shipping_address' => ['street' => 'Testowa 1', 'city' => 'Łódź', 'postal_code' => '90-001', 'country' => 'Polska']]);
+    $cart->update([
+        'shipping_method' => 'inpost_locker',
+        'shipping_address' => [
+            'recipient_name' => 'Jan Kowalski',
+            'locker_name' => 'LOD01A',
+            'locker_address' => 'Piotrkowska 120',
+            'locker_city' => 'Łódź',
+        ],
+    ]);
 
     $response = $this->actingAs($this->user)
         ->get(route('checkout.payment'));
 
     $response->assertOk();
     $response->assertSee(__('Przelewy24'));
+    $response->assertSee('LOD01A');
 });
 
 it('creates order and redirects to payment gateway', function () {
@@ -83,13 +105,22 @@ it('creates order and redirects to payment gateway', function () {
 
     app(CartService::class)->addItem($this->user, $this->product->id, null, 1);
     $cart = Cart::firstOrCreate(['user_id' => $this->user->id]);
-    $cart->update(['shipping_method' => 'inpost_locker', 'shipping_address' => ['street' => 'Testowa 1', 'city' => 'Łódź', 'postal_code' => '90-001', 'country' => 'Polska']]);
+    $cart->update([
+        'shipping_method' => 'inpost_locker',
+        'shipping_address' => [
+            'recipient_name' => 'Jan Kowalski',
+            'locker_name' => 'LOD01A',
+            'locker_address' => 'Piotrkowska 120',
+            'locker_city' => 'Łódź',
+        ],
+    ]);
 
     $response = $this->actingAs($this->user)
         ->post(route('checkout.place'));
 
     $response->assertRedirect();
     $this->assertDatabaseHas('orders', ['user_id' => $this->user->id]);
+    expect(Order::first()->shipping_address['locker_name'])->toBe('LOD01A');
 });
 
 it('confirmation page requires auth', function () {

@@ -49,10 +49,14 @@ class CheckoutController extends Controller
         if ($needsShipping) {
             $rules = [
                 'shipping_method' => ['required', 'string', 'in:inpost_locker,inpost_courier,dpd_locker,dpd_courier,pickup'],
-                'address.street' => ['required', 'string', 'max:255'],
-                'address.city' => ['required', 'string', 'max:255'],
-                'address.postal_code' => ['required', 'string', 'max:20'],
-                'address.country' => ['required', 'string', 'max:100'],
+                'address.recipient_name' => ['required', 'string', 'max:255'],
+                'address.street' => ['nullable', 'required_if:shipping_method,inpost_courier,dpd_courier', 'string', 'max:255'],
+                'address.city' => ['nullable', 'required_if:shipping_method,inpost_courier,dpd_courier', 'string', 'max:255'],
+                'address.postal_code' => ['nullable', 'required_if:shipping_method,inpost_courier,dpd_courier', 'string', 'max:20'],
+                'address.country' => ['nullable', 'required_if:shipping_method,inpost_courier,dpd_courier', 'string', 'max:100'],
+                'address.locker_name' => ['nullable', 'required_if:shipping_method,inpost_locker,dpd_locker', 'string', 'max:100'],
+                'address.locker_address' => ['nullable', 'required_if:shipping_method,inpost_locker,dpd_locker', 'string', 'max:255'],
+                'address.locker_city' => ['nullable', 'required_if:shipping_method,inpost_locker,dpd_locker', 'string', 'max:255'],
             ];
         }
 
