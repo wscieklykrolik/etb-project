@@ -11,7 +11,10 @@ use App\Models\AppSetting;
 use App\Models\ClubSection;
 use App\Models\LeagueStanding;
 use App\Models\News;
+use App\Models\Order;
 use App\Models\Player;
+use App\Models\Product;
+use App\Models\ProductFilterGroup;
 use App\Models\Sponsor;
 use App\Models\TeamMatch;
 use App\Models\TeamStaff;
@@ -49,6 +52,7 @@ class ProfileController extends Controller
             'notifications-history',
             'league-table',
             'sponsors',
+            'shop',
             'account',
         ];
         $activeSection = in_array($request->query('section'), $allowedSections, true)
@@ -129,6 +133,13 @@ class ProfileController extends Controller
             ->paginate(20, ['*'], 'notifications_page')
             ->withQueryString();
         $unreadNotificationsCount = $adminNotifications->whereNull('read_at')->count();
+        $shopStats = [
+            'orders' => Order::count(),
+            'products' => Product::count(),
+            'publishedProducts' => Product::where('is_published', true)->count(),
+            'categories' => \App\Models\Category::count(),
+            'filterGroups' => ProductFilterGroup::count(),
+        ];
         $users = $user->role === User::ROLE_ADMIN
             ? User::query()
                 ->with('fanProfile')
@@ -174,6 +185,7 @@ class ProfileController extends Controller
             'adminNotifications' => $adminNotifications,
             'notificationHistory' => $notificationHistory,
             'unreadNotificationsCount' => $unreadNotificationsCount,
+            'shopStats' => $shopStats,
         ]);
     }
 

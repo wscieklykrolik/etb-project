@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductFilterGroup;
 use App\Models\ProductVariantSize;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -55,6 +56,9 @@ it('displays price in PLN format', function () {
 });
 
 it('admin can create product via API', function () {
+    $filterGroup = ProductFilterGroup::query()->create(['name' => 'Typ produktu', 'slug' => 'typ-produktu']);
+    $filterOption = $filterGroup->options()->create(['name' => 'Koszulka', 'slug' => 'koszulka']);
+
     $response = $this->actingAs($this->admin)
         ->post(route('admin.products.store'), [
             'name' => 'New Product',
@@ -63,15 +67,34 @@ it('admin can create product via API', function () {
             'stock_qty' => 10,
             'is_physical' => true,
             'is_published' => true,
+            'filter_options' => [$filterOption->id],
         ]);
 
     $response->assertRedirect();
     $this->assertDatabaseHas('products', ['name' => 'New Product']);
+    expect(Product::where('name', 'New Product')->first()->filterOptions)->toHaveCount(1);
 });
 
 it('guest cannot access product admin', function () {
     $response = $this->get(route('admin.products.create'));
     $response->assertRedirect(route('login'));
+});
+
+it('admin can open shop management pages', function () {
+    $filterGroup = ProductFilterGroup::query()->create(['name' => 'Typ produktu', 'slug' => 'typ-produktu']);
+    $filterGroup->options()->create(['name' => 'Koszulka', 'slug' => 'koszulka']);
+
+    $this->actingAs($this->admin)
+        ->get(route('admin.product-filters.index'))
+        ->assertOk()
+        ->assertSee('Filtry sklepu')
+        ->assertSee('Koszulka');
+
+    $this->actingAs($this->admin)
+        ->get(route('admin.products.create'))
+        ->assertOk()
+        ->assertSee('Etykiety i filtry produktu')
+        ->assertSee('Koszulka');
 });
 
 it('shows public shop with published products', function () {
@@ -110,4 +133,31 @@ it('shows only published product details', function () {
 
     $this->get(route('shop.show', $hiddenProduct))
         ->assertNotFound();
+});
+
+it('filters public shop by product filter option and size', function () {
+    $filterGroup = ProductFilterGroup::query()->create(['name' => 'Typ produktu', 'slug' => 'typ-produktu']);
+    $shirtOption = $filterGroup->options()->create(['name' => 'Koszulka', 'slug' => 'koszulka']);
+    $gadgetOption = $filterGroup->options()->create(['name' => 'Gadżet', 'slug' => 'gadzet']);
+
+    $shirt = Product::factory()->published()->create([
+        'name' => 'Koszulka filtrowana',
+        'category_id' => $this->category->id,
+        'stock_qty' => 10,
+    ]);
+    $shirt->filterOptions()->attach($shirtOption);
+    ProductVariantSize::factory()->create(['product_id' => $shirt->id, 'size_label' => 'M', 'stock_qty' => 5]);
+
+    $gadget = Product::factory()->published()->create([
+        'name' => 'Kubek filtrowany',
+        'category_id' => $this->category->id,
+        'stock_qty' => 10,
+    ]);
+    $gadget->filterOptions()->attach($gadgetOption);
+    ProductVariantSize::factory()->create(['product_id' => $gadget->id, 'size_label' => 'XL', 'stock_qty' => 5]);
+
+    $this->get(route('shop.index', ['filter_options' => [$shirtOption->id], 'sizes' => ['M']]))
+        ->assertOk()
+        ->assertSee('Koszulka filtrowana')
+        ->assertDontSee('Kubek filtrowany');
 });

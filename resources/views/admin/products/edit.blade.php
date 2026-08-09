@@ -58,6 +58,28 @@
                 @error('category_id') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
             </div>
 
+            @if($filterGroups->isNotEmpty())
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950/70 p-4">
+                    <h2 class="text-sm font-semibold text-zinc-200">Etykiety i filtry produktu</h2>
+                    <p class="mt-1 text-xs text-zinc-500">Zaznaczone opcje pojawią się jako filtry w sklepie.</p>
+                    <div class="mt-4 space-y-4">
+                        @foreach($filterGroups as $group)
+                            <fieldset>
+                                <legend class="text-xs font-bold uppercase tracking-wide text-zinc-500">{{ $group->name }}</legend>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach($group->options as $option)
+                                        <label class="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-yellow-400">
+                                            <input type="checkbox" name="filter_options[]" value="{{ $option->id }}" @checked(in_array($option->id, old('filter_options', $selectedFilterOptions))) class="rounded border-zinc-700 bg-zinc-950 text-yellow-400 focus:ring-yellow-400">
+                                            {{ $option->name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </fieldset>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="flex items-center gap-6">
                 <label class="inline-flex items-center gap-2">
                     <input type="hidden" name="is_published" value="0">

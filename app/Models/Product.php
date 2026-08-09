@@ -6,6 +6,7 @@ use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -61,6 +62,11 @@ class Product extends Model
     public function variantSizes(): HasMany
     {
         return $this->hasMany(ProductVariantSize::class);
+    }
+
+    public function filterOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductFilterOption::class, 'product_filter_option_product');
     }
 
     public function displayPrice(): string

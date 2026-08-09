@@ -9,6 +9,8 @@ use App\Models\News;
 use App\Models\Opponent;
 use App\Models\Player;
 use App\Models\Product;
+use App\Models\ProductFilterGroup;
+use App\Models\ProductFilterOption;
 use App\Models\ProductVariantSize;
 use App\Models\Sponsor;
 use App\Models\SportsHall;
@@ -459,6 +461,29 @@ class ContentSeeder extends Seeder
             ['name' => 'Gadżety', 'description' => 'Pamiątki i gadżety kibica ETB Łódź'],
         );
 
+        $filterOptions = collect([
+            'Typ produktu' => ['Koszulka', 'Akcesoria', 'Gadżet'],
+            'Przeznaczenie' => ['Mecz', 'Trening', 'Kibic', 'Na co dzień'],
+            'Kolekcja' => ['Oficjalny merch', 'Sezon 2025/2026'],
+        ])->flatMap(function (array $options, string $groupName) {
+            $group = ProductFilterGroup::updateOrCreate(
+                ['slug' => \Illuminate\Support\Str::slug($groupName)],
+                ['name' => $groupName, 'sort_order' => 0, 'is_active' => true],
+            );
+
+            return collect($options)->mapWithKeys(function (string $optionName, int $index) use ($group) {
+                $option = ProductFilterOption::updateOrCreate(
+                    [
+                        'product_filter_group_id' => $group->id,
+                        'slug' => \Illuminate\Support\Str::slug($optionName),
+                    ],
+                    ['name' => $optionName, 'sort_order' => $index, 'is_active' => true],
+                );
+
+                return [$optionName => $option->id];
+            });
+        });
+
         $products = [
             [
                 'name' => 'Koszulka meczowa ETB 2025/2026',
@@ -575,6 +600,30 @@ class ContentSeeder extends Seeder
                     $product->variantSizes()->create($variant);
                 }
             }
+
+            $filters = ['Oficjalny merch'];
+
+            if ($data['category_id'] === $categoryKoszulki->id) {
+                $filters[] = 'Koszulka';
+                $filters[] = \Illuminate\Support\Str::contains($data['name'], 'meczowa') ? 'Mecz' : 'Trening';
+            } elseif ($data['category_id'] === $categoryAkcesoria->id) {
+                $filters[] = 'Akcesoria';
+                $filters[] = \Illuminate\Support\Str::contains($data['name'], ['Opaska', 'Bidon']) ? 'Trening' : 'Na co dzień';
+            } else {
+                $filters[] = 'Gadżet';
+                $filters[] = 'Kibic';
+            }
+
+            if (\Illuminate\Support\Str::contains($data['name'], '2025/2026')) {
+                $filters[] = 'Sezon 2025/2026';
+            }
+
+            $product->filterOptions()->sync(
+                collect($filters)
+                    ->map(fn (string $filter) => $filterOptions->get($filter))
+                    ->filter()
+                    ->all(),
+            );
         }
     }
 }

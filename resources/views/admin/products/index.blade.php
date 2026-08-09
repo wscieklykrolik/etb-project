@@ -31,6 +31,13 @@
                     <tr class="hover:bg-zinc-800/50">
                         <td class="px-5 py-3">
                             <span class="font-medium text-zinc-200">{{ $product->name }}</span>
+                            @if($product->filterOptions->isNotEmpty())
+                                <div class="mt-2 flex flex-wrap gap-1">
+                                    @foreach($product->filterOptions->take(4) as $option)
+                                        <span class="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-300">{{ $option->group?->name }}: {{ $option->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
                             @if($product->images)
                                 <div class="mt-1 flex -space-x-1">
                                     @foreach(array_slice($product->images, 0, 3) as $img)

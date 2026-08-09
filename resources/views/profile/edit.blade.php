@@ -83,6 +83,16 @@
                                 <a href="{{ $sectionUrl('sponsors') }}" class="{{ $sectionClasses('sponsors') }}"><i data-lucide="handshake" class="h-4 w-4"></i>Sponsorzy</a>
                             </div>
                         </div>
+                        <div>
+                            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Sklep</p>
+                            <div class="mt-3 space-y-1">
+                                <a href="{{ $sectionUrl('shop') }}" class="{{ $sectionClasses('shop') }}"><i data-lucide="store" class="h-4 w-4"></i>Podsumowanie sklepu</a>
+                                <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="shopping-cart" class="h-4 w-4"></i>Zamówienia</a>
+                                <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="package" class="h-4 w-4"></i>Produkty</a>
+                                <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="tags" class="h-4 w-4"></i>Kategorie</a>
+                                <a href="{{ route('admin.product-filters.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="sliders-horizontal" class="h-4 w-4"></i>Filtry sklepu</a>
+                            </div>
+                        </div>
                     </nav>
 
                     <div class="mt-auto border-t border-white/10 pt-5">
@@ -820,6 +830,42 @@
                         @if ($notificationHistory->hasPages())
                             <div class="mt-5">{{ $notificationHistory->links() }}</div>
                         @endif
+                    </section>
+
+                    <section id="shop" class="{{ $activeSection === 'shop' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h2 class="text-xl font-black">Sklep i zarządzanie</h2>
+                                <p class="text-sm text-slate-600">Produkty, zamówienia, kategorie oraz filtry sklepu w jednym miejscu.</p>
+                            </div>
+                            <a href="{{ route('shop.index') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black hover:bg-yellow-50">
+                                <i data-lucide="external-link" class="h-4 w-4"></i>
+                                Zobacz sklep
+                            </a>
+                        </div>
+
+                        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                            @foreach ([
+                                ['icon' => 'shopping-cart', 'value' => $shopStats['orders'], 'label' => 'Zamówienia', 'route' => route('admin.orders.index')],
+                                ['icon' => 'package', 'value' => $shopStats['products'], 'label' => 'Produkty', 'route' => route('admin.products.index')],
+                                ['icon' => 'badge-check', 'value' => $shopStats['publishedProducts'], 'label' => 'Opublikowane', 'route' => route('admin.products.index')],
+                                ['icon' => 'tags', 'value' => $shopStats['categories'], 'label' => 'Kategorie', 'route' => route('admin.categories.index')],
+                                ['icon' => 'sliders-horizontal', 'value' => $shopStats['filterGroups'], 'label' => 'Grupy filtrów', 'route' => route('admin.product-filters.index')],
+                            ] as $stat)
+                                <a href="{{ $stat['route'] }}" class="rounded-lg border border-slate-200 p-4 transition hover:border-yellow-400 hover:bg-yellow-50">
+                                    <i data-lucide="{{ $stat['icon'] }}" class="h-6 w-6 text-yellow-600"></i>
+                                    <p class="mt-3 text-2xl font-black">{{ $stat['value'] }}</p>
+                                    <p class="text-sm font-bold text-slate-600">{{ $stat['label'] }}</p>
+                                </a>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-6 grid gap-4 lg:grid-cols-4">
+                            <a href="{{ route('admin.products.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-4 py-3 text-sm font-black text-black hover:bg-yellow-300"><i data-lucide="plus" class="h-4 w-4"></i>Dodaj produkt</a>
+                            <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 text-sm font-black hover:bg-slate-50"><i data-lucide="folder-plus" class="h-4 w-4"></i>Dodaj kategorię</a>
+                            <a href="{{ route('admin.product-filters.index') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 text-sm font-black hover:bg-slate-50"><i data-lucide="sliders-horizontal" class="h-4 w-4"></i>Edytuj filtry</a>
+                            <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 text-sm font-black hover:bg-slate-50"><i data-lucide="clipboard-list" class="h-4 w-4"></i>Obsłuż zamówienia</a>
+                        </div>
                     </section>
 
                     <section id="account" class="{{ $activeSection === 'account' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
