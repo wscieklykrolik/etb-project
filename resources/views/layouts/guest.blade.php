@@ -13,11 +13,29 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-black text-white">
+        @php
+            $authImages = [
+                'images/auth/tlo_ETB0.jpeg',
+                'images/auth/tlo_ETB1.jpeg',
+                'images/auth/tlo_ETB2.jpeg',
+                'images/auth/tlo_ETB3.jpeg',
+                'images/auth/tlo_ETB4.jpeg',
+                'images/auth/tlo_ETB5.jpeg',
+                'images/auth/tlo_ETB6.jpeg',
+            ];
+
+            $authImage = $authImages[array_rand($authImages)];
+        @endphp
+
         <div class="min-h-screen flex items-center justify-center p-6">
             <div class="w-full max-w-5xl grid lg:grid-cols-2 overflow-hidden rounded-xl border-4 border-yellow-400 shadow-2xl shadow-yellow-700/30">
                 <div class="hidden lg:flex bg-zinc-900 border-r-4 border-yellow-400 p-10 items-center justify-center">
-                    <div class="w-full h-full min-h-96 rounded-lg border-2 border-dashed border-yellow-400/80 bg-black/40 flex items-center justify-center text-center text-yellow-300 px-6">
-                        <p class="text-sm uppercase tracking-[0.2em]">Miejsce na zdjęcie / grafikę organizacji</p>
+                    <div class="w-full h-full min-h-96 overflow-hidden rounded-lg border-2 border-dashed border-yellow-400/80 bg-black/40">
+                        <img
+                            src="{{ asset($authImage) }}"
+                            alt="Zdjęcie drużyny ETB"
+                            class="h-full min-h-96 w-full object-cover"
+                        >
                     </div>
                 </div>
 

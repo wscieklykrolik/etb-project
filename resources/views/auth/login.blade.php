@@ -2,7 +2,7 @@
     <x-auth-session-status class="mb-4 text-sm text-black" :status="session('status')" />
 
     <h1 class="text-2xl font-bold text-black">Zaloguj się</h1>
-    <p class="mt-1 text-sm text-black/80">Nie masz konta? <a href="{{ route('register') }}" class="font-semibold underline">Zarejestruj się w tym samym panelu</a>.</p>
+    <p class="mt-1 text-sm text-black/80">Nie masz konta? <a href="{{ route('register') }}" class="font-semibold underline">Zarejestruj się</a>.</p>
 
     <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
         @csrf
