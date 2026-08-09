@@ -54,11 +54,11 @@
 
                 <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
                     <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-                        <a href="{{ route('news.index') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Aktualności</span></a>
+                        <a href="{{ route('news.index') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Aktualności</a>
                     </div>
 
                     <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
-                        <a href="{{ route('club') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Klub</span></a>
+                        <a href="{{ route('club') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Klub</a>
                         <div x-show="open==='club'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
                             <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
@@ -71,7 +71,7 @@
                     </div>
 
                     <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
-                        <a href="{{ route('schedule') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Rozgrywki</span></a>
+                        <a href="{{ route('schedule') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Rozgrywki</a>
                         <div x-show="open==='schedule'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('schedule') }}">Terminarz</a>
                             <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
@@ -84,7 +84,7 @@
                     </div>
 
                     <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Drużyna</span></a>
+                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Drużyna</a>
                         <div x-show="open==='team'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
                             <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Kontakt</span></a>
+                    <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Kontakt</a>
                 </div>
             </div>
 
