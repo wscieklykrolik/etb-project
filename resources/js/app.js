@@ -347,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateCountdown, 1000);
 });
 
-const FONT_SIZE_STORAGE_KEY = 'etb.fontSize';
 const DEFAULT_FONT_SIZE = 16;
 const MIN_FONT_SIZE = 14;
 const MAX_FONT_SIZE = 22;
@@ -356,15 +355,7 @@ function setRootFontSize(size) {
     const root = document.documentElement;
     const next = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, size));
     root.style.fontSize = `${next}px`;
-    localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(next));
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const savedFontSize = Number(localStorage.getItem(FONT_SIZE_STORAGE_KEY));
-    if (Number.isFinite(savedFontSize)) {
-        setRootFontSize(savedFontSize);
-    }
-});
 
 window.adjustFontSize = function adjustFontSize(change) {
     const current = parseFloat(getComputedStyle(document.documentElement).fontSize) || DEFAULT_FONT_SIZE;

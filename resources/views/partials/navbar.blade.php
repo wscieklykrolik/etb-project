@@ -54,11 +54,11 @@
 
                 <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
                     <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-                        <a href="{{ route('news.index') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Aktualności</a>
+                        <a href="{{ route('news.index') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Aktualności</span></a>
                     </div>
 
                     <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
-                        <a href="{{ route('club') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Klub</a>
+                        <a href="{{ route('club') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Klub</span></a>
                         <div x-show="open==='club'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
                             <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
@@ -71,7 +71,7 @@
                     </div>
 
                     <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
-                        <a href="{{ route('schedule') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Rozgrywki</a>
+                        <a href="{{ route('schedule') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Rozgrywki</span></a>
                         <div x-show="open==='schedule'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('schedule') }}">Terminarz</a>
                             <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
@@ -84,7 +84,7 @@
                     </div>
 
                     <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-                        <a href="{{ route('team') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Drużyna</a>
+                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Drużyna</span></a>
                         <div x-show="open==='team'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
                             <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
@@ -92,13 +92,13 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('contact') }}" class="ajax-link text-yellow-500 hover:text-yellow-600 transition-colors font-semibold">Kontakt</a>
+                    <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-opacity hover:opacity-80"><span class="bg-yellow-400 px-1">Kontakt</span></a>
                 </div>
             </div>
 
             <div class="flex w-full flex-col gap-3 lg:w-[27rem]">
             <form id="etb-site-search" class="relative flex w-full min-w-0 items-stretch gap-2" role="search" autocomplete="off" onsubmit="event.preventDefault(); etbSearch()">
-                <div class="relative min-w-0 flex-1 rounded border border-zinc-300 bg-white text-sm shadow-sm transition focus-within:border-yellow-400 focus-within:ring-2 focus-within:ring-yellow-400/70 sm:w-72 sm:flex-none">
+                <div class="relative min-w-0 flex-1 rounded border border-zinc-300 bg-white text-sm shadow-sm transition focus-within:border-yellow-400 focus-within:ring-2 focus-within:ring-yellow-400/70">
                     <div id="etb-search-ghost" class="etb-search-ghost pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre px-3 text-zinc-400" aria-hidden="true"></div>
                     <input
                         id="etb-search"
