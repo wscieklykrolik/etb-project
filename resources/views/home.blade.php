@@ -65,13 +65,13 @@
 
     <section class="bg-zinc-950/50 py-16 border-y border-zinc-800/50">
         <div class="mx-auto max-w-7xl px-6">
-            <p class="text-xs font-black uppercase tracking-[0.28em] text-zinc-600">Mecze pierwszej drużyny</p>
-            <h2 class="mt-2 text-4xl font-black uppercase italic text-zinc-950">Terminarz</h2>
-            <div class="mt-8 grid gap-5 lg:grid-cols-3">
+            <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Mecze pierwszej drużyny</p>
+            <h2 class="mt-2 text-4xl font-black uppercase italic text-white">Terminarz</h2>
+            <div class="mt-8 grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)_minmax(0,1fr)]">
                 @include('pages.partials.match-public-card', ['match' => $lastFinishedMatch, 'label' => 'Ostatni mecz'])
 
                 @foreach($upcomingMatches as $match)
-                    @include('pages.partials.match-public-card', ['match' => $match, 'label' => $loop->first ? 'Najbliższy mecz' : 'Kolejny mecz'])
+                    @include('pages.partials.match-public-card', ['match' => $match, 'label' => $loop->first ? 'Najbliższy mecz' : 'Kolejny mecz', 'featured' => $loop->first])
                 @endforeach
 
                 @if(! $lastFinishedMatch && $upcomingMatches->isEmpty())
