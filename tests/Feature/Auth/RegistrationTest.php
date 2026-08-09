@@ -49,7 +49,7 @@ test('new users can complete registration with activation code', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('home', absolute: false));
     expect(User::where('email', 'test@example.com')->exists())->toBeTrue();
     expect(PendingRegistration::where('email', 'test@example.com')->exists())->toBeFalse();
 });

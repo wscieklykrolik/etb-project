@@ -114,6 +114,14 @@ class NewsService
             $data['video_url'] = null;
         }
 
+        if ($data['type'] !== News::TYPE_ARTICLE) {
+            $data['article_author'] = null;
+        }
+
+        if (! in_array($data['type'], [News::TYPE_ARTICLE, News::TYPE_GALLERY], true)) {
+            $data['photo_author'] = null;
+        }
+
         return $data;
     }
 }

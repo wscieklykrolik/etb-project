@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $this->cartService->mergeGuestIntoUser(Auth::user());
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('home', absolute: false));
     }
 
     /**

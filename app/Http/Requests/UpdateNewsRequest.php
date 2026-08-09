@@ -29,6 +29,8 @@ class UpdateNewsRequest extends FormRequest
             'content' => ['nullable', 'required_if:type,'.News::TYPE_ARTICLE, 'string', 'min:10'],
             'excerpt' => ['nullable', 'required_if:type,'.News::TYPE_GALLERY, 'required_if:type,'.News::TYPE_VIDEO, 'string', 'max:500'],
             'video_url' => ['nullable', 'required_if:type,'.News::TYPE_VIDEO, 'url', 'max:2048'],
+            'article_author' => ['nullable', 'string', 'max:255'],
+            'photo_author' => ['nullable', 'string', 'max:255'],
             'publish_at' => ['nullable', 'date'],
             'is_visible' => ['nullable', 'boolean'],
             'main_image' => ['nullable', 'image', 'max:5120'],

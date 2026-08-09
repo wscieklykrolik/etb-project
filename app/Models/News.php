@@ -24,6 +24,8 @@ class News extends Model
         'content',
         'excerpt',
         'video_url',
+        'article_author',
+        'photo_author',
         'author_id',
         'publish_at',
         'is_visible',

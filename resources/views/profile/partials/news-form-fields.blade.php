@@ -50,6 +50,18 @@
     </label>
 
     <div class="grid gap-4 md:grid-cols-2">
+        <label class="block" x-show="type === 'article'">
+            <span class="text-sm font-medium text-gray-700">Autor artykułu</span>
+            <input name="article_author" value="{{ old('article_author', $item?->article_author) }}" class="mt-1 w-full rounded border-gray-300">
+        </label>
+
+        <label class="block" x-show="type === 'article' || type === 'gallery'">
+            <span class="text-sm font-medium text-gray-700">Autor zdjęć</span>
+            <input name="photo_author" value="{{ old('photo_author', $item?->photo_author) }}" class="mt-1 w-full rounded border-gray-300">
+        </label>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
         <label class="block">
             <span class="text-sm font-medium text-gray-700">Data publikacji</span>
             <input name="publish_at" type="datetime-local" value="{{ old('publish_at', $item?->publish_at?->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded border-gray-300">

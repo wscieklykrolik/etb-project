@@ -54,6 +54,18 @@
                     </div>
                 </div>
             @endif
+
+            @if (($news->type === \App\Models\News::TYPE_ARTICLE && $news->article_author) || (($news->type === \App\Models\News::TYPE_ARTICLE || $news->type === \App\Models\News::TYPE_GALLERY) && $news->photo_author))
+                <div class="mt-10 border-t border-zinc-800 pt-5 text-sm font-semibold text-zinc-400 sm:text-right">
+                    @if ($news->type === \App\Models\News::TYPE_ARTICLE && $news->article_author)
+                        <p>Autor artykułu: {{ $news->article_author }}</p>
+                    @endif
+
+                    @if (($news->type === \App\Models\News::TYPE_ARTICLE || $news->type === \App\Models\News::TYPE_GALLERY) && $news->photo_author)
+                        <p class="mt-1">Autor zdjęć: {{ $news->photo_author }}</p>
+                    @endif
+                </div>
+            @endif
         </div>
     </article>
 

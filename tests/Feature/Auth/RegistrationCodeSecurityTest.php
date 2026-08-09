@@ -66,7 +66,7 @@ test('verified activation code marks the user email as verified', function () {
     $this->post('/register/verify', [
         'email' => 'test@example.com',
         'code' => '123456',
-    ])->assertRedirect(route('dashboard', absolute: false));
+    ])->assertRedirect(route('home', absolute: false));
 
     expect(User::where('email', 'test@example.com')->first()->email_verified_at)->not->toBeNull();
 });
