@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [SecurityHeaders::class]);
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES'));
 
         $middleware->alias([
             'role' => CheckRole::class,
