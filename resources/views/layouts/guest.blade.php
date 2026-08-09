@@ -22,33 +22,41 @@
                 'images/auth/tlo_ETB4.jpeg',
                 'images/auth/tlo_ETB5.jpeg',
                 'images/auth/tlo_ETB6.jpeg',
+                'images/auth/tlo_ETB7.jpeg',
+                'images/auth/tlo_ETB8.jpeg',
+                'images/auth/tlo_ETB9.jpeg',
+                'images/auth/tlo_ETB10.jpeg',
             ];
 
             $authImage = $authImages[array_rand($authImages)];
         @endphp
 
-        <div class="min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-5xl grid lg:grid-cols-2 overflow-hidden rounded-xl border-4 border-yellow-400 shadow-2xl shadow-yellow-700/30">
+        <div class="relative min-h-screen overflow-hidden">
+            <img
+                src="{{ asset($authImage) }}"
+                alt="Zdjęcie drużyny ETB"
+                class="absolute inset-0 h-full w-full object-cover"
+            >
+            <div class="absolute inset-0 bg-black/45"></div>
+
+            <div class="relative z-10 flex min-h-screen items-center justify-center p-6">
+            <div class="w-full max-w-5xl grid lg:grid-cols-2 overflow-hidden rounded-xl border-4 border-yellow-400 shadow-2xl shadow-black/60">
                 <div class="hidden lg:flex bg-zinc-900 border-r-4 border-yellow-400 p-10 items-center justify-center">
-                    <div class="w-full h-full min-h-96 overflow-hidden rounded-lg border-2 border-dashed border-yellow-400/80 bg-black/40">
-                        <img
-                            src="{{ asset($authImage) }}"
-                            alt="Zdjęcie drużyny ETB"
-                            class="h-full min-h-96 w-full object-cover"
-                        >
+                    <div class="w-full h-full min-h-96 rounded-lg border-2 border-dashed border-yellow-400/80 bg-black/40 flex items-center justify-center text-center text-yellow-300 px-6">
+                        <p class="text-sm uppercase tracking-[0.2em]">Miejsce na logo klubu</p>
                     </div>
                 </div>
 
                 <div class="bg-yellow-400 p-6 sm:p-10">
                     <div class="mb-6 flex items-center justify-between gap-4">
-                        <a href="/" class="flex items-center gap-3 text-black font-bold">
-                            <x-application-logo class="w-10 h-10 fill-current text-black" />
-                            <span>Panel ETB</span>
+                        <a href="/" class="text-black text-lg font-black tracking-wide">
+                            Logowanie ETB
                         </a>
                     </div>
 
                     {{ $slot }}
                 </div>
+            </div>
             </div>
         </div>
     </body>
