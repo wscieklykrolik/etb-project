@@ -17,7 +17,7 @@
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                 @foreach ($clubSection->images as $image)
                     <figure>
-                        <img src="{{ asset('storage/'.$image->image_path) }}" alt="{{ $image->alt ?: $clubSection->title }}" class="aspect-[16/10] w-full rounded object-cover">
+                        <img src="{{ \App\Support\MediaStorage::url($image->image_path) }}" alt="{{ $image->alt ?: $clubSection->title }}" class="aspect-[16/10] w-full rounded object-cover">
                         @if (filled($image->caption))
                             <figcaption class="mt-2 text-xs leading-5 text-zinc-400">{{ $image->caption }}</figcaption>
                         @endif
@@ -27,3 +27,4 @@
         @endif
     </div>
 </section>
+

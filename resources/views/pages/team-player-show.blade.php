@@ -7,7 +7,7 @@
     <article class="mt-8 grid overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-2xl lg:grid-cols-[0.9fr_1.1fr]">
         <div class="bg-zinc-900">
             @if ($player->photo_path)
-                <img src="{{ asset('storage/'.$player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full min-h-[28rem] w-full object-cover object-top">
+                <img src="{{ \App\Support\MediaStorage::url($player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full min-h-[28rem] w-full object-cover object-top">
             @else
                 <div class="flex min-h-[28rem] items-center justify-center text-5xl font-black text-zinc-700">ETB</div>
             @endif
@@ -38,3 +38,4 @@
     </article>
 </section>
 @endsection
+

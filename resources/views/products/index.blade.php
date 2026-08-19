@@ -155,7 +155,7 @@
                             <a href="{{ route('shop.show', $product) }}" class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
                                 <div class="aspect-square overflow-hidden bg-zinc-800 flex items-center justify-center">
                                     @if($product->images && $img = $product->images[0] ?? null)
-                                        <img src="{{ asset('storage/'.$img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                        <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                                     @else
                                         <span class="text-4xl font-black text-zinc-700">{{ strtoupper(substr($product->name, 0, 2)) }}</span>
                                     @endif
@@ -191,3 +191,4 @@
     </section>
 </div>
 @endsection
+

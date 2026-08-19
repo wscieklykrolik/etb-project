@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\TeamMatch;
+use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,16 +35,16 @@ class AdminMatchController extends Controller
         $defaultHomeLogo = AppSetting::getValue('default_home_logo');
 
         if ($request->hasFile('default_home_logo')) {
-            $defaultHomeLogo = $request->file('default_home_logo')->store('logos', 'public');
+            $defaultHomeLogo = MediaStorage::store($request->file('default_home_logo'), 'logos');
             AppSetting::setValue('default_home_logo', $defaultHomeLogo);
         }
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('matches', 'public');
+            $validated['image'] = MediaStorage::store($request->file('image'), 'matches');
         }
 
         if ($request->hasFile('away_logo')) {
-            $validated['away_logo'] = $request->file('away_logo')->store('logos', 'public');
+            $validated['away_logo'] = MediaStorage::store($request->file('away_logo'), 'logos');
         }
 
         $validated['home_logo'] = $defaultHomeLogo;

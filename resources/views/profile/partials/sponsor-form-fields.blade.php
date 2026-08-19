@@ -31,7 +31,7 @@
     <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-logo-{{ $sponsor?->id ?? 'new' }}">Logo</label>
     @if ($sponsor?->logo_path)
         <div class="mb-3 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <img src="{{ asset('storage/'.$sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="h-12 w-28 object-contain">
+            <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="h-12 w-28 object-contain">
             <span class="text-xs text-slate-500">Wgraj nowe logo tylko wtedy, gdy chcesz je podmienić.</span>
         </div>
     @endif
@@ -42,3 +42,4 @@
     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $sponsor?->is_active ?? true)) class="rounded border-slate-300 text-yellow-500 focus:ring-yellow-400">
     Widoczny na stronie
 </label>
+

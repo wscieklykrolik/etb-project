@@ -102,7 +102,7 @@
                     <div class="mt-2 flex flex-wrap gap-2">
                         @foreach($product->images as $img)
                             <div class="relative">
-                                <img src="{{ asset('storage/' . $img) }}" alt="" class="h-16 w-16 rounded-lg border border-zinc-700 object-cover">
+                                <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="" class="h-16 w-16 rounded-lg border border-zinc-700 object-cover">
                             </div>
                         @endforeach
                     </div>
@@ -201,3 +201,4 @@
     </div>
 </div>
 @endsection
+

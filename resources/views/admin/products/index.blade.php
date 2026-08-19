@@ -41,7 +41,7 @@
                             @if($product->images)
                                 <div class="mt-1 flex -space-x-1">
                                     @foreach(array_slice($product->images, 0, 3) as $img)
-                                        <img src="{{ asset('storage/' . $img) }}" alt="" class="h-6 w-6 rounded-full border border-zinc-700 object-cover">
+                                        <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="" class="h-6 w-6 rounded-full border border-zinc-700 object-cover">
                                     @endforeach
                                 </div>
                             @endif
@@ -94,3 +94,4 @@
     @endif
 </div>
 @endsection
+

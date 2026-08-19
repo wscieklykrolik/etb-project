@@ -18,7 +18,7 @@
             <article class="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/70">
                 <div class="aspect-[4/5] bg-zinc-900">
                     @if ($member->photo_path)
-                        <img src="{{ asset('storage/'.$member->photo_path) }}" alt="{{ $member->name }}" class="h-full w-full object-cover object-top">
+                        <img src="{{ \App\Support\MediaStorage::url($member->photo_path) }}" alt="{{ $member->name }}" class="h-full w-full object-cover object-top">
                     @else
                         <div class="flex h-full items-center justify-center text-sm font-bold uppercase tracking-widest text-zinc-600">3x3</div>
                     @endif
@@ -39,3 +39,4 @@
         @endforelse
     </div>
 </section>
+

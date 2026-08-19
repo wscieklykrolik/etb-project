@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\Opponent;
 use App\Services\LzkoszLeagueTableService;
+use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -38,12 +38,10 @@ class LeagueTableController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            if ($opponent->logo_path) {
-                Storage::disk('public')->delete($opponent->logo_path);
-            }
-
-            $opponent->logo_path = $request->file('logo')->store('team-logos', 'public');
+            $oldPath = $opponent->logo_path;
+            $opponent->logo_path = MediaStorage::store($request->file('logo'), 'team-logos');
             $opponent->save();
+            MediaStorage::delete($oldPath);
 
             if (Str::of($opponent->name)->lower()->contains('etb')) {
                 AppSetting::setValue('default_home_logo', $opponent->logo_path);

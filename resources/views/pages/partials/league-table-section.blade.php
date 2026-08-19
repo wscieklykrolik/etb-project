@@ -42,7 +42,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-white p-2">
                                         @if ($standing->opponent->logo_path)
-                                            <img src="{{ asset('storage/'.$standing->opponent->logo_path) }}" alt="{{ $standing->opponent->name }}" class="max-h-full max-w-full object-contain">
+                                            <img src="{{ \App\Support\MediaStorage::url($standing->opponent->logo_path) }}" alt="{{ $standing->opponent->name }}" class="max-h-full max-w-full object-contain">
                                         @else
                                             <span class="text-xs font-black text-zinc-500">LOGO</span>
                                         @endif
@@ -78,3 +78,4 @@
         </p>
     @endif
 </section>
+

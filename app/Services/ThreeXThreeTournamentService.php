@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\ThreeXThreeTournament;
+use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class ThreeXThreeTournamentService
 {
@@ -18,7 +18,7 @@ class ThreeXThreeTournamentService
         $data = $this->normalizeRegistrationData($data);
 
         if ($image) {
-            $data['image_path'] = $image->store('3x3-tournaments', 'public');
+            $data['image_path'] = MediaStorage::store($image, '3x3-tournaments');
         }
 
         $tournament = ThreeXThreeTournament::query()->create($data);
@@ -35,16 +35,15 @@ class ThreeXThreeTournamentService
         $categories = $data['categories'] ?? [];
         unset($data['categories']);
         $data = $this->normalizeRegistrationData($data);
+        $oldPath = null;
 
         if ($image) {
-            if ($tournament->image_path) {
-                Storage::disk('public')->delete($tournament->image_path);
-            }
-
-            $data['image_path'] = $image->store('3x3-tournaments', 'public');
+            $oldPath = $tournament->image_path;
+            $data['image_path'] = MediaStorage::store($image, '3x3-tournaments');
         }
 
         $tournament->update($data);
+        MediaStorage::delete($oldPath);
         $this->syncCategories($tournament, $categories);
 
         return $tournament;
@@ -53,7 +52,7 @@ class ThreeXThreeTournamentService
     public function delete(ThreeXThreeTournament $tournament): void
     {
         if ($tournament->image_path) {
-            Storage::disk('public')->delete($tournament->image_path);
+            MediaStorage::delete($tournament->image_path);
         }
 
         $tournament->delete();

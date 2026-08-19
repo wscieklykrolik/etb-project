@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\News;
+use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class NewsService
 {
@@ -18,7 +18,7 @@ class NewsService
         $data['is_visible'] = (bool) ($data['is_visible'] ?? true);
 
         if ($mainImage && $data['type'] === News::TYPE_ARTICLE) {
-            $data['main_image_path'] = $mainImage->store('news/main', 'public');
+            $data['main_image_path'] = MediaStorage::store($mainImage, 'news/main');
         }
 
         $news = News::query()->create([
@@ -39,21 +39,27 @@ class NewsService
     {
         $data = $this->normalizeData($data);
         $data['is_visible'] = (bool) ($data['is_visible'] ?? false);
+        $deleteAfterUpdate = [];
 
         if ($data['type'] !== News::TYPE_ARTICLE && $news->main_image_path) {
-            Storage::disk('public')->delete($news->main_image_path);
+            $deleteAfterUpdate[] = $news->main_image_path;
             $data['main_image_path'] = null;
         }
 
         if ($mainImage && $data['type'] === News::TYPE_ARTICLE) {
-            if ($news->main_image_path) {
-                Storage::disk('public')->delete($news->main_image_path);
-            }
+            $data['main_image_path'] = MediaStorage::store($mainImage, 'news/main');
 
-            $data['main_image_path'] = $mainImage->store('news/main', 'public');
+            if ($news->main_image_path) {
+                $deleteAfterUpdate[] = $news->main_image_path;
+            }
         }
 
         $news->update($data);
+
+        foreach (array_unique($deleteAfterUpdate) as $path) {
+            MediaStorage::delete($path);
+        }
+
         $this->storeGallery($news, $gallery);
 
         return $news;
@@ -62,11 +68,11 @@ class NewsService
     public function delete(News $news): void
     {
         if ($news->main_image_path) {
-            Storage::disk('public')->delete($news->main_image_path);
+            MediaStorage::delete($news->main_image_path);
         }
 
         foreach ($news->images as $image) {
-            Storage::disk('public')->delete($image->path);
+            MediaStorage::delete($image->path);
         }
 
         $news->delete();
@@ -92,7 +98,7 @@ class NewsService
 
         foreach (array_slice($gallery, 0, $remainingSlots) as $index => $image) {
             $news->images()->create([
-                'path' => $image->store('news/gallery', 'public'),
+                'path' => MediaStorage::store($image, 'news/gallery'),
                 'sort_order' => $existingCount + $index,
             ]);
         }

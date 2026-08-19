@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Sponsor;
+use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class SponsorService
 {
@@ -15,7 +15,7 @@ class SponsorService
     {
         $data['is_active'] = (bool) ($data['is_active'] ?? false);
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
-        $data['logo_path'] = $logo->store('sponsors', 'public');
+        $data['logo_path'] = MediaStorage::store($logo, 'sponsors');
 
         return Sponsor::query()->create($data);
     }
@@ -27,20 +27,22 @@ class SponsorService
     {
         $data['is_active'] = (bool) ($data['is_active'] ?? false);
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+        $oldPath = null;
 
         if ($logo) {
-            Storage::disk('public')->delete($sponsor->logo_path);
-            $data['logo_path'] = $logo->store('sponsors', 'public');
+            $oldPath = $sponsor->logo_path;
+            $data['logo_path'] = MediaStorage::store($logo, 'sponsors');
         }
 
         $sponsor->update($data);
+        MediaStorage::delete($oldPath);
 
         return $sponsor;
     }
 
     public function delete(Sponsor $sponsor): void
     {
-        Storage::disk('public')->delete($sponsor->logo_path);
+        MediaStorage::delete($sponsor->logo_path);
         $sponsor->delete();
     }
 }

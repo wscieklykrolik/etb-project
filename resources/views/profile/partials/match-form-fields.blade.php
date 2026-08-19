@@ -12,7 +12,7 @@
         status: @js($currentStatus),
         includeInLzkosz: @js($includeInLzkosz),
         isTicketed: @js($isTicketed),
-        opponentLogo: @js($match?->opponent_logo ? asset('storage/'.$match->opponent_logo) : null),
+        opponentLogo: @js($match?->opponent_logo ? \App\Support\MediaStorage::url($match->opponent_logo) : null),
         locationsUrl: @js(route('admin.match-suggestions.locations')),
         opponentsUrl: @js(route('admin.match-suggestions.opponents'))
     })"
@@ -127,7 +127,7 @@
             <span class="text-sm font-medium text-gray-700">Logo drużyny ETB</span>
             <input name="home_logo" type="file" accept="image/*" class="mt-1 w-full rounded border border-gray-300 bg-white text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold">
             @if ($match?->home_logo)
-                <img src="{{ asset('storage/'.$match->home_logo) }}" alt="Logo ETB" class="mt-3 h-14 w-14 rounded object-contain ring-1 ring-gray-200">
+                <img src="{{ \App\Support\MediaStorage::url($match->home_logo) }}" alt="Logo ETB" class="mt-3 h-14 w-14 rounded object-contain ring-1 ring-gray-200">
             @endif
         </label>
 
@@ -137,3 +137,4 @@
         </label>
     </div>
 </div>
+

@@ -21,7 +21,7 @@
                     <a href="{{ route('three-x-three.tournaments.show', $tournament) }}" class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/70">
                         <div class="aspect-[16/10] bg-zinc-900">
                             @if ($tournament->image_path)
-                                <img src="{{ asset('storage/'.$tournament->image_path) }}" alt="{{ $tournament->name }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                <img src="{{ \App\Support\MediaStorage::url($tournament->image_path) }}" alt="{{ $tournament->name }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
                             @else
                                 <div class="flex h-full items-center justify-center text-sm font-bold uppercase tracking-widest text-zinc-600">3x3</div>
                             @endif
@@ -48,3 +48,4 @@
         </section>
     @endforeach
 </section>
+

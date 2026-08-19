@@ -22,7 +22,7 @@
                             <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 @foreach ($items as $sponsor)
                                     <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-400 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
-                                        <img src="{{ asset('storage/'.$sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-24 w-full object-contain transition group-hover:scale-105">
+                                        <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-24 w-full object-contain transition group-hover:scale-105">
                                     </a>
                                 @endforeach
                             </div>
@@ -35,3 +35,4 @@
         @endif
     </div>
 </section>
+

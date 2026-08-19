@@ -11,7 +11,7 @@
             <div class="grid gap-12 lg:grid-cols-2">
                 <div class="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
                     @if($product->images && $img = $product->images[0] ?? null)
-                        <img src="{{ asset('storage/'.$img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                        <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
                     @else
                         <span class="text-6xl font-black text-zinc-700">{{ strtoupper(substr($product->name, 0, 2)) }}</span>
                     @endif
@@ -84,3 +84,4 @@
     </section>
 </div>
 @endsection
+

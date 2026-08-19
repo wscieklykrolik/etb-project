@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFilterGroup;
 use App\Models\ProductVariantSize;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -46,7 +47,7 @@ class ProductController extends Controller
         if ($request->hasFile('images')) {
             $paths = [];
             foreach ($request->file('images') as $image) {
-                $paths[] = $image->store('products', 'public');
+                $paths[] = MediaStorage::store($image, 'products');
             }
             $product->update(['images' => $paths]);
         }
@@ -82,7 +83,7 @@ class ProductController extends Controller
         if ($request->hasFile('images')) {
             $paths = $product->images ?? [];
             foreach ($request->file('images') as $image) {
-                $paths[] = $image->store('products', 'public');
+                $paths[] = MediaStorage::store($image, 'products');
             }
             $product->update(['images' => $paths]);
         }
@@ -94,6 +95,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
+        foreach ($product->images ?? [] as $image) {
+            MediaStorage::delete($image);
+        }
+
         $product->delete();
 
         return redirect()

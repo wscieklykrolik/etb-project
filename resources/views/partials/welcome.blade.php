@@ -20,7 +20,7 @@
 
         <!-- TŁO -->
         <div class="absolute inset-0">
-            <img src="{{ $nextMatch->image ? asset('storage/'.$nextMatch->image) : '/images/default.jpg' }}"
+            <img src="{{ $nextMatch->image ? \App\Support\MediaStorage::url($nextMatch->image) : '/images/default.jpg' }}"
                  class="w-full h-full object-cover opacity-40">
         </div>
 
@@ -85,3 +85,4 @@
     </div>
 
 @endif
+

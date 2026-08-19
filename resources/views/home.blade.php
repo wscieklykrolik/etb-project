@@ -6,7 +6,7 @@
     $articleImage = function ($item) {
         $path = $item->main_image_path ?: $item->images->first()?->path;
 
-        return $path ? asset('storage/'.$path) : null;
+        return $path ? \App\Support\MediaStorage::url($path) : null;
     };
 @endphp
 
@@ -138,7 +138,7 @@
                     <a href="{{ route('team.players.show', $player) }}" class="group overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
                         <div class="aspect-[4/5] bg-zinc-800 overflow-hidden">
                             @if($player->photo_path)
-                                <img src="{{ asset('storage/'.$player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                <img src="{{ \App\Support\MediaStorage::url($player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                             @endif
                         </div>
                         <div class="p-5">
@@ -169,7 +169,7 @@
                         <a href="{{ route('shop.show', $product) }}" class="group overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
                             <div class="aspect-square bg-zinc-800 overflow-hidden flex items-center justify-center">
                                 @if($product->images && $img = $product->images[0] ?? null)
-                                    <img src="{{ asset('storage/'.$img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                    <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                                 @else
                                     <span class="text-4xl font-black text-zinc-700">{{ strtoupper(substr($product->name, 0, 2)) }}</span>
                                 @endif
@@ -194,7 +194,7 @@
                     @foreach($sponsors as $sponsor)
                         <a href="{{ $sponsor->url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-center" title="{{ $sponsor->name }}">
                             @if($sponsor->logo_path)
-                                <img src="{{ asset('storage/'.$sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-12 opacity-60 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0">
+                                <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-12 opacity-60 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0">
                             @else
                                 <span class="text-sm font-bold text-zinc-500 transition-colors group-hover:text-yellow-400">{{ $sponsor->name }}</span>
                             @endif
@@ -222,3 +222,4 @@
     </section>
 </div>
 @endsection
+

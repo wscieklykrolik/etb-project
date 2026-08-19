@@ -18,7 +18,7 @@
                             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                                 @foreach ($items as $sponsor)
                                     <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-24 items-center justify-center rounded-lg border border-white/10 bg-white p-4 shadow-sm transition duration-200 hover:z-10 hover:scale-105 hover:border-yellow-400 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
-                                        <img src="{{ asset('storage/'.$sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-16 w-full object-contain transition duration-200 group-hover:scale-105">
+                                        <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-16 w-full object-contain transition duration-200 group-hover:scale-105">
                                     </a>
                                 @endforeach
                             </div>
@@ -53,3 +53,4 @@
         © {{ now()->year }} ETB Łódź. Wszelkie prawa zastrzeżone.
     </section>
 </footer>
+

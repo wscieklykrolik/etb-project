@@ -26,7 +26,7 @@
                         <a href="{{ route('schedule.matches.show', $match) }}" class="grid gap-4 px-5 py-5 transition hover:bg-zinc-900 lg:grid-cols-[4rem_1.4fr_1fr_1fr_0.8fr_0.7fr] lg:items-center">
                             <div class="flex h-14 w-14 items-center justify-center rounded bg-white p-2">
                                 @if ($logo)
-                                    <img src="{{ asset('storage/'.$logo) }}" alt="{{ $match->opponent_name }}" class="max-h-full max-w-full object-contain">
+                                    <img src="{{ \App\Support\MediaStorage::url($logo) }}" alt="{{ $match->opponent_name }}" class="max-h-full max-w-full object-contain">
                                 @else
                                     <span class="text-xs font-black text-zinc-500">LOGO</span>
                                 @endif
@@ -54,3 +54,4 @@
     @endforeach
 </section>
 @endsection
+

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ClubSection;
+use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
 
 class ClubSectionService
@@ -19,7 +20,7 @@ class ClubSectionService
 
         foreach ($photos as $photo) {
             $section->images()->create([
-                'image_path' => $photo->store("club/{$section->slug}", 'public'),
+                'image_path' => MediaStorage::store($photo, "club/{$section->slug}"),
                 'alt' => $section->title,
                 'sort_order' => $section->images()->count(),
             ]);

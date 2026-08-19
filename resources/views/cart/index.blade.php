@@ -32,7 +32,7 @@
                         <div class="flex min-w-0 items-center gap-4">
                             <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-zinc-300 bg-zinc-900">
                                 @if($image)
-                                    <img src="{{ asset('storage/'.$image) }}" alt="{{ $item->product->name }}" class="h-full w-full object-cover">
+                                    <img src="{{ \App\Support\MediaStorage::url($image) }}" alt="{{ $item->product->name }}" class="h-full w-full object-cover">
                                 @else
                                     <span class="text-xl font-black text-zinc-500">{{ strtoupper(substr($item->product->name, 0, 2)) }}</span>
                                 @endif
@@ -87,3 +87,4 @@
     @endif
 </div>
 @endsection
+

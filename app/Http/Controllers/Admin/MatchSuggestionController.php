@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Opponent;
 use App\Models\SportsHall;
+use App\Support\MediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,6 +34,12 @@ class MatchSuggestionController extends Controller
                 ->orderBy('name')
                 ->limit(12)
                 ->get(['id', 'name', 'logo_path'])
+                ->map(fn (Opponent $opponent) => [
+                    'id' => $opponent->id,
+                    'name' => $opponent->name,
+                    'logo_path' => $opponent->logo_path,
+                    'logo_url' => MediaStorage::url($opponent->logo_path),
+                ])
         );
     }
 }

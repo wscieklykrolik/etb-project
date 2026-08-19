@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class MediaCardService
 {
@@ -15,7 +15,7 @@ class MediaCardService
     public function create(string $modelClass, array $data, ?UploadedFile $photo, string $directory): Model
     {
         if ($photo) {
-            $data['photo_path'] = $photo->store($directory, 'public');
+            $data['photo_path'] = MediaStorage::store($photo, $directory);
         }
 
         return $modelClass::query()->create($data);
@@ -26,29 +26,22 @@ class MediaCardService
      */
     public function update(Model $model, array $data, ?UploadedFile $photo, string $directory): Model
     {
+        $oldPath = null;
+
         if ($photo) {
-            $path = (string) $model->getAttribute('photo_path');
-
-            if ($path !== '') {
-                Storage::disk('public')->delete($path);
-            }
-
-            $data['photo_path'] = $photo->store($directory, 'public');
+            $oldPath = (string) $model->getAttribute('photo_path');
+            $data['photo_path'] = MediaStorage::store($photo, $directory);
         }
 
         $model->update($data);
+        MediaStorage::delete($oldPath);
 
         return $model;
     }
 
     public function delete(Model $model): void
     {
-        $path = (string) $model->getAttribute('photo_path');
-
-        if ($path !== '') {
-            Storage::disk('public')->delete($path);
-        }
-
+        MediaStorage::delete((string) $model->getAttribute('photo_path'));
         $model->delete();
     }
 }

@@ -6,7 +6,7 @@
             <article class="rounded border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="grid gap-8 md:grid-cols-[240px_1fr] md:items-center">
                     @if ($player->photo_path)
-                        <img src="{{ asset('storage/'.$player->photo_path) }}"
+                        <img src="{{ \App\Support\MediaStorage::url($player->photo_path) }}"
                              alt="{{ $player->first_name }} {{ $player->last_name }}"
                              class="h-80 w-full rounded object-cover">
                     @else
@@ -38,3 +38,4 @@
         </div>
     </div>
 @endsection
+

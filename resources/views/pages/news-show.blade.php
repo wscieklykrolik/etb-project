@@ -3,7 +3,7 @@
 @section('content')
 <section
     class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8"
-    x-data="newsLightbox(@js($news->images->map(fn ($image) => asset('storage/'.$image->path))->values()))"
+    x-data="newsLightbox(@js($news->images->map(fn ($image) => \App\Support\MediaStorage::url($image->path))->values()))"
     @keydown.arrow-left.window="previous()"
     @keydown.arrow-right.window="next()"
     @keydown.escape.window="close()"
@@ -27,7 +27,7 @@
                     allowfullscreen></iframe>
             </div>
         @elseif ($news->type === \App\Models\News::TYPE_ARTICLE && $news->main_image_path)
-            <img src="{{ asset('storage/'.$news->main_image_path) }}" alt="{{ $news->title }}" class="aspect-[16/7] w-full object-cover">
+            <img src="{{ \App\Support\MediaStorage::url($news->main_image_path) }}" alt="{{ $news->title }}" class="aspect-[16/7] w-full object-cover">
         @endif
 
         <div class="p-6 sm:p-10">
@@ -48,7 +48,7 @@
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                         @foreach ($news->images as $image)
                             <button type="button" class="relative aspect-square overflow-hidden rounded border border-zinc-800 transition hover:border-yellow-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/60" @click="openGallery({{ $loop->index }})">
-                                <img src="{{ asset('storage/'.$image->path) }}" alt="Zdjęcie galerii" class="h-full w-full object-cover">
+                                <img src="{{ \App\Support\MediaStorage::url($image->path) }}" alt="Zdjęcie galerii" class="h-full w-full object-cover">
                             </button>
                         @endforeach
                     </div>
@@ -106,3 +106,4 @@
     </div>
 </section>
 @endsection
+

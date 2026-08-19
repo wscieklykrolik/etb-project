@@ -2,13 +2,13 @@
     <div class="flex gap-4">
         <div class="flex items-center gap-2">
             @if ($match->home_logo)
-                <img src="{{ asset('storage/'.$match->home_logo) }}"
+                <img src="{{ \App\Support\MediaStorage::url($match->home_logo) }}"
                      alt="Logo ETB"
                      class="h-12 w-12 rounded bg-white object-contain p-1 ring-1 ring-gray-200">
             @endif
 
             @if ($match->opponent_logo)
-                <img src="{{ asset('storage/'.$match->opponent_logo) }}"
+                <img src="{{ \App\Support\MediaStorage::url($match->opponent_logo) }}"
                      alt="Logo przeciwnika {{ $match->opponent_name }}"
                      class="h-12 w-12 rounded bg-white object-contain p-1 ring-1 ring-gray-200">
             @else
@@ -73,3 +73,4 @@
         </div>
     </div>
 </article>
+

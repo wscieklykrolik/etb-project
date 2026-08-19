@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ClubSection;
 use App\Services\ClubSectionService;
+use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ClubSectionController extends Controller
 {
@@ -36,7 +36,7 @@ class ClubSectionController extends Controller
     {
         $clubImage = $section->images()->whereKey($image)->firstOrFail();
 
-        Storage::disk('public')->delete($clubImage->image_path);
+        MediaStorage::delete($clubImage->image_path);
         $clubImage->delete();
 
         return redirect()

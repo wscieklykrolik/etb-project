@@ -30,7 +30,7 @@
                         @endif
                                 <div class="aspect-[4/5] bg-zinc-900">
                                     @if ($player->photo_path)
-                                        <img src="{{ asset('storage/'.$player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105">
+                                        <img src="{{ \App\Support\MediaStorage::url($player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105">
                                     @else
                                         <div class="flex h-full items-center justify-center text-sm font-bold uppercase tracking-widest text-zinc-600">ETB</div>
                                     @endif
@@ -51,3 +51,4 @@
         @endforeach
     </div>
 </section>
+

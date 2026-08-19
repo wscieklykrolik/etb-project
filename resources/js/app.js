@@ -97,7 +97,7 @@ window.matchForm = function matchForm(config) {
         },
         selectOpponent(opponent) {
             this.$root.querySelector('[name="opponent_name"]').value = opponent.name;
-            this.opponentLogo = opponent.logo_path ? `/storage/${opponent.logo_path}` : null;
+            this.opponentLogo = opponent.logo_url || null;
             this.opponents = [];
         },
         syncTime(value) {
@@ -665,3 +665,4 @@ window.materialsCarousel = function materialsCarousel(items) {
         },
     };
 };
+

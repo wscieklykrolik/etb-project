@@ -477,7 +477,7 @@
                                     <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                         @forelse ($clubSection->images as $image)
                                             <div class="rounded-lg border border-slate-200 bg-white p-2">
-                                                <img src="{{ asset('storage/'.$image->image_path) }}" alt="{{ $image->alt ?? $clubSection->title }}" class="h-32 w-full rounded object-cover">
+                                                <img src="{{ \App\Support\MediaStorage::url($image->image_path) }}" alt="{{ $image->alt ?? $clubSection->title }}" class="h-32 w-full rounded object-cover">
                                                 <form method="POST" action="{{ route('admin.club-sections.images.update', [$clubSection, $image]) }}" class="mt-2 space-y-2">
                                                     @csrf
                                                     @method('PATCH')
@@ -523,7 +523,7 @@
                         @if ($defaultHomeLogo)
                             <div class="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-950">
                                 Domyślne logo ETB jest ustawione.
-                                <img src="{{ asset('storage/'.$defaultHomeLogo) }}" alt="Logo ETB" class="mt-2 h-12 w-12 rounded bg-white object-contain p-1 ring-1 ring-yellow-200">
+                                <img src="{{ \App\Support\MediaStorage::url($defaultHomeLogo) }}" alt="Logo ETB" class="mt-2 h-12 w-12 rounded bg-white object-contain p-1 ring-1 ring-yellow-200">
                             </div>
                         @endif
 
@@ -535,7 +535,7 @@
                                             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white">{{ $standing->position }}</span>
                                             <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white p-2 ring-1 ring-slate-200">
                                                 @if ($standing->opponent->logo_path)
-                                                    <img src="{{ asset('storage/'.$standing->opponent->logo_path) }}" alt="{{ $standing->opponent->name }}" class="max-h-full max-w-full object-contain">
+                                                    <img src="{{ \App\Support\MediaStorage::url($standing->opponent->logo_path) }}" alt="{{ $standing->opponent->name }}" class="max-h-full max-w-full object-contain">
                                                 @else
                                                     <span class="text-xs font-black text-slate-400">LOGO</span>
                                                 @endif
@@ -589,7 +589,7 @@
                                                 <div class="flex gap-4">
                                                     @php($previewImage = $item->previewImagePath())
                                                     @if ($previewImage)
-                                                        <img src="{{ asset('storage/'.$previewImage) }}" alt="{{ $item->title }}" class="h-20 w-24 rounded-lg object-cover">
+                                                        <img src="{{ \App\Support\MediaStorage::url($previewImage) }}" alt="{{ $item->title }}" class="h-20 w-24 rounded-lg object-cover">
                                                     @else
                                                         <div class="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-xs font-black uppercase text-slate-500">{{ $item->type === \App\Models\News::TYPE_VIDEO ? 'Wideo' : 'ETB' }}</div>
                                                     @endif
@@ -644,7 +644,7 @@
                                         @if ($section['type'] === 'player')
                                             <div class="flex gap-4">
                                                 @if ($item->photo_path)
-                                                    <img src="{{ asset('storage/'.$item->photo_path) }}" alt="{{ $item->full_name }}" class="h-24 w-20 rounded-lg object-cover">
+                                                    <img src="{{ \App\Support\MediaStorage::url($item->photo_path) }}" alt="{{ $item->full_name }}" class="h-24 w-20 rounded-lg object-cover">
                                                 @else
                                                     <div class="flex h-24 w-20 items-center justify-center rounded-lg bg-slate-200 text-xs font-bold text-slate-500">ETB</div>
                                                 @endif
@@ -694,7 +694,7 @@
                                         @else
                                             <div class="flex gap-4">
                                                 @if ($item->photo_path)
-                                                    <img src="{{ asset('storage/'.$item->photo_path) }}" alt="{{ $item->name }}" class="h-24 w-20 rounded-lg object-cover">
+                                                    <img src="{{ \App\Support\MediaStorage::url($item->photo_path) }}" alt="{{ $item->name }}" class="h-24 w-20 rounded-lg object-cover">
                                                 @else
                                                     <div class="flex h-24 w-20 items-center justify-center rounded-lg bg-slate-200 text-xs font-bold text-slate-500">ETB</div>
                                                 @endif
@@ -739,7 +739,7 @@
                                 <article data-admin-search class="etb-admin-card rounded-lg border border-slate-200 bg-slate-50 p-4">
                                     <div class="flex gap-4">
                                         <div class="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg bg-white p-3">
-                                            <img src="{{ asset('storage/'.$sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-14 w-full object-contain">
+                                            <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-14 w-full object-contain">
                                         </div>
                                         <div class="min-w-0">
                                             <h3 class="truncate font-black">{{ $sponsor->name }}</h3>
@@ -1293,3 +1293,4 @@
     @endif
 </div>
 @endsection
+

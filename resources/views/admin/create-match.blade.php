@@ -62,7 +62,7 @@
                 <h2 class="font-semibold mb-2">Logo ETB (domyślne)</h2>
                 <p class="text-xs text-zinc-400 mb-3">To logo zapisuje się globalnie i jest podpinane automatycznie do kolejnych meczów. Możesz je nadpisać w każdej chwili.</p>
                 @if ($defaultHomeLogo)
-                    <img src="{{ asset('storage/' . $defaultHomeLogo) }}" alt="Domyślne logo ETB" class="h-20 w-20 object-contain bg-zinc-950 border border-zinc-700 rounded mb-3">
+                    <img src="{{ \App\Support\MediaStorage::url($defaultHomeLogo) }}" alt="Domyślne logo ETB" class="h-20 w-20 object-contain bg-zinc-950 border border-zinc-700 rounded mb-3">
                 @else
                     <div class="h-20 w-20 flex items-center justify-center text-xs text-zinc-500 bg-zinc-950 border border-dashed border-zinc-700 rounded mb-3">Brak logo</div>
                 @endif
@@ -88,3 +88,4 @@
     </form>
 </section>
 @endsection
+

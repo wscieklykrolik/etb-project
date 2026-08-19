@@ -7,7 +7,7 @@
         <article class="rounded-lg border bg-white p-6 shadow-sm">
             <div class="flex gap-4">
                 @if ($match->opponent_logo)
-                    <img src="{{ asset('storage/'.$match->opponent_logo) }}"
+                    <img src="{{ \App\Support\MediaStorage::url($match->opponent_logo) }}"
                          alt="Logo przeciwnika {{ $match->opponent_name }}"
                          class="h-20 w-20 rounded object-contain ring-1 ring-gray-200">
                 @endif
@@ -39,3 +39,4 @@
         </article>
     </div>
 @endsection
+
