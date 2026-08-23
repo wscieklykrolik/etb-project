@@ -1,35 +1,31 @@
 <footer class="mt-16">
     @php
-        $footerSponsorsByType = $footerSponsorsByType ?? collect();
-        $footerSponsorTypes = \App\Models\Sponsor::types();
+        $footerSponsorCategories = $footerSponsorCategories ?? collect();
     @endphp
 
-    <section id="partners" class="bg-zinc-950 py-12 text-white">
-        <div class="mx-auto max-w-7xl px-6">
-            <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Partnerzy</p>
-            <h3 class="mt-2 text-3xl font-black uppercase">ETB Wspierają</h3>
+    @if ($footerSponsorCategories->isNotEmpty())
+        <section id="partners" class="bg-zinc-950 py-12 text-white">
+            <div class="mx-auto max-w-7xl px-6">
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Partnerzy</p>
+                <h3 class="mt-2 text-3xl font-black uppercase">ETB Wspierają</h3>
 
-            <div class="mt-8 divide-y divide-white/15 border-y border-white/15">
-                @foreach ($footerSponsorTypes as $type => $label)
-                    @php($items = $footerSponsorsByType->get($type, collect()))
-                    <div class="grid gap-5 py-7 lg:grid-cols-[16rem_1fr] lg:items-center">
-                        <h4 class="text-lg font-black uppercase italic text-white">{{ $label }}</h4>
-                        @if ($items->isNotEmpty())
+                <div class="mt-8 divide-y divide-white/15 border-y border-white/15">
+                    @foreach ($footerSponsorCategories as $category)
+                        <div class="grid gap-5 py-7 lg:grid-cols-[16rem_1fr] lg:items-center">
+                            <h4 class="text-lg font-black uppercase italic text-white">{{ $category->name }}</h4>
                             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-                                @foreach ($items as $sponsor)
-                                    <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-24 items-center justify-center rounded-lg border border-white/10 bg-white p-4 shadow-sm transition duration-200 hover:z-10 hover:scale-105 hover:border-yellow-400 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
-                                        <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-16 w-full object-contain transition duration-200 group-hover:scale-105">
+                                @foreach ($category->sponsors as $sponsor)
+                                    <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-28 items-center justify-center rounded-lg border border-white/10 bg-white p-5 shadow-sm transition duration-200 hover:z-10 hover:scale-105 hover:border-yellow-400 hover:shadow-xl hover:shadow-yellow-400/20 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
+                                        <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-20 w-full object-contain transition duration-200 group-hover:scale-105">
                                     </a>
                                 @endforeach
                             </div>
-                        @else
-                            <p class="rounded-lg border border-dashed border-white/15 p-4 text-sm text-zinc-400">Ta sekcja zostanie uzupełniona po dodaniu partnerów w panelu admina.</p>
-                        @endif
-                    </div>
-                @endforeach
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     <section class="bg-zinc-900 text-zinc-200 py-10 border-t border-zinc-700">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-5 gap-6 text-sm">

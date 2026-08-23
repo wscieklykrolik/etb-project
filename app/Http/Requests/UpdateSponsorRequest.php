@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Sponsor;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateSponsorRequest extends FormRequest
 {
@@ -20,7 +18,7 @@ class UpdateSponsorRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', Rule::in(array_keys(Sponsor::types()))],
+            'sponsor_category_id' => ['required', 'exists:sponsor_categories,id'],
             'url' => ['required', 'url', 'max:2048'],
             'logo' => ['nullable', 'image', 'max:5120'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],

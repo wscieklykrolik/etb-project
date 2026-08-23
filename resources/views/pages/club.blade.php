@@ -18,8 +18,7 @@
         @foreach ($clubSections as $clubSection)
             @if ($clubSection->slug === 'sponsors')
                 @include('pages.partials.sponsor-showcase', [
-                    'sponsorsByType' => $clubSponsorsByType,
-                    'sponsorTypes' => $clubSponsorTypes,
+                    'sponsorCategories' => $clubSponsorCategories,
                 ])
             @else
                 @include('pages.partials.club-section-content', ['clubSection' => $clubSection])

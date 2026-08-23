@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\UserEmailExportController;
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\Admin\UserSearchController;
 use App\Http\Controllers\SponsorController;
+use App\Http\Controllers\SponsorCategoryController;
 use App\Http\Controllers\TeamStaffController;
 use App\Http\Controllers\ThreeXThreeMemberController;
 use App\Http\Controllers\ThreeXThreeTournamentController;
@@ -81,6 +82,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::resource('/admin/3x3/members', ThreeXThreeMemberController::class)->only(['store', 'update', 'destroy'])->parameters(['members' => 'member']);
     Route::resource('/admin/3x3/tournaments', ThreeXThreeTournamentController::class)->only(['store', 'update', 'destroy'])->parameters(['tournaments' => 'tournament']);
     Route::resource('/admin/sponsors', SponsorController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('/admin/sponsor-categories', SponsorCategoryController::class)->only(['store', 'update', 'destroy']);
 
     Route::resource('/admin/products', ProductController::class)->names('admin.products');
     Route::post('/admin/products/{product}/variants', [ProductController::class, 'addVariant'])->name('admin.products.variants.store');

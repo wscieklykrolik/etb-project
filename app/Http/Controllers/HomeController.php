@@ -52,8 +52,17 @@ class HomeController extends Controller
             ->values();
 
         $sponsors = Sponsor::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
+            ->with('category')
+            ->where('sponsors.is_active', true)
+            ->where(function ($query): void {
+                $query->whereNull('sponsor_category_id')
+                    ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->active());
+            })
+            ->leftJoin('sponsor_categories', 'sponsors.sponsor_category_id', '=', 'sponsor_categories.id')
+            ->select('sponsors.*')
+            ->orderBy('sponsor_categories.sort_order')
+            ->orderBy('sponsors.sort_order')
+            ->orderBy('sponsors.name')
             ->get();
 
         $shopProducts = Product::query()

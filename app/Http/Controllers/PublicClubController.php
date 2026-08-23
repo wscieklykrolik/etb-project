@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClubSection;
-use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use Illuminate\View\View;
 
 class PublicClubController extends Controller
@@ -12,8 +12,7 @@ class PublicClubController extends Controller
     {
         return view('pages.club', [
             'clubSections' => $this->sections(),
-            'clubSponsorsByType' => $this->sponsorsByType(),
-            'clubSponsorTypes' => Sponsor::types(),
+            'clubSponsorCategories' => $this->sponsorCategories(),
         ]);
     }
 
@@ -25,8 +24,7 @@ class PublicClubController extends Controller
 
         return view('pages.club-section', [
             'clubSection' => $clubSection,
-            'clubSponsorsByType' => $this->sponsorsByType(),
-            'clubSponsorTypes' => Sponsor::types(),
+            'clubSponsorCategories' => $this->sponsorCategories(),
         ]);
     }
 
@@ -52,14 +50,17 @@ class PublicClubController extends Controller
             ->get();
     }
 
-    private function sponsorsByType()
+    private function sponsorCategories()
     {
-        return Sponsor::query()
+        return SponsorCategory::query()
             ->active()
-            ->orderBy('type')
+            ->whereHas('sponsors', fn ($query) => $query->active())
+            ->with(['sponsors' => fn ($query) => $query
+                ->active()
+                ->orderBy('sort_order')
+                ->orderBy('name')])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get()
-            ->groupBy('type');
+            ->get();
     }
 }

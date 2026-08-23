@@ -1,7 +1,6 @@
 @php
-    $sponsorsByType = $sponsorsByType ?? collect();
-    $sponsorTypes = $sponsorTypes ?? \App\Models\Sponsor::types();
-    $hasSponsors = $sponsorsByType->flatten(1)->isNotEmpty();
+    $sponsorCategories = $sponsorCategories ?? collect();
+    $hasSponsors = $sponsorCategories->isNotEmpty();
 @endphp
 
 <section id="sponsors" class="scroll-mt-28">
@@ -14,20 +13,17 @@
     <div class="rounded-lg bg-white p-5 text-slate-950 shadow-xl sm:p-7 lg:p-8">
         @if ($hasSponsors)
             <div class="space-y-9">
-                @foreach ($sponsorTypes as $type => $label)
-                    @php($items = $sponsorsByType->get($type, collect()))
-                    @if ($items->isNotEmpty())
-                        <div>
-                            <h3 class="text-sm font-black uppercase tracking-[0.18em] text-slate-500">{{ $label }}</h3>
-                            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                @foreach ($items as $sponsor)
-                                    <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-40 items-center justify-center rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-400 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
-                                        <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-24 w-full object-contain transition group-hover:scale-105">
-                                    </a>
-                                @endforeach
-                            </div>
+                @foreach ($sponsorCategories as $category)
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-[0.18em] text-slate-500">{{ $category->name }}</h3>
+                        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($category->sponsors as $sponsor)
+                                <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-44 items-center justify-center rounded-lg border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-yellow-400 hover:shadow-lg hover:shadow-yellow-400/20 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="{{ $sponsor->name }}">
+                                    <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-28 w-full object-contain transition group-hover:scale-105">
+                                </a>
+                            @endforeach
                         </div>
-                    @endif
+                    </div>
                 @endforeach
             </div>
         @else

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +13,12 @@ beforeEach(function (): void {
 
 it('stores uploaded media on the configured media disk and keeps a relative path in the database', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_TECHNOLOGY)->firstOrFail();
     $logo = UploadedFile::fake()->create('oryginalne-logo.png', 12, 'image/png');
 
     $this->actingAs($admin)->post(route('sponsors.store'), [
         'name' => 'Partner Media Disk',
-        'type' => Sponsor::TYPE_TECHNOLOGY,
+        'sponsor_category_id' => $category->id,
         'url' => 'https://partner.example.com',
         'logo' => $logo,
         'sort_order' => 5,
@@ -52,9 +54,11 @@ it('replaces uploaded media on update and deletes the old file from the configur
         'is_active' => true,
     ]);
 
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_PARTNER)->firstOrFail();
+
     $this->actingAs($admin)->patch(route('sponsors.update', $sponsor), [
         'name' => 'Partner po podmianie',
-        'type' => Sponsor::TYPE_PARTNER,
+        'sponsor_category_id' => $category->id,
         'url' => 'https://new.example.com',
         'logo' => UploadedFile::fake()->create('nowe-logo.png', 12, 'image/png'),
         'sort_order' => 2,

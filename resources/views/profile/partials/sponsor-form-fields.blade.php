@@ -9,10 +9,10 @@
 
 <div class="grid gap-4 md:grid-cols-2">
     <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-type-{{ $sponsor?->id ?? 'new' }}">Typ partnera</label>
-        <select id="sponsor-type-{{ $sponsor?->id ?? 'new' }}" name="type" required class="w-full rounded-lg border-slate-300 text-sm">
-            @foreach ($sponsorTypes as $value => $label)
-                <option value="{{ $value }}" @selected(old('type', $sponsor?->type) === $value)>{{ $label }}</option>
+        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-category-{{ $sponsor?->id ?? 'new' }}">Kategoria partnera</label>
+        <select id="sponsor-category-{{ $sponsor?->id ?? 'new' }}" name="sponsor_category_id" required class="w-full rounded-lg border-slate-300 text-sm">
+            @foreach ($sponsorCategories as $category)
+                <option value="{{ $category->id }}" @selected((int) old('sponsor_category_id', $sponsor?->sponsor_category_id) === $category->id)>{{ $category->name }}</option>
             @endforeach
         </select>
     </div>

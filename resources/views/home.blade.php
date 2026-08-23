@@ -190,11 +190,11 @@
         <section class="bg-zinc-950 py-12 border-t border-zinc-800/50">
             <div class="mx-auto max-w-7xl px-6">
                 <p class="text-center text-xs font-black uppercase tracking-[0.28em] text-yellow-400 mb-8">Partnerzy i sponsorzy</p>
-                <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+                <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-6">
                     @foreach($sponsors as $sponsor)
-                        <a href="{{ $sponsor->url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-center" title="{{ $sponsor->name }}">
+                        <a href="{{ $sponsor->url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="group flex min-h-24 min-w-32 items-center justify-center rounded-lg border border-white/5 bg-white/[0.03] px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-yellow-400/70 hover:bg-yellow-400/10 hover:shadow-lg hover:shadow-yellow-400/20 focus:outline-none focus:ring-2 focus:ring-yellow-400" title="{{ $sponsor->name }}">
                             @if($sponsor->logo_path)
-                                <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-12 opacity-60 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0">
+                                <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-20 w-full object-contain opacity-65 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-hover:drop-shadow-[0_0_18px_rgba(250,204,21,0.55)]">
                             @else
                                 <span class="text-sm font-bold text-zinc-500 transition-colors group-hover:text-yellow-400">{{ $sponsor->name }}</span>
                             @endif

@@ -17,6 +17,7 @@ use App\Models\Player;
 use App\Models\Product;
 use App\Models\ProductFilterGroup;
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\TeamMatch;
 use App\Models\TeamStaff;
 use App\Models\ThreeXThreeMember;
@@ -97,7 +98,20 @@ class ProfileController extends Controller
             ->with(['categories', 'teams.players', 'groups.teams', 'groups.matches.teamOne', 'groups.matches.teamTwo', 'matches.teamOne', 'matches.teamTwo'])
             ->orderByDesc('date')
             ->get();
-        $sponsors = Sponsor::query()->orderBy('type')->orderBy('sort_order')->orderBy('name')->get();
+        SponsorCategory::syncDefaults();
+        $sponsorCategories = SponsorCategory::query()
+            ->withCount('sponsors')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        $sponsors = Sponsor::query()
+            ->with('category')
+            ->leftJoin('sponsor_categories', 'sponsors.sponsor_category_id', '=', 'sponsor_categories.id')
+            ->select('sponsors.*')
+            ->orderBy('sponsor_categories.sort_order')
+            ->orderBy('sponsors.sort_order')
+            ->orderBy('sponsors.name')
+            ->get();
         ClubSection::syncDefaults();
         $clubSections = ClubSection::query()
             ->with('images')
@@ -180,7 +194,7 @@ class ProfileController extends Controller
             'threeXThreeMembers' => $threeXThreeMembers,
             'threeXThreeTournaments' => $threeXThreeTournaments,
             'sponsors' => $sponsors,
-            'sponsorTypes' => Sponsor::types(),
+            'sponsorCategories' => $sponsorCategories,
             'clubSections' => $clubSections,
             'leagueStandings' => $leagueStandings,
             'defaultHomeLogo' => AppSetting::getValue('default_home_logo'),

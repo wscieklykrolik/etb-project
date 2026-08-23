@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sponsor extends Model
 {
@@ -21,6 +22,7 @@ class Sponsor extends Model
     protected $fillable = [
         'name',
         'type',
+        'sponsor_category_id',
         'url',
         'logo_path',
         'sort_order',
@@ -31,6 +33,32 @@ class Sponsor extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $sponsor): void {
+            if ($sponsor->sponsor_category_id) {
+                $category = SponsorCategory::query()->find($sponsor->sponsor_category_id);
+
+                if ($category) {
+                    $sponsor->type = $category->typeKey();
+                }
+
+                return;
+            }
+
+            if ($sponsor->type) {
+                $category = SponsorCategory::query()
+                    ->where('legacy_type', $sponsor->type)
+                    ->orWhere('slug', $sponsor->type)
+                    ->first();
+
+                if ($category) {
+                    $sponsor->sponsor_category_id = $category->id;
+                }
+            }
+        });
+    }
 
     /**
      * @return array<string, string>
@@ -47,11 +75,16 @@ class Sponsor extends Model
 
     public function typeLabel(): string
     {
-        return self::types()[$this->type] ?? $this->type;
+        return $this->category?->name ?? self::types()[$this->type] ?? $this->type;
     }
 
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(SponsorCategory::class, 'sponsor_category_id');
     }
 }

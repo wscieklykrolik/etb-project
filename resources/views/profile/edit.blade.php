@@ -761,9 +761,59 @@
                         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-black">Sponsorzy</h2>
-                                <p class="text-sm text-slate-600">Logo, linki i typy partnerów widoczne w stopce każdej strony.</p>
+                                <p class="text-sm text-slate-600">Logo, linki i kategorie partnerów widoczne w stopce każdej strony.</p>
                             </div>
-                            <button type="button" class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" @click="openModal = 'sponsor-create'">Dodaj sponsora</button>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-yellow-50" @click="openModal = 'sponsor-category-create'">Dodaj kategorię</button>
+                                <button type="button" class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" @click="openModal = 'sponsor-create'">Dodaj sponsora</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                                <div>
+                                    <h3 class="font-black">Kategorie sponsorów</h3>
+                                    <p class="text-sm text-slate-600">Podpis kategorii pokaże się publicznie tylko wtedy, gdy ma aktywnego sponsora.</p>
+                                </div>
+                                <p class="text-xs font-bold uppercase text-slate-500">{{ $sponsorCategories->count() }} kategorii</p>
+                            </div>
+                            <div class="mt-4 grid gap-3 lg:grid-cols-2">
+                                @foreach ($sponsorCategories as $category)
+                                    <article class="rounded-lg border border-slate-200 bg-white p-3">
+                                        <form method="POST" action="{{ route('sponsor-categories.update', $category) }}" class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_6rem_auto] sm:items-end">
+                                            @csrf
+                                            @method('PUT')
+                                            <div>
+                                                <label class="mb-1 block text-xs font-bold uppercase text-slate-500" for="sponsor-category-name-{{ $category->id }}">Nazwa</label>
+                                                <input id="sponsor-category-name-{{ $category->id }}" name="name" value="{{ old('name', $category->name) }}" required class="w-full rounded-lg border-slate-300 text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="mb-1 block text-xs font-bold uppercase text-slate-500" for="sponsor-category-sort-{{ $category->id }}">Kolejność</label>
+                                                <input id="sponsor-category-sort-{{ $category->id }}" type="number" min="0" max="9999" name="sort_order" value="{{ old('sort_order', $category->sort_order) }}" class="w-full rounded-lg border-slate-300 text-sm">
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <label class="flex items-center gap-2 text-xs font-bold uppercase text-slate-600">
+                                                    <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->is_active)) class="rounded border-slate-300 text-yellow-500 focus:ring-yellow-400">
+                                                    Aktywna
+                                                </label>
+                                                <button class="rounded-lg bg-yellow-400 px-3 py-2 text-xs font-black text-black hover:bg-yellow-300">Zapisz</button>
+                                            </div>
+                                        </form>
+                                        <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
+                                            <span>Sponsorzy: {{ $category->sponsors_count }}</span>
+                                            @if ($category->sponsors_count === 0)
+                                                <form method="POST" action="{{ route('sponsor-categories.destroy', $category) }}" onsubmit="return confirm('Czy na pewno usunąć tę kategorię?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="font-bold text-red-700 hover:text-red-900">Usuń kategorię</button>
+                                                </form>
+                                            @else
+                                                <span class="font-bold text-slate-500">Najpierw przenieś sponsorów, aby usunąć</span>
+                                            @endif
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
                         </div>
 
                         <div class="admin-scroll-list grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -1297,6 +1347,28 @@
                 </div>
             @endif
         @endforeach
+
+        <div x-show="openModal === 'sponsor-category-create'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div class="w-full max-w-lg rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">
+                <h4 class="mb-4 text-lg font-black">Dodaj kategorię sponsorów</h4>
+                <form method="POST" action="{{ route('sponsor-categories.store') }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-category-name-new">Nazwa kategorii</label>
+                        <input id="sponsor-category-name-new" name="name" value="{{ old('name') }}" required class="w-full rounded-lg border-slate-300 text-sm">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-category-sort-new">Kolejność</label>
+                        <input id="sponsor-category-sort-new" type="number" min="0" max="9999" name="sort_order" value="{{ old('sort_order', 0) }}" class="w-full rounded-lg border-slate-300 text-sm">
+                    </div>
+                    <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        <input type="checkbox" name="is_active" value="1" checked class="rounded border-slate-300 text-yellow-500 focus:ring-yellow-400">
+                        Aktywna
+                    </label>
+                    <div class="flex justify-between"><button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold" @click="openModal = null">Anuluj</button><button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz</button></div>
+                </form>
+            </div>
+        </div>
 
         <div x-show="openModal === 'sponsor-create'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">

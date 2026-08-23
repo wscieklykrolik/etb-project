@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -33,6 +34,7 @@ it('shows active sponsors in the public footer grouped by type', function () {
     $response->assertSee('Partner strategiczny');
     $response->assertSee('Strategic Logo');
     $response->assertSee('https://strategic.example.com');
+    $response->assertDontSee('Partner technologiczny');
     $response->assertDontSee('Hidden Sponsor');
 });
 
@@ -40,11 +42,12 @@ it('lets an admin create and delete sponsors with logo and link', function () {
     Storage::fake('public');
 
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_TECHNOLOGY)->firstOrFail();
     $logo = UploadedFile::fake()->create('logo.png', 12, 'image/png');
 
     $createResponse = $this->actingAs($admin)->post(route('sponsors.store'), [
         'name' => 'Partner Testowy',
-        'type' => Sponsor::TYPE_TECHNOLOGY,
+        'sponsor_category_id' => $category->id,
         'url' => 'https://partner.example.com',
         'logo' => $logo,
         'sort_order' => 7,
@@ -55,6 +58,7 @@ it('lets an admin create and delete sponsors with logo and link', function () {
 
     $createResponse->assertRedirect(route('profile.edit'));
     expect($sponsor->name)->toBe('Partner Testowy');
+    expect($sponsor->sponsor_category_id)->toBe($category->id);
     expect($sponsor->type)->toBe(Sponsor::TYPE_TECHNOLOGY);
     expect($sponsor->url)->toBe('https://partner.example.com');
     Storage::disk('public')->assertExists($sponsor->logo_path);
@@ -64,6 +68,34 @@ it('lets an admin create and delete sponsors with logo and link', function () {
     $deleteResponse->assertRedirect();
     $this->assertDatabaseMissing('sponsors', ['id' => $sponsor->id]);
     Storage::disk('public')->assertMissing($sponsor->logo_path);
+});
+
+it('lets an admin manage sponsor categories', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $createResponse = $this->actingAs($admin)->post(route('sponsor-categories.store'), [
+        'name' => 'Partnerzy lokalni',
+        'sort_order' => 55,
+        'is_active' => '1',
+    ]);
+
+    $category = SponsorCategory::query()->where('name', 'Partnerzy lokalni')->firstOrFail();
+
+    $createResponse->assertRedirect(route('profile.edit', ['section' => 'sponsors']));
+    expect($category->sort_order)->toBe(55);
+    expect($category->is_active)->toBeTrue();
+
+    $this->actingAs($admin)->put(route('sponsor-categories.update', $category), [
+        'name' => 'Partnerzy miejscy',
+        'sort_order' => 60,
+    ])->assertRedirect(route('profile.edit', ['section' => 'sponsors']));
+
+    $category->refresh();
+    expect($category->name)->toBe('Partnerzy miejscy');
+    expect($category->is_active)->toBeFalse();
+
+    $this->actingAs($admin)->delete(route('sponsor-categories.destroy', $category))->assertRedirect(route('profile.edit', ['section' => 'sponsors']));
+    $this->assertDatabaseMissing('sponsor_categories', ['id' => $category->id]);
 });
 
 it('shows active sponsors on the club sponsors page with large white logo tiles', function () {
@@ -91,6 +123,6 @@ it('shows active sponsors on the club sponsors page with large white logo tiles'
     $response->assertSee('Partner technologiczny');
     $response->assertSee('White Tile Partner');
     $response->assertSee('bg-white');
-    $response->assertSee('max-h-24');
+    $response->assertSee('max-h-28');
     $response->assertDontSee('Inactive Tile Partner');
 });

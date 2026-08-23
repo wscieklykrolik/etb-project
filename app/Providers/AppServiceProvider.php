@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\ShippingProviderInterface;
 use App\Models\AppSetting;
-use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\User;
 use App\Rules\NotCommonPassword;
 use App\Support\MediaStorage;
@@ -72,13 +72,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('partials.footer', function ($view): void {
-            $view->with('footerSponsorsByType', Sponsor::query()
+            $view->with('footerSponsorCategories', SponsorCategory::query()
                 ->active()
-                ->orderBy('type')
+                ->whereHas('sponsors', fn ($query) => $query->active())
+                ->with(['sponsors' => fn ($query) => $query
+                    ->active()
+                    ->orderBy('sort_order')
+                    ->orderBy('name')])
                 ->orderBy('sort_order')
                 ->orderBy('name')
-                ->get()
-                ->groupBy('type'));
+                ->get());
         });
     }
 }
