@@ -56,6 +56,10 @@ it('lets an admin upload separate logos for every marked site area', function ()
         ->assertOk()
         ->assertSee('<title>Aktualności | ETB Łódź</title>', false)
         ->assertSee('rel="icon"', false)
+        ->assertSee('media="(prefers-color-scheme: light)"', false)
+        ->assertSee('media="(prefers-color-scheme: dark)"', false)
+        ->assertSee('images/browser/etb-logo-jasny-motyw.png', false)
+        ->assertSee('images/browser/etb-logo-ciemny-motyw.png', false)
         ->assertSee(AppSetting::getValue('browser_logo'), false);
 
     $this->get(route('academy'))
