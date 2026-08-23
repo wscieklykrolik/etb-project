@@ -349,11 +349,19 @@
                                 'path' => $authLogoPath,
                                 'fallback' => 'Logo logowania',
                             ],
+                            [
+                                'id' => 'browser',
+                                'title' => 'Logo karty przeglądarki',
+                                'description' => 'Ikona widoczna obok tytułu strony w karcie przeglądarki. Gdy nie jest ustawiona, używane jest logo ETB Łódź.',
+                                'url' => $browserIconUrl,
+                                'path' => $browserLogoPath,
+                                'fallback' => 'Ikona',
+                            ],
                         ])
                         <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                             <div class="mb-5">
                                 <h2 class="text-xl font-black">Logotypy strony</h2>
-                                <p class="mt-1 max-w-3xl text-sm text-slate-600">Każde wskazane miejsce ma osobny plik: nagłówek ETB Łódź, sponsor tytularny, akademia, sklep, bilety, panel admina oraz panel logowania.</p>
+                                <p class="mt-1 max-w-3xl text-sm text-slate-600">Każde wskazane miejsce ma osobny plik: nagłówek ETB Łódź, sponsor tytularny, akademia, sklep, bilety, panel admina, panel logowania oraz karta przeglądarki.</p>
                             </div>
                             <div class="grid gap-4 xl:grid-cols-3 2xl:grid-cols-4">
                                 @foreach ($managedLogos as $managedLogo)

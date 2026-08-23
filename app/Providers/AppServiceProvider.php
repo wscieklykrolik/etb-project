@@ -8,6 +8,7 @@ use App\Models\AppSetting;
 use App\Models\SponsorCategory;
 use App\Models\User;
 use App\Rules\NotCommonPassword;
+use App\Support\BrowserPageTitle;
 use App\Support\MediaStorage;
 use App\Services\DpdShippingProvider;
 use App\Services\InPostShippingProvider;
@@ -71,6 +72,8 @@ class AppServiceProvider extends ServiceProvider
                 $ticketsLogoPath = AppSetting::getValue('tickets_logo');
                 $adminLogoPath = AppSetting::getValue('admin_logo');
                 $authLogoPath = AppSetting::getValue('auth_logo');
+                $browserLogoPath = AppSetting::getValue('browser_logo');
+                $browserIconPath = $browserLogoPath ?? $clubLogoPath;
 
                 $logoData = [
                     'clubLogoPath' => $clubLogoPath,
@@ -88,6 +91,10 @@ class AppServiceProvider extends ServiceProvider
                     'adminLogoUrl' => MediaStorage::url($adminLogoPath),
                     'authLogoPath' => $authLogoPath,
                     'authLogoUrl' => MediaStorage::url($authLogoPath),
+                    'browserLogoPath' => $browserLogoPath,
+                    'browserLogoUrl' => MediaStorage::url($browserLogoPath),
+                    'browserIconPath' => $browserIconPath,
+                    'browserIconUrl' => MediaStorage::url($browserIconPath),
                     'siteLogoPath' => $clubLogoPath,
                     'siteLogoUrl' => MediaStorage::url($clubLogoPath),
                 ];
@@ -96,6 +103,9 @@ class AppServiceProvider extends ServiceProvider
             foreach ($logoData as $key => $value) {
                 $view->with($key, $value);
             }
+
+            $view->with('browserBrandName', 'ETB Łódź');
+            $view->with('browserPageTitle', BrowserPageTitle::fromRequest(request()));
         });
 
         View::composer('partials.footer', function ($view): void {

@@ -26,6 +26,7 @@ it('lets an admin upload separate logos for every marked site area', function ()
         'tickets' => 'tickets_logo',
         'admin' => 'admin_logo',
         'auth' => 'auth_logo',
+        'browser' => 'browser_logo',
     ];
 
     foreach ($logoKeys as $logo => $settingKey) {
@@ -45,10 +46,17 @@ it('lets an admin upload separate logos for every marked site area', function ()
 
     $this->get(route('home'))
         ->assertOk()
+        ->assertSee('<title>Strona główna | ETB Łódź</title>', false)
         ->assertSee('Eat The Ball - oficjalna strona')
         ->assertSee('ETB Łódź')
         ->assertSee('Logo sponsora tytularnego')
         ->assertSee('logos/', false);
+
+    $this->get(route('news.index'))
+        ->assertOk()
+        ->assertSee('<title>Aktualności | ETB Łódź</title>', false)
+        ->assertSee('rel="icon"', false)
+        ->assertSee(AppSetting::getValue('browser_logo'), false);
 
     $this->get(route('academy'))
         ->assertOk()
@@ -68,6 +76,7 @@ it('lets an admin upload separate logos for every marked site area', function ()
     $this->get(route('profile.edit', ['section' => 'dashboard']))
         ->assertOk()
         ->assertSee('Logo panelu admina')
+        ->assertSee('Logo karty przeglądarki')
         ->assertSee('logos/', false);
 
     auth()->logout();

@@ -42,6 +42,10 @@ class SiteLogoController extends Controller
             'key' => 'auth_logo',
             'label' => 'Logo panelu logowania',
         ],
+        'browser' => [
+            'key' => 'browser_logo',
+            'label' => 'Logo karty przeglądarki',
+        ],
     ];
 
     public function update(Request $request, string $logo): RedirectResponse
