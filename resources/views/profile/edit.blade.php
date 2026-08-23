@@ -43,9 +43,9 @@
             <aside class="bg-slate-950 text-white">
                 <div class="sticky top-0 flex h-screen flex-col px-5 py-6">
                     <a href="{{ route('home') }}" class="flex items-center gap-3">
-                        <x-site-logo image-class="h-11 w-11 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black" />
+                        <x-site-logo :url="$adminLogoUrl" alt="Logo panelu admina" image-class="h-11 w-11 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black" />
                         <span>
-                            <span class="block text-2xl font-black leading-5 text-yellow-400">ETB</span>
+                            <span class="block text-xl font-black leading-5 text-yellow-400">ETB Łódź</span>
                             <span class="block text-xs font-bold uppercase tracking-[0.22em] text-white">Admin</span>
                         </span>
                     </a>
@@ -261,7 +261,7 @@
                     <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} overflow-hidden rounded-lg border border-yellow-300 bg-yellow-50 p-5 shadow-sm">
                         <div class="grid gap-5 xl:grid-cols-[1.2fr_repeat(4,1fr)]">
                             <div class="flex items-center gap-5">
-                                <x-site-logo image-class="h-20 w-20 shrink-0 rounded-full bg-white object-contain p-2 ring-1 ring-yellow-300" fallback-class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-xl font-black text-slate-950" />
+                                <x-site-logo :url="$adminLogoUrl" alt="Logo panelu admina" image-class="h-20 w-20 shrink-0 rounded-full bg-white object-contain p-2 ring-1 ring-yellow-300" fallback-class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-xl font-black text-slate-950" />
                                 <div>
                                     <h2 class="text-lg font-black">Witaj ponownie, {{ $isAdmin ? 'Administratorze' : 'Pracowniku' }}!</h2>
                                     <p class="mt-1 text-sm text-slate-600">Miło Cię znowu widzieć w panelu zarządzania ETB.</p>
@@ -291,32 +291,98 @@
                     </section>
 
                     @if ($isAdmin)
+                        @php($managedLogos = [
+                            [
+                                'id' => 'club',
+                                'title' => 'Logo ETB Łódź',
+                                'description' => 'Logo widoczne po lewej stronie głównego nagłówka strony.',
+                                'url' => $clubLogoUrl,
+                                'path' => $clubLogoPath,
+                                'fallback' => 'ETB',
+                            ],
+                            [
+                                'id' => 'title-sponsor',
+                                'title' => 'Logo sponsora tytularnego',
+                                'description' => 'Logo wyświetlane po prawej stronie głównego nagłówka strony.',
+                                'url' => $titleSponsorLogoUrl,
+                                'path' => $titleSponsorLogoPath,
+                                'fallback' => 'Sponsor tytularny',
+                            ],
+                            [
+                                'id' => 'academy',
+                                'title' => 'Logo akademii',
+                                'description' => 'Logo widoczne obok tytułu na stronie akademii.',
+                                'url' => $academyLogoUrl,
+                                'path' => $academyLogoPath,
+                                'fallback' => 'Akademia',
+                            ],
+                            [
+                                'id' => 'shop',
+                                'title' => 'Logo sklepu',
+                                'description' => 'Logo widoczne w nagłówku strony sklepu.',
+                                'url' => $shopLogoUrl,
+                                'path' => $shopLogoPath,
+                                'fallback' => 'Sklep',
+                            ],
+                            [
+                                'id' => 'tickets',
+                                'title' => 'Logo biletów',
+                                'description' => 'Logo widoczne w nagłówku strony biletów.',
+                                'url' => $ticketsLogoUrl,
+                                'path' => $ticketsLogoPath,
+                                'fallback' => 'Bilety',
+                            ],
+                            [
+                                'id' => 'admin',
+                                'title' => 'Logo panelu admina',
+                                'description' => 'Logo widoczne w bocznym panelu admina i na pulpicie.',
+                                'url' => $adminLogoUrl,
+                                'path' => $adminLogoPath,
+                                'fallback' => 'ETB',
+                            ],
+                            [
+                                'id' => 'auth',
+                                'title' => 'Logo panelu logowania',
+                                'description' => 'Logo widoczne w dużym polu po lewej stronie ekranu logowania.',
+                                'url' => $authLogoUrl,
+                                'path' => $authLogoPath,
+                                'fallback' => 'Logo logowania',
+                            ],
+                        ])
                         <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-slate-100 p-3 ring-1 ring-slate-200">
-                                        <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-xl font-black text-slate-950" />
-                                    </div>
-                                    <div>
-                                        <h2 class="text-xl font-black">Logo strony</h2>
-                                        <p class="mt-1 max-w-2xl text-sm text-slate-600">Logo widoczne w nagłówku strony, sekcjach Biletów, Sklepu i Akademii oraz w panelu admina.</p>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                    <form method="POST" action="{{ route('admin.site-logo.update') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input name="site_logo" type="file" accept="image/*" required class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold sm:w-64">
-                                        <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz logo</button>
-                                    </form>
-                                    @if ($siteLogoPath)
-                                        <form method="POST" action="{{ route('admin.site-logo.destroy') }}" onsubmit="return confirm('Usunąć logo strony?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">Usuń logo</button>
-                                        </form>
-                                    @endif
-                                </div>
+                            <div class="mb-5">
+                                <h2 class="text-xl font-black">Logotypy strony</h2>
+                                <p class="mt-1 max-w-3xl text-sm text-slate-600">Każde wskazane miejsce ma osobny plik: nagłówek ETB Łódź, sponsor tytularny, akademia, sklep, bilety, panel admina oraz panel logowania.</p>
+                            </div>
+                            <div class="grid gap-4 xl:grid-cols-3 2xl:grid-cols-4">
+                                @foreach ($managedLogos as $managedLogo)
+                                    <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                        <div class="flex items-start gap-4">
+                                            <div class="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-white p-2 ring-1 ring-slate-200">
+                                                <x-site-logo :url="$managedLogo['url']" :alt="$managedLogo['title']" image-class="max-h-full max-w-full object-contain" :fallback="$managedLogo['fallback']" fallback-class="text-center text-[10px] font-black uppercase tracking-wide text-slate-500" />
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h3 class="font-black">{{ $managedLogo['title'] }}</h3>
+                                                <p class="mt-1 text-sm text-slate-600">{{ $managedLogo['description'] }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 space-y-2">
+                                            <form method="POST" action="{{ route('admin.site-logos.update', $managedLogo['id']) }}" enctype="multipart/form-data" class="space-y-2">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input name="logo" type="file" accept="image/*" required class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
+                                                <button class="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz logo</button>
+                                            </form>
+                                            @if ($managedLogo['path'])
+                                                <form method="POST" action="{{ route('admin.site-logos.destroy', $managedLogo['id']) }}" onsubmit="return confirm('Usunąć ten logotyp?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">Usuń logo</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </article>
+                                @endforeach
                             </div>
                         </section>
                     @endif

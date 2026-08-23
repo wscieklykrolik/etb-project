@@ -59,16 +59,41 @@ class AppServiceProvider extends ServiceProvider
         );
 
         View::composer('*', function ($view): void {
-            static $siteLogoPath = null;
-            static $siteLogoLoaded = false;
+            static $logoData = null;
 
-            if (! $siteLogoLoaded) {
-                $siteLogoPath = AppSetting::getValue('site_logo');
-                $siteLogoLoaded = true;
+            if ($logoData === null) {
+                $legacySiteLogoPath = AppSetting::getValue('site_logo');
+                $clubLogoPath = AppSetting::getValue('club_logo') ?? $legacySiteLogoPath;
+                $titleSponsorLogoPath = AppSetting::getValue('title_sponsor_logo');
+                $academyLogoPath = AppSetting::getValue('academy_logo');
+                $shopLogoPath = AppSetting::getValue('shop_logo');
+                $ticketsLogoPath = AppSetting::getValue('tickets_logo');
+                $adminLogoPath = AppSetting::getValue('admin_logo');
+                $authLogoPath = AppSetting::getValue('auth_logo');
+
+                $logoData = [
+                    'clubLogoPath' => $clubLogoPath,
+                    'clubLogoUrl' => MediaStorage::url($clubLogoPath),
+                    'titleSponsorLogoPath' => $titleSponsorLogoPath,
+                    'titleSponsorLogoUrl' => MediaStorage::url($titleSponsorLogoPath),
+                    'academyLogoPath' => $academyLogoPath,
+                    'academyLogoUrl' => MediaStorage::url($academyLogoPath),
+                    'shopLogoPath' => $shopLogoPath,
+                    'shopLogoUrl' => MediaStorage::url($shopLogoPath),
+                    'ticketsLogoPath' => $ticketsLogoPath,
+                    'ticketsLogoUrl' => MediaStorage::url($ticketsLogoPath),
+                    'adminLogoPath' => $adminLogoPath,
+                    'adminLogoUrl' => MediaStorage::url($adminLogoPath),
+                    'authLogoPath' => $authLogoPath,
+                    'authLogoUrl' => MediaStorage::url($authLogoPath),
+                    'siteLogoPath' => $clubLogoPath,
+                    'siteLogoUrl' => MediaStorage::url($clubLogoPath),
+                ];
             }
 
-            $view->with('siteLogoPath', $siteLogoPath);
-            $view->with('siteLogoUrl', MediaStorage::url($siteLogoPath));
+            foreach ($logoData as $key => $value) {
+                $view->with($key, $value);
+            }
         });
 
         View::composer('partials.footer', function ($view): void {

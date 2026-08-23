@@ -10,31 +10,100 @@ beforeEach(function (): void {
     Storage::fake('media');
 });
 
-it('lets an admin upload a site logo and renders it in the public header', function () {
+function fakeLogo(string $name): UploadedFile
+{
+    return UploadedFile::fake()->createWithContent($name, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='));
+}
+
+it('lets an admin upload separate logos for every marked site area', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-    $this->actingAs($admin)->patch(route('admin.site-logo.update'), [
-        'site_logo' => UploadedFile::fake()->createWithContent('logo-etb.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=')),
-    ])->assertRedirect();
+    $logoKeys = [
+        'club' => 'club_logo',
+        'title-sponsor' => 'title_sponsor_logo',
+        'academy' => 'academy_logo',
+        'shop' => 'shop_logo',
+        'tickets' => 'tickets_logo',
+        'admin' => 'admin_logo',
+        'auth' => 'auth_logo',
+    ];
 
-    $logoPath = AppSetting::getValue('site_logo');
+    foreach ($logoKeys as $logo => $settingKey) {
+        $this->actingAs($admin)->patch(route('admin.site-logos.update', $logo), [
+            'logo' => fakeLogo($logo.'.png'),
+        ])->assertRedirect();
 
-    expect($logoPath)->toStartWith('logos/');
-    Storage::disk('media')->assertExists($logoPath);
+        $logoPath = AppSetting::getValue($settingKey);
+
+        expect($logoPath)->toStartWith('logos/');
+        Storage::disk('media')->assertExists($logoPath);
+    }
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('Logo ETB')
+        ->assertSee('Eat The Ball - oficjalna strona')
+        ->assertSee('ETB Łódź')
+        ->assertSee('Logo sponsora tytularnego')
+        ->assertSee('logos/', false);
+
+    $this->get(route('academy'))
+        ->assertOk()
+        ->assertSee('Logo akademii')
+        ->assertSee('logos/', false);
+
+    $this->get(route('shop.index'))
+        ->assertOk()
+        ->assertSee('Logo sklepu')
+        ->assertSee('logos/', false);
+
+    $this->get(route('tickets'))
+        ->assertOk()
+        ->assertSee('Logo biletów')
+        ->assertSee('logos/', false);
+
+    $this->get(route('profile.edit', ['section' => 'dashboard']))
+        ->assertOk()
+        ->assertSee('Logo panelu admina')
+        ->assertSee('logos/', false);
+
+    auth()->logout();
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('Logowanie ETB Łódź')
+        ->assertSee('Logo panelu logowania')
         ->assertSee('logos/', false);
 });
 
-it('lets an admin remove the site logo', function () {
+it('lets an admin remove a selected site logo without deleting the others', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    Storage::disk('media')->put('logos/klub.png', 'logo');
+    Storage::disk('media')->put('logos/sponsor.png', 'logo');
+    AppSetting::setValue('club_logo', 'logos/klub.png');
+    AppSetting::setValue('title_sponsor_logo', 'logos/sponsor.png');
+
+    $this->actingAs($admin)->delete(route('admin.site-logos.destroy', 'title-sponsor'))->assertRedirect();
+
+    expect(AppSetting::getValue('title_sponsor_logo'))->toBeNull();
+    expect(AppSetting::getValue('club_logo'))->toBe('logos/klub.png');
+    Storage::disk('media')->assertMissing('logos/sponsor.png');
+    Storage::disk('media')->assertExists('logos/klub.png');
+});
+
+it('uses the previous site logo as the club logo fallback and migrates it on upload', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
     Storage::disk('media')->put('logos/stare-logo.png', 'logo');
     AppSetting::setValue('site_logo', 'logos/stare-logo.png');
 
-    $this->actingAs($admin)->delete(route('admin.site-logo.destroy'))->assertRedirect();
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('logos/stare-logo.png', false);
+
+    $this->actingAs($admin)->patch(route('admin.site-logos.update', 'club'), [
+        'logo' => fakeLogo('nowe-logo.png'),
+    ])->assertRedirect();
 
     expect(AppSetting::getValue('site_logo'))->toBeNull();
+    expect(AppSetting::getValue('club_logo'))->toStartWith('logos/');
     Storage::disk('media')->assertMissing('logos/stare-logo.png');
 });

@@ -14,7 +14,7 @@
     <section class="border-b border-zinc-800/50 bg-zinc-950 py-12">
         <div class="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
             <div class="flex h-32 w-32 shrink-0 items-center justify-center rounded-lg bg-white p-4">
-                <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-3xl font-black text-black" />
+                <x-site-logo :url="$shopLogoUrl" alt="Logo sklepu" image-class="max-h-full max-w-full object-contain" fallback="Sklep" fallback-class="text-center text-sm font-black uppercase tracking-wide text-black" />
             </div>
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Sklep</p>

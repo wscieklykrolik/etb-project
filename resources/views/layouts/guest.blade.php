@@ -43,14 +43,14 @@
             <div class="w-full max-w-5xl grid lg:grid-cols-2 overflow-hidden rounded-xl border-4 border-yellow-400 shadow-2xl shadow-black/60">
                 <div class="hidden lg:flex bg-zinc-900 border-r-4 border-yellow-400 p-10 items-center justify-center">
                     <div class="w-full h-full min-h-96 rounded-lg border-2 border-dashed border-yellow-400/80 bg-black/40 flex items-center justify-center text-center text-yellow-300 px-6">
-                        <p class="text-sm uppercase tracking-[0.2em]">Miejsce na logo klubu</p>
+                        <x-site-logo :url="$authLogoUrl" alt="Logo panelu logowania" image-class="max-h-72 max-w-full object-contain" fallback="Miejsce na logo klubu" fallback-class="text-sm font-black uppercase tracking-[0.2em]" />
                     </div>
                 </div>
 
                 <div class="bg-yellow-400 p-6 sm:p-10">
                     <div class="mb-6 flex items-center justify-between gap-4">
                         <a href="/" class="text-black text-lg font-black tracking-wide">
-                            Logowanie ETB
+                            Logowanie ETB Łódź
                         </a>
                     </div>
 

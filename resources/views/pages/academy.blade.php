@@ -33,7 +33,7 @@
         <div class="mb-8 rounded-lg bg-black p-6 text-yellow-400">
             <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
                 <div class="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg bg-yellow-400 p-3">
-                    <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-3xl font-black text-black" />
+                    <x-site-logo :url="$academyLogoUrl" alt="Logo akademii" image-class="max-h-full max-w-full object-contain" fallback="Akademia" fallback-class="text-center text-sm font-black uppercase tracking-wide text-black" />
                 </div>
                 <h1 class="text-3xl font-black sm:text-4xl">Akademia</h1>
             </div>

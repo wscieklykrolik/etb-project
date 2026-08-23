@@ -27,8 +27,8 @@ if (Auth::user()->isAdmin()) {
 <aside class="flex w-64 flex-col border-r border-zinc-800 bg-zinc-900">
     <div class="flex h-14 items-center gap-3 border-b border-zinc-800 px-6">
         <a href="{{ route('home') }}" class="flex items-center gap-2">
-            <x-site-logo image-class="h-9 w-9 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-400 text-xs font-black text-black" />
-            <span class="text-xl font-black text-yellow-400 tracking-tight">ETB</span>
+            <x-site-logo :url="$adminLogoUrl" alt="Logo panelu admina" image-class="h-9 w-9 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-400 text-xs font-black text-black" />
+            <span class="text-xl font-black text-yellow-400 tracking-tight">ETB Łódź</span>
         </a>
         <span class="text-xs text-zinc-500 uppercase tracking-wider">Admin</span>
     </div>
