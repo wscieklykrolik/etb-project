@@ -307,6 +307,7 @@
                                 'url' => $titleSponsorLogoUrl,
                                 'path' => $titleSponsorLogoPath,
                                 'fallback' => 'Sponsor tytularny',
+                                'link' => $titleSponsorUrl,
                             ],
                             [
                                 'id' => 'academy',
@@ -370,7 +371,10 @@
                                             <form method="POST" action="{{ route('admin.site-logos.update', $managedLogo['id']) }}" enctype="multipart/form-data" class="space-y-2">
                                                 @csrf
                                                 @method('PATCH')
-                                                <input name="logo" type="file" accept="image/*" required class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
+                                                <input name="logo" type="file" accept="image/*" @required(! $managedLogo['path']) class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
+                                                @if ($managedLogo['id'] === 'title-sponsor')
+                                                    <input name="url" type="url" value="{{ old('url', $managedLogo['link'] ?? '') }}" placeholder="Link sponsora" class="w-full rounded border border-slate-300 bg-white text-sm">
+                                                @endif
                                                 <button class="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz logo</button>
                                             </form>
                                             @if ($managedLogo['path'])

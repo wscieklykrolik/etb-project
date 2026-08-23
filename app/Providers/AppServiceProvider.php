@@ -65,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
                 $legacySiteLogoPath = AppSetting::getValue('site_logo');
                 $clubLogoPath = AppSetting::getValue('club_logo') ?? $legacySiteLogoPath;
                 $titleSponsorLogoPath = AppSetting::getValue('title_sponsor_logo');
+                $titleSponsorUrl = AppSetting::getValue('title_sponsor_url');
                 $academyLogoPath = AppSetting::getValue('academy_logo');
                 $shopLogoPath = AppSetting::getValue('shop_logo');
                 $ticketsLogoPath = AppSetting::getValue('tickets_logo');
@@ -76,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
                     'clubLogoUrl' => MediaStorage::url($clubLogoPath),
                     'titleSponsorLogoPath' => $titleSponsorLogoPath,
                     'titleSponsorLogoUrl' => MediaStorage::url($titleSponsorLogoPath),
+                    'titleSponsorUrl' => $titleSponsorUrl,
                     'academyLogoPath' => $academyLogoPath,
                     'academyLogoUrl' => MediaStorage::url($academyLogoPath),
                     'shopLogoPath' => $shopLogoPath,

@@ -29,9 +29,13 @@ it('lets an admin upload separate logos for every marked site area', function ()
     ];
 
     foreach ($logoKeys as $logo => $settingKey) {
-        $this->actingAs($admin)->patch(route('admin.site-logos.update', $logo), [
-            'logo' => fakeLogo($logo.'.png'),
-        ])->assertRedirect();
+        $payload = ['logo' => fakeLogo($logo.'.png')];
+
+        if ($logo === 'title-sponsor') {
+            $payload['url'] = 'https://sponsor.example.com';
+        }
+
+        $this->actingAs($admin)->patch(route('admin.site-logos.update', $logo), $payload)->assertRedirect();
 
         $logoPath = AppSetting::getValue($settingKey);
 

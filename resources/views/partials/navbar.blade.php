@@ -136,8 +136,14 @@
                 </div>
             </div>
 
-            <div class="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-zinc-400 bg-white p-3 text-center">
-                <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="Sponsor tytularny" fallback-class="text-xs font-black uppercase tracking-[0.18em] text-zinc-500" />
+            <div class="flex min-h-24 items-center justify-center p-3 text-center">
+                @if ($titleSponsorLogoUrl && $titleSponsorUrl)
+                    <a href="{{ $titleSponsorUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex max-h-20 max-w-full items-center justify-center">
+                        <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="" />
+                    </a>
+                @else
+                    <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="" />
+                @endif
             </div>
         </div>
     </div>
