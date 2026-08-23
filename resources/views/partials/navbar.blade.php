@@ -47,13 +47,14 @@
 </div>
 
 <nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
-    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-        <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_27rem_16rem] xl:items-center">
+    <div class="mx-auto max-w-[108rem] px-4 py-4 sm:px-6">
+        <div class="grid gap-4 xl:grid-cols-[12rem_minmax(24rem,1fr)_27rem_15rem] xl:items-center">
+            <a href="{{ route('home') }}" class="ajax-link flex h-24 w-full items-center justify-center p-1">
+                <x-site-logo :url="$clubLogoUrl" image-class="max-h-full max-w-full object-contain" fallback="ETB Łódź" fallback-class="text-center text-3xl font-black text-zinc-800" />
+            </a>
+
             <div class="min-w-0">
-                <a href="{{ route('home') }}" class="ajax-link inline-flex min-h-14 items-center gap-3">
-                    <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-1 ring-1 ring-zinc-300">
-                        <x-site-logo :url="$clubLogoUrl" image-class="max-h-full max-w-full object-contain" fallback-class="text-base font-black text-zinc-800" />
-                    </span>
+                <a href="{{ route('home') }}" class="ajax-link inline-flex min-h-14 items-center">
                     <span class="text-3xl font-extrabold text-zinc-800">ETB Łódź</span>
                 </a>
 
@@ -136,9 +137,9 @@
                 </div>
             </div>
 
-            <div class="flex min-h-24 items-center justify-center p-3 text-center">
+            <div class="flex min-h-24 items-center justify-end p-3 text-right">
                 @if ($titleSponsorLogoUrl && $titleSponsorUrl)
-                    <a href="{{ $titleSponsorUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex max-h-20 max-w-full items-center justify-center">
+                    <a href="{{ $titleSponsorUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex max-h-20 w-full items-center justify-end">
                         <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="" />
                     </a>
                 @else
