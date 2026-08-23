@@ -73,7 +73,9 @@ class AppServiceProvider extends ServiceProvider
                 $adminLogoPath = AppSetting::getValue('admin_logo');
                 $authLogoPath = AppSetting::getValue('auth_logo');
                 $browserLogoPath = AppSetting::getValue('browser_logo');
-                $browserIconPath = $browserLogoPath ?? $clubLogoPath;
+                $browserLightLogoPath = AppSetting::getValue('browser_light_logo');
+                $browserDarkLogoPath = AppSetting::getValue('browser_dark_logo');
+                $browserIconPath = $browserLogoPath ?? $browserLightLogoPath ?? $browserDarkLogoPath ?? $clubLogoPath;
 
                 $logoData = [
                     'clubLogoPath' => $clubLogoPath,
@@ -93,6 +95,10 @@ class AppServiceProvider extends ServiceProvider
                     'authLogoUrl' => MediaStorage::url($authLogoPath),
                     'browserLogoPath' => $browserLogoPath,
                     'browserLogoUrl' => MediaStorage::url($browserLogoPath),
+                    'browserLightLogoPath' => $browserLightLogoPath,
+                    'browserLightLogoUrl' => MediaStorage::url($browserLightLogoPath),
+                    'browserDarkLogoPath' => $browserDarkLogoPath,
+                    'browserDarkLogoUrl' => MediaStorage::url($browserDarkLogoPath),
                     'browserIconPath' => $browserIconPath,
                     'browserIconUrl' => MediaStorage::url($browserIconPath),
                     'siteLogoPath' => $clubLogoPath,

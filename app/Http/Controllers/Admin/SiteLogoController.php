@@ -46,6 +46,14 @@ class SiteLogoController extends Controller
             'key' => 'browser_logo',
             'label' => 'Logo karty przeglądarki',
         ],
+        'browser-light' => [
+            'key' => 'browser_light_logo',
+            'label' => 'Logo karty przeglądarki dla jasnego motywu',
+        ],
+        'browser-dark' => [
+            'key' => 'browser_dark_logo',
+            'label' => 'Logo karty przeglądarki dla ciemnego motywu',
+        ],
     ];
 
     public function update(Request $request, string $logo): RedirectResponse

@@ -4,8 +4,10 @@
     $browserTitle = $sectionTitle !== '' && $sectionTitle !== $browserBrand
         ? $sectionTitle.' | '.$browserBrand
         : $browserBrand;
-    $lightThemeBrowserIconUrl = asset('images/browser/etb-logo-jasny-motyw.png');
-    $darkThemeBrowserIconUrl = asset('images/browser/etb-logo-ciemny-motyw.png');
+    $staticLightThemeBrowserIconUrl = asset('images/browser/etb-logo-jasny-motyw.png');
+    $staticDarkThemeBrowserIconUrl = asset('images/browser/etb-logo-ciemny-motyw.png');
+    $lightThemeBrowserIconUrl = $browserLightLogoUrl ?: $staticLightThemeBrowserIconUrl;
+    $darkThemeBrowserIconUrl = $browserDarkLogoUrl ?: $staticDarkThemeBrowserIconUrl;
     $fallbackBrowserIconUrl = $browserIconUrl ?: $lightThemeBrowserIconUrl;
 @endphp
 <title>{{ $browserTitle }}</title>

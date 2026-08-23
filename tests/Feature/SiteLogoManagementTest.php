@@ -27,6 +27,8 @@ it('lets an admin upload separate logos for every marked site area', function ()
         'admin' => 'admin_logo',
         'auth' => 'auth_logo',
         'browser' => 'browser_logo',
+        'browser-light' => 'browser_light_logo',
+        'browser-dark' => 'browser_dark_logo',
     ];
 
     foreach ($logoKeys as $logo => $settingKey) {
@@ -58,8 +60,8 @@ it('lets an admin upload separate logos for every marked site area', function ()
         ->assertSee('rel="icon"', false)
         ->assertSee('media="(prefers-color-scheme: light)"', false)
         ->assertSee('media="(prefers-color-scheme: dark)"', false)
-        ->assertSee('images/browser/etb-logo-jasny-motyw.png', false)
-        ->assertSee('images/browser/etb-logo-ciemny-motyw.png', false)
+        ->assertSee(AppSetting::getValue('browser_light_logo'), false)
+        ->assertSee(AppSetting::getValue('browser_dark_logo'), false)
         ->assertSee(AppSetting::getValue('browser_logo'), false);
 
     $this->get(route('academy'))
@@ -80,7 +82,8 @@ it('lets an admin upload separate logos for every marked site area', function ()
     $this->get(route('profile.edit', ['section' => 'dashboard']))
         ->assertOk()
         ->assertSee('Logo panelu admina')
-        ->assertSee('Logo karty przeglądarki')
+        ->assertSee('Logo karty przeglądarki - jasny motyw')
+        ->assertSee('Logo karty przeglądarki - ciemny motyw')
         ->assertSee('logos/', false);
 
     auth()->logout();

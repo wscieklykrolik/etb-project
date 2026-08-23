@@ -350,12 +350,20 @@
                                 'fallback' => 'Logo logowania',
                             ],
                             [
-                                'id' => 'browser',
-                                'title' => 'Logo karty przeglądarki',
-                                'description' => 'Ikona widoczna obok tytułu strony w karcie przeglądarki. Gdy nie jest ustawiona, używane jest logo ETB Łódź.',
-                                'url' => $browserIconUrl,
-                                'path' => $browserLogoPath,
-                                'fallback' => 'Ikona',
+                                'id' => 'browser-light',
+                                'title' => 'Logo karty przeglądarki - jasny motyw',
+                                'description' => 'Czarne logo widoczne w karcie przeglądarki przy jasnym motywie.',
+                                'url' => $browserLightLogoUrl,
+                                'path' => $browserLightLogoPath,
+                                'fallback' => 'Jasny motyw',
+                            ],
+                            [
+                                'id' => 'browser-dark',
+                                'title' => 'Logo karty przeglądarki - ciemny motyw',
+                                'description' => 'Białe logo widoczne w karcie przeglądarki przy ciemnym motywie.',
+                                'url' => $browserDarkLogoUrl,
+                                'path' => $browserDarkLogoPath,
+                                'fallback' => 'Ciemny motyw',
                             ],
                         ])
                         <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
