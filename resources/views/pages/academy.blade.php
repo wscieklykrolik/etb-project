@@ -31,9 +31,12 @@
 <section class="bg-yellow-400 text-black">
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-8 rounded-lg bg-black p-6 text-yellow-400">
-            <p class="text-sm font-bold uppercase tracking-[0.2em]">ETB Akademia</p>
-            <h1 class="mt-2 text-3xl font-black sm:text-4xl">Akademia</h1>
-            <p class="mt-3 max-w-3xl text-yellow-100">Grupy treningowe, komunikaty trenerów i aktualny kalendarz zajęć akademii.</p>
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div class="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg bg-yellow-400 p-3">
+                    <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-3xl font-black text-black" />
+                </div>
+                <h1 class="text-3xl font-black sm:text-4xl">Akademia</h1>
+            </div>
         </div>
 
         <div class="grid gap-6 lg:grid-cols-[20rem_1fr]">

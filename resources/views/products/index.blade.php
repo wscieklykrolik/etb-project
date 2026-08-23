@@ -12,7 +12,10 @@
 
 <div class="bg-black text-white">
     <section class="border-b border-zinc-800/50 bg-zinc-950 py-12">
-        <div class="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div class="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+            <div class="flex h-32 w-32 shrink-0 items-center justify-center rounded-lg bg-white p-4">
+                <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-3xl font-black text-black" />
+            </div>
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Sklep</p>
                 <h1 class="mt-2 text-4xl font-black uppercase md:text-5xl">Kupuj oficjalny merch Eat The Ball</h1>

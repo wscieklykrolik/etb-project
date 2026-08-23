@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\MatchSuggestionController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductFilterController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SiteLogoController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentDrawController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentGroupController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentMatchController;
@@ -100,6 +101,8 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::patch('/admin/site-logo', [SiteLogoController::class, 'update'])->name('admin.site-logo.update');
+    Route::delete('/admin/site-logo', [SiteLogoController::class, 'destroy'])->name('admin.site-logo.destroy');
     Route::patch('/admin/users/{user}/role', [UserRoleController::class, 'update'])->name('admin.users.role.update');
     Route::get('/admin/users/search', UserSearchController::class)->name('admin.users.search');
     Route::get('/admin/users/emails/export', UserEmailExportController::class)->name('admin.users.emails.export');

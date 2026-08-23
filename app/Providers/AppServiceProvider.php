@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGatewayInterface;
 use App\Contracts\ShippingProviderInterface;
+use App\Models\AppSetting;
 use App\Models\Sponsor;
 use App\Models\User;
 use App\Rules\NotCommonPassword;
+use App\Support\MediaStorage;
 use App\Services\DpdShippingProvider;
 use App\Services\InPostShippingProvider;
 use App\Services\OrderNotificationService;
@@ -55,6 +57,19 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('manage-matches', fn (User $user): bool => $user->hasAnyRole([User::ROLE_ADMIN, User::ROLE_EMPLOYEE])
         );
+
+        View::composer('*', function ($view): void {
+            static $siteLogoPath = null;
+            static $siteLogoLoaded = false;
+
+            if (! $siteLogoLoaded) {
+                $siteLogoPath = AppSetting::getValue('site_logo');
+                $siteLogoLoaded = true;
+            }
+
+            $view->with('siteLogoPath', $siteLogoPath);
+            $view->with('siteLogoUrl', MediaStorage::url($siteLogoPath));
+        });
 
         View::composer('partials.footer', function ($view): void {
             $view->with('footerSponsorsByType', Sponsor::query()

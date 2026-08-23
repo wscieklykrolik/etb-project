@@ -50,7 +50,9 @@
     <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div class="min-w-0">
-                <a href="{{ route('home') }}" class="text-3xl font-extrabold text-zinc-800 ajax-link">ETB</a>
+                <a href="{{ route('home') }}" class="ajax-link inline-flex min-h-14 items-center">
+                    <x-site-logo image-class="h-14 w-auto max-w-[11rem] object-contain" fallback-class="text-3xl font-extrabold text-zinc-800" />
+                </a>
 
                 <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
                     <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">

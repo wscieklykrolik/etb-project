@@ -43,7 +43,7 @@
             <aside class="bg-slate-950 text-white">
                 <div class="sticky top-0 flex h-screen flex-col px-5 py-6">
                     <a href="{{ route('home') }}" class="flex items-center gap-3">
-                        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black">ETB</span>
+                        <x-site-logo image-class="h-11 w-11 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black" />
                         <span>
                             <span class="block text-2xl font-black leading-5 text-yellow-400">ETB</span>
                             <span class="block text-xs font-bold uppercase tracking-[0.22em] text-white">Admin</span>
@@ -261,9 +261,7 @@
                     <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} overflow-hidden rounded-lg border border-yellow-300 bg-yellow-50 p-5 shadow-sm">
                         <div class="grid gap-5 xl:grid-cols-[1.2fr_repeat(4,1fr)]">
                             <div class="flex items-center gap-5">
-                                <span class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-slate-950">
-                                    <i data-lucide="users-round" class="h-10 w-10"></i>
-                                </span>
+                                <x-site-logo image-class="h-20 w-20 shrink-0 rounded-full bg-white object-contain p-2 ring-1 ring-yellow-300" fallback-class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-xl font-black text-slate-950" />
                                 <div>
                                     <h2 class="text-lg font-black">Witaj ponownie, {{ $isAdmin ? 'Administratorze' : 'Pracowniku' }}!</h2>
                                     <p class="mt-1 text-sm text-slate-600">Miło Cię znowu widzieć w panelu zarządzania ETB.</p>
@@ -291,6 +289,37 @@
                             @endforeach
                         </div>
                     </section>
+
+                    @if ($isAdmin)
+                        <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-slate-100 p-3 ring-1 ring-slate-200">
+                                        <x-site-logo image-class="max-h-full max-w-full object-contain" fallback-class="text-xl font-black text-slate-950" />
+                                    </div>
+                                    <div>
+                                        <h2 class="text-xl font-black">Logo strony</h2>
+                                        <p class="mt-1 max-w-2xl text-sm text-slate-600">Logo widoczne w nagłówku strony, sekcjach Biletów, Sklepu i Akademii oraz w panelu admina.</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    <form method="POST" action="{{ route('admin.site-logo.update') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input name="site_logo" type="file" accept="image/*" required class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold sm:w-64">
+                                        <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz logo</button>
+                                    </form>
+                                    @if ($siteLogoPath)
+                                        <form method="POST" action="{{ route('admin.site-logo.destroy') }}" onsubmit="return confirm('Usunąć logo strony?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">Usuń logo</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </section>
+                    @endif
 
                     @if ($isAdmin)
                         <section id="users" class="{{ $activeSection === 'users' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm" x-data="adminUserSearch(@js(route('admin.users.search')), {
