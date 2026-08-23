@@ -3,24 +3,39 @@
 @php
 $groups = [
     'Panel' => [
-        ['label' => 'Pulpit', 'route' => 'admin.dashboard', 'icon' => 'layout-dashboard', 'active' => 'admin.dashboard'],
+        ['label' => 'Pulpit', 'route' => 'profile.edit', 'params' => ['section' => 'dashboard'], 'icon' => 'layout-dashboard', 'active' => null],
+        ['label' => 'Historia zmian', 'route' => 'profile.edit', 'params' => ['section' => 'notifications-history'], 'icon' => 'history', 'active' => null],
+        ['label' => 'Pytania i odpowiedzi', 'route' => 'profile.edit', 'params' => ['section' => 'faq'], 'icon' => 'circle-help', 'active' => null],
+    ],
+    'Zarządzanie' => [
+        ['label' => 'Klub', 'route' => 'profile.edit', 'params' => ['section' => 'club-content'], 'icon' => 'building-2', 'active' => null],
+        ['label' => 'Aktualności', 'route' => 'profile.edit', 'params' => ['section' => 'news'], 'icon' => 'newspaper', 'active' => null],
+        ['label' => 'Akademia', 'route' => 'profile.edit', 'params' => ['section' => 'academy'], 'icon' => 'graduation-cap', 'active' => null],
+        ['label' => 'Sponsorzy', 'route' => 'profile.edit', 'params' => ['section' => 'sponsors'], 'icon' => 'handshake', 'active' => null],
+    ],
+    'Terminarz' => [
+        ['label' => 'Mecze', 'route' => 'profile.edit', 'params' => ['section' => 'matches'], 'icon' => 'calendar-days', 'active' => null],
+        ['label' => 'Terminarz ŁZKosz', 'route' => 'schedule.lzkosz', 'icon' => 'calendar', 'active' => 'schedule.lzkosz'],
+        ['label' => 'Tabela ligi', 'route' => 'profile.edit', 'params' => ['section' => 'league-table'], 'icon' => 'table-2', 'active' => null],
+        ['label' => 'Terminarz 3x3', 'route' => 'schedule.3x3', 'icon' => 'calendar-range', 'active' => 'schedule.3x3'],
+        ['label' => 'Turnieje 3x3', 'route' => 'profile.edit', 'params' => ['section' => 'tournaments'], 'icon' => 'trophy', 'active' => null],
+    ],
+    'Skład' => [
+        ['label' => 'Zawodnicy', 'route' => 'profile.edit', 'params' => ['section' => 'players'], 'icon' => 'user-round', 'active' => null],
+        ['label' => 'Sztab szkoleniowy', 'route' => 'profile.edit', 'params' => ['section' => 'staff'], 'icon' => 'user-cog', 'active' => null],
+        ['label' => 'Drużyna 3x3', 'route' => 'profile.edit', 'params' => ['section' => 'three-x-three'], 'icon' => 'circle-dot', 'active' => null],
     ],
     'Sklep' => [
+        ['label' => 'Podsumowanie sklepu', 'route' => 'profile.edit', 'params' => ['section' => 'shop'], 'icon' => 'store', 'active' => null],
         ['label' => 'Zamówienia', 'route' => 'admin.orders.index', 'icon' => 'shopping-cart', 'active' => 'admin.orders.*'],
         ['label' => 'Produkty', 'route' => 'admin.products.index', 'icon' => 'package', 'active' => 'admin.products.*'],
         ['label' => 'Kategorie', 'route' => 'admin.categories.index', 'icon' => 'tags', 'active' => 'admin.categories.*'],
         ['label' => 'Filtry sklepu', 'route' => 'admin.product-filters.index', 'icon' => 'sliders-horizontal', 'active' => 'admin.product-filters.*'],
     ],
-    'Terminarz' => [
-        ['label' => 'Dodaj mecz', 'route' => 'admin.matches.create', 'icon' => 'calendar-plus', 'active' => 'admin.matches.*'],
-    ],
-    'Zarządzanie' => [
-        ['label' => 'Sponsorzy', 'route' => 'profile.edit', 'params' => ['section' => 'sponsors'], 'icon' => 'star', 'active' => null],
-    ],
 ];
 
 if (Auth::user()->isAdmin()) {
-    $groups['Zarządzanie'][] = ['label' => 'Użytkownicy', 'route' => 'admin.users.search', 'icon' => 'users', 'active' => 'admin.users.*'];
+    array_unshift($groups['Zarządzanie'], ['label' => 'Użytkownicy', 'route' => 'profile.edit', 'params' => ['section' => 'users'], 'icon' => 'users', 'active' => null]);
 }
 @endphp
 
@@ -33,7 +48,7 @@ if (Auth::user()->isAdmin()) {
         <span class="text-xs text-zinc-500 uppercase tracking-wider">Admin</span>
     </div>
 
-    <nav class="flex-1 space-y-6 overflow-y-auto p-4">
+    <nav class="admin-side-nav min-h-0 flex-1 space-y-6 overflow-y-auto p-4">
         @foreach ($groups as $groupLabel => $items)
             <div>
                 <p class="px-3 text-xs font-bold uppercase tracking-widest text-zinc-500">{{ $groupLabel }}</p>
@@ -58,7 +73,7 @@ if (Auth::user()->isAdmin()) {
         @endforeach
     </nav>
 
-    <div class="border-t border-zinc-800 p-4">
+    <div class="shrink-0 border-t border-zinc-800 p-4">
         <div class="flex items-center gap-3">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-zinc-300">{{ Str::upper(substr(Auth::user()->name, 0, 1)) }}</span>
             <div class="flex-1 min-w-0">

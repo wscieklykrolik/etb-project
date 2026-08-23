@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Str;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -82,4 +83,51 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+test('admin panel sidebar follows the requested order and keeps shop summary in profile panel', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $response = $this
+        ->actingAs($admin)
+        ->get(route('profile.edit', ['section' => 'dashboard']));
+
+    $response->assertOk();
+    $response->assertSee(route('profile.edit', ['section' => 'shop']), false);
+
+    $content = Str::between($response->getContent(), '<aside', '</aside>');
+    $labels = [
+        'Pulpit',
+        'Historia zmian',
+        'Pytania i odpowiedzi',
+        'Zarządzanie',
+        'Użytkownicy',
+        'Klub',
+        'Aktualności',
+        'Akademia',
+        'Sponsorzy',
+        'Terminarz',
+        'Mecze',
+        'Terminarz ŁZKosz',
+        'Tabela ligi',
+        'Terminarz 3x3',
+        'Turnieje 3x3',
+        'Skład',
+        'Zawodnicy',
+        'Sztab szkoleniowy',
+        'Drużyna 3x3',
+        'Sklep',
+        'Podsumowanie sklepu',
+        'Zamówienia',
+        'Produkty',
+        'Kategorie',
+        'Filtry sklepu',
+        'Profil',
+        'Wyloguj',
+    ];
+
+    $positions = array_map(fn (string $label): int|false => mb_strpos($content, $label), $labels);
+
+    expect($positions)->not->toContain(false);
+    expect($positions)->toEqual(collect($positions)->sort()->values()->all());
 });

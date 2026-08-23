@@ -48,6 +48,23 @@ html {
     animation-duration: 0.7s;
 }
 
+.admin-side-nav {
+    scrollbar-width: thin;
+    scrollbar-color: #facc15 #0f172a;
+}
+
+.admin-side-nav::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.admin-side-nav::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.admin-side-nav::-webkit-scrollbar-thumb {
+    background: #facc15;
+    border-radius: 999px;
+}
 .admin-scroll-list {
     max-height: 26rem;
     overflow-y: auto;
