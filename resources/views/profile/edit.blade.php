@@ -67,6 +67,7 @@
                                 <a href="{{ $sectionUrl('matches') }}" class="{{ $sectionClasses('matches') }}"><i data-lucide="calendar-days" class="h-4 w-4"></i>Mecze</a>
                                 <a href="{{ $sectionUrl('club-content') }}" class="{{ $sectionClasses('club-content') }}"><i data-lucide="building-2" class="h-4 w-4"></i>Klub</a>
                                 <a href="{{ $sectionUrl('academy') }}" class="{{ $sectionClasses('academy') }}"><i data-lucide="graduation-cap" class="h-4 w-4"></i>Akademia</a>
+                                <a href="{{ $sectionUrl('faq') }}" class="{{ $sectionClasses('faq') }}"><i data-lucide="circle-help" class="h-4 w-4"></i>Pytania i odpowiedzi</a>
                                 <a href="{{ $sectionUrl('news') }}" class="{{ $sectionClasses('news') }}"><i data-lucide="newspaper" class="h-4 w-4"></i>Aktualności</a>
                                 <a href="{{ $sectionUrl('players') }}" class="{{ $sectionClasses('players') }}"><i data-lucide="user-round" class="h-4 w-4"></i>Zawodnicy</a>
                                 <a href="{{ $sectionUrl('staff') }}" class="{{ $sectionClasses('staff') }}"><i data-lucide="user-cog" class="h-4 w-4"></i>Sztab szkoleniowy</a>
@@ -724,6 +725,8 @@
                     @endforeach
 
                     @include('profile.partials.academy-admin')
+
+                    @include('profile.partials.faq-admin')
 
                     <section id="sponsors" class="{{ $activeSection === 'sponsors' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

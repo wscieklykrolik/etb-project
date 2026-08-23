@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AcademyTrainingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ClubSectionController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\FaqQuestionController;
 use App\Http\Controllers\Admin\LeagueTableController;
 use App\Http\Controllers\Admin\MatchSuggestionController;
 use App\Http\Controllers\Admin\OrderController;
@@ -61,6 +62,10 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::delete('/admin/academy/trainers/{trainer}', [AcademyTrainerController::class, 'destroy'])->name('admin.academy.trainers.destroy');
     Route::patch('/admin/academy/messages/{message}', [AcademyMessageController::class, 'update'])->name('admin.academy.messages.update');
     Route::delete('/admin/academy/messages/{message}', [AcademyMessageController::class, 'destroy'])->name('admin.academy.messages.destroy');
+    Route::resource('/admin/faq', FaqQuestionController::class)
+        ->only(['store', 'update', 'destroy'])
+        ->names('admin.faq')
+        ->parameters(['faq' => 'question']);
     Route::post('/admin/league-table/sync', [LeagueTableController::class, 'sync'])->name('admin.league-table.sync');
     Route::patch('/admin/opponents/{opponent}', [LeagueTableController::class, 'updateOpponent'])->name('admin.opponents.update');
     Route::post('/admin/3x3/tournaments/{tournament}/groups', [ThreeXThreeTournamentGroupController::class, 'store'])->name('admin.3x3.tournaments.groups.store');

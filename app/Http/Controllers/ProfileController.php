@@ -9,6 +9,7 @@ use App\Models\AcademyTraining;
 use App\Models\AdminNotification;
 use App\Models\AppSetting;
 use App\Models\ClubSection;
+use App\Models\FaqQuestion;
 use App\Models\LeagueStanding;
 use App\Models\News;
 use App\Models\Order;
@@ -44,6 +45,7 @@ class ProfileController extends Controller
             'matches',
             'club-content',
             'academy',
+            'faq',
             'news',
             'players',
             'staff',
@@ -122,6 +124,10 @@ class ProfileController extends Controller
             ->orderByDesc('starts_on')
             ->take(50)
             ->get();
+        $faqQuestions = FaqQuestion::query()
+            ->orderBy('sort_order')
+            ->orderBy('question')
+            ->get();
         $adminNotifications = AdminNotification::query()
             ->with(['actor', 'acceptedBy'])
             ->latest()
@@ -182,6 +188,7 @@ class ProfileController extends Controller
             'academyTrainings' => $academyTrainings,
             'academyTrainingDate' => $academyTrainingDate,
             'academyCalendarNotes' => $academyCalendarNotes,
+            'faqQuestions' => $faqQuestions,
             'adminNotifications' => $adminNotifications,
             'notificationHistory' => $notificationHistory,
             'unreadNotificationsCount' => $unreadNotificationsCount,

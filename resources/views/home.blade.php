@@ -220,6 +220,31 @@
             </span>
         </a>
     </section>
+
+    @if($faqQuestions->isNotEmpty())
+        <section class="bg-black py-16 text-white border-t border-zinc-800/50">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="max-w-3xl">
+                    <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Pytania i odpowiedzi</p>
+                    <h2 class="mt-2 text-4xl font-black uppercase">Najczęstsze pytania</h2>
+                    <p class="mt-4 text-sm leading-relaxed text-zinc-400">Odpowiedzi na pytania, które najczęściej pojawiają się przed kontaktem z klubem, akademią i pierwszą drużyną ETB.</p>
+                </div>
+
+                <div class="mt-8 divide-y divide-zinc-800 rounded-xl border border-zinc-800 bg-zinc-950/70">
+                    @foreach($faqQuestions as $question)
+                        <details class="group p-6" {{ $loop->first ? 'open' : '' }}>
+                            <summary class="flex cursor-pointer list-none items-start justify-between gap-4 text-left">
+                                <h3 class="text-lg font-black text-white">{{ $question->question }}</h3>
+                                <span class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black transition group-open:rotate-45">+</span>
+                            </summary>
+                            <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-zinc-300">{{ $question->answer }}</p>
+                        </details>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        <script type="application/ld+json">{!! $faqSchemaJson !!}</script>
+    @endif
 </div>
 @endsection
 

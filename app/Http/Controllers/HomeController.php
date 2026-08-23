@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FaqQuestion;
 use App\Models\News;
 use App\Models\Player;
 use App\Models\Product;
@@ -62,6 +63,24 @@ class HomeController extends Controller
             ->take(4)
             ->get();
 
+        $faqQuestions = FaqQuestion::query()
+            ->published()
+            ->orderBy('sort_order')
+            ->orderBy('question')
+            ->get();
+        $faqSchemaJson = $faqQuestions->isEmpty() ? null : json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $faqQuestions->map(fn (FaqQuestion $item) => [
+                '@type' => 'Question',
+                'name' => $item->question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $item->answer,
+                ],
+            ])->values()->all(),
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+
         return view('home', [
             'heroNews' => $latestNews->take(5),
             'featuredArticles' => $latestNews->slice(5, 2),
@@ -71,6 +90,8 @@ class HomeController extends Controller
             'startingFive' => $startingFive,
             'sponsors' => $sponsors,
             'shopProducts' => $shopProducts,
+            'faqQuestions' => $faqQuestions,
+            'faqSchemaJson' => $faqSchemaJson,
         ]);
     }
 }
