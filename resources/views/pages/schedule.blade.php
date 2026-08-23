@@ -16,7 +16,6 @@
             [route('schedule.table'), 'Tabela'],
             [route('schedule.3x3'), 'Terminarz 3x3'],
             [route('schedule.3x3.tournaments'), 'Turnieje 3x3'],
-            [route('schedule.3x3.team'), 'Zespół'],
         ] as [$url, $label])
             <a href="{{ $url }}" class="rounded border border-zinc-700 bg-zinc-950 px-4 py-2 text-sm font-bold text-white transition hover:border-yellow-400 hover:bg-yellow-400 hover:text-black">{{ $label }}</a>
         @endforeach
@@ -66,12 +65,6 @@
             'pageTitle' => 'Turnieje 3x3',
             'pageEyebrow' => 'Organizowane przez ETB',
             'emptyMessage' => 'Brak turniejów organizowanych przez ETB w tej sekcji.',
-        ])
-
-        @include('pages.partials.static-content-section', [
-            'sectionId' => 'three-x-three-team',
-            'eyebrow' => 'Rozgrywki',
-            'title' => 'Zespół',
         ])
     </div>
 </section>

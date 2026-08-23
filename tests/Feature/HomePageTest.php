@@ -88,7 +88,7 @@ it('shows homepage sections from published news, visible matches, and starting f
     $response->assertSee('Slask Wroclaw');
     $response->assertSee('Jan Kowalski');
     $response->assertDontSee('Adam Rezerwowy');
-    $response->assertSee('Kochasz koszykowke');
+    $response->assertSee('Kochasz koszykówkę');
     $response->assertSee('academy-cta-link');
     $response->assertSee('academy-cta-arrow');
     $response->assertSee('group-hover:bg-white');

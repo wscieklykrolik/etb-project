@@ -47,10 +47,8 @@ class PublicScheduleController extends Controller
             ->orderBy('match_date')
             ->get();
 
-        $leagueStandings = LeagueStanding::query()
-            ->with('opponent')
-            ->orderBy('position')
-            ->get();
+        $leagueStandings = $this->leagueStandings();
+
 
         $participatingUpcomingTournaments = ThreeXThreeTournament::query()
             ->with('categories')
@@ -119,5 +117,20 @@ class PublicScheduleController extends Controller
             'roundOneMatches' => $matches->where('lzkosz_round', TeamMatch::LZKOSZ_ROUND_ONE),
             'roundTwoMatches' => $matches->where('lzkosz_round', TeamMatch::LZKOSZ_ROUND_TWO),
         ]);
+    }
+
+    public function table(): View
+    {
+        return view('pages.schedule-table', [
+            'leagueStandings' => $this->leagueStandings(),
+        ]);
+    }
+
+    private function leagueStandings()
+    {
+        return LeagueStanding::query()
+            ->with('opponent')
+            ->orderBy('position')
+            ->get();
     }
 }

@@ -332,7 +332,7 @@ class ContentSeeder extends Seeder
             ],
             [
                 'title' => 'Nabór do Akademii ETB - sezon 2026/2027',
-                'content' => '<p>Akademia ETB Łódź ogłasza nabór dzieci i młodzieży do grup treningowych na sezon 2026/2027!</p><p>Jeśli Twoje dziecko kocha koszykówkę i chce rozwijać swoje umiejętności pod okiem doświadczonych trenerów, to idealny moment, aby dołączyć do naszej akademii.</p><p><strong>Oferujemy:</strong></p><ul><li>Profesjonalne treningi koszykarskie dla dzieci od 7 roku życia</li><li>Wykwalifikowaną kadrę trenerską</li><li>Regularne udział w turniejach i ligach młodzieżowych</li><li>Możliwość rozwoju i awansu do drużyn seniorskich</li></ul><p><strong>Zapisy i informacje:</strong> biuro@etb-lodz.pl</p><p>Dołącz do nas i zostań częścią koszykarskiej rodziny ETB Łódź!</p>',
+                'content' => '<p>Akademia ETB Łódź ogłasza nabór dzieci i młodzieży do grup treningowych na sezon 2026/2027!</p><p>Jeśli Twoje dziecko kocha koszykówkę i chce rozwijać swoje umiejętności pod okiem doświadczonych trenerów, to idealny moment, aby dołączyć do naszej akademii.</p><p><strong>Oferujemy:</strong></p><ul><li>Profesjonalne treningi koszykarskie dla dzieci od 7 roku życia</li><li>Wykwalifikowaną kadrę trenerską</li><li>Regularny udział w turniejach i ligach młodzieżowych</li><li>Możliwość rozwoju i awansu do drużyn seniorskich</li></ul><p><strong>Zapisy i informacje:</strong> biuro@etb-lodz.pl</p><p>Dołącz do nas i zostań częścią koszykarskiej rodziny ETB Łódź!</p>',
                 'excerpt' => 'Rusza nabór do Akademii ETB na sezon 2026/2027! Zapraszamy dzieci i młodzież do zapisów.',
                 'author_id' => $admin->id,
                 'publish_at' => Carbon::now()->subDay(),

@@ -45,7 +45,7 @@
             </div>
             <div class="relative mx-auto flex min-h-[560px] max-w-7xl items-end px-6 pb-16">
                 <div>
-                    <span class="inline-block rounded-full bg-yellow-400 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-black">ETB Lodz</span>
+                    <span class="inline-block rounded-full bg-yellow-400 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-black">ETB Łódź</span>
                     <h1 class="mt-4 max-w-4xl text-4xl font-black uppercase leading-tight md:text-6xl">Oficjalna strona klubu</h1>
                     <p class="mt-5 max-w-2xl text-base font-semibold text-zinc-200 md:text-lg">Wkrótce pojawią się tutaj najnowsze informacje, galerie i zapowiedzi.</p>
                 </div>
@@ -210,7 +210,7 @@
         <a href="{{ route('academy') }}" class="academy-cta-link group relative mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-black/60">Akademia ETB</p>
-                <h2 class="mt-2 text-4xl font-black uppercase md:text-5xl">Kochasz koszykowke? Dołącz do nas</h2>
+                <h2 class="mt-2 text-4xl font-black uppercase md:text-5xl">Kochasz koszykówkę? Dołącz do nas</h2>
             </div>
             <span class="academy-cta-arrow flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-black text-3xl font-black text-yellow-400 transition-[transform,background-color,color] duration-300 group-hover:scale-110 group-hover:bg-white group-hover:text-black group-focus-visible:scale-110 group-focus-visible:bg-white group-focus-visible:text-black" aria-hidden="true">
                 <svg class="academy-cta-arrow-icon h-10 w-10" viewBox="0 0 24 24" fill="none">

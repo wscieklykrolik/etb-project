@@ -90,7 +90,7 @@ Route::post('/payment/przelewy24/webhook', [CheckoutController::class, 'webhook'
 Route::get('/club', [PublicClubController::class, 'index'])->name('club');
 Route::get('/schedule', [PublicScheduleController::class, 'index'])->name('schedule');
 Route::get('/schedule/matches/{match}', [PublicScheduleController::class, 'show'])->name('schedule.matches.show');
-Route::view('/team', 'pages.team')->name('team');
+Route::get('/team', [PublicTeamController::class, 'index'])->name('team');
 Route::get('/contact', [PublicClubController::class, 'contact'])->name('contact');
 
 /* Klub */
@@ -105,11 +105,11 @@ Route::get('/club/contact', [PublicClubController::class, 'contact'])->name('clu
 /* Rozgrywki */
 Route::get('/schedule/lzkosz', [PublicScheduleController::class, 'lzkosz'])->name('schedule.lzkosz');
 Route::redirect('/schedule/third-league', 'https://www.lzkosz.pl/liga/215.html')->name('schedule.third-league');
-Route::view('/schedule/table', 'pages.schedule-table')->name('schedule.table');
+Route::get('/schedule/table', [PublicScheduleController::class, 'table'])->name('schedule.table');
 Route::get('/schedule/3x3', [ThreeXThreeTournamentController::class, 'participating'])->name('schedule.3x3');
 Route::redirect('/schedule/3x3-tournaments', '/schedule/3x3')->name('schedule.3x3.tournaments.old');
 Route::redirect('/schedule/3x3/tournaments', '/schedule/3x3')->name('schedule.3x3.tournaments');
-Route::view('/schedule/3x3/team', 'pages.schedule-3x3-team')->name('schedule.3x3.team');
+Route::redirect('/schedule/3x3/team', '/team/3x3')->name('schedule.3x3.team');
 
 /* Drużyna */
 Route::get('/team/players', [PublicTeamController::class, 'players'])->name('team.players');

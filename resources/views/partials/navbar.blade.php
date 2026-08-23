@@ -72,7 +72,6 @@
                             <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
                             <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
                             <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
-                            <a class="ajax-link" href="{{ route('club.contact') }}">Kontakt</a>
                         </div>
                     </div>
 
@@ -85,20 +84,19 @@
                             <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
                             <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
                             <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
-                            <a class="ajax-link" href="{{ route('schedule.3x3.team') }}">Zespół</a>
                         </div>
                     </div>
 
-                    <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Drużyna</a>
-                        <div x-show="open==='team'" x-transition class="dropdown-panel">
+                    <div class="relative" @mouseenter="open='contact'" @mouseleave="open=null">
+                        <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Kontakt</a>
+                        <div x-show="open==='contact'" x-transition class="dropdown-panel">
+                            <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
+                            <a class="ajax-link" href="{{ route('team') }}">Drużyna</a>
                             <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
                             <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
-                            <a class="ajax-link" href="{{ route('team.3x3') }}">Zawodnicy 3x3</a>
+                            <a class="ajax-link" href="{{ route('team.3x3') }}">Drużyna 3x3</a>
                         </div>
                     </div>
-
-                    <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Kontakt</a>
                 </div>
             </div>
 
