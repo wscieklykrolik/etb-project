@@ -87,14 +87,20 @@
                         </div>
                     </div>
 
+                    <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
+                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Drużyna</a>
+                        <div x-show="open==='team'" x-transition class="dropdown-panel">
+                            <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
+                            <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
+                            <a class="ajax-link" href="{{ route('team.3x3') }}">Drużyna 3x3</a>
+                        </div>
+                    </div>
+
                     <div class="relative" @mouseenter="open='contact'" @mouseleave="open=null">
                         <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Kontakt</a>
                         <div x-show="open==='contact'" x-transition class="dropdown-panel">
                             <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
-                            <a class="ajax-link" href="{{ route('team') }}">Drużyna</a>
-                            <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
-                            <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
-                            <a class="ajax-link" href="{{ route('team.3x3') }}">Drużyna 3x3</a>
+                            <a class="ajax-link" href="{{ route('contact') }}#marketing">Marketing</a>
                         </div>
                     </div>
                 </div>

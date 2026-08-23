@@ -32,3 +32,18 @@ it('renders public navigation routes without server errors', function () {
     $this->get(route('schedule.3x3.tournaments'))->assertRedirect('/schedule/3x3');
     $this->get(route('schedule.third-league'))->assertRedirect('https://www.lzkosz.pl/liga/215.html');
 });
+
+it('shows team as a separate navigation item and contact dropdown for contact and marketing', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Drużyna')
+        ->assertSee(route('team'), false)
+        ->assertSee(route('contact'), false)
+        ->assertSee(route('contact').'#marketing', false)
+        ->assertSee('Marketing');
+
+    $this->get(route('contact'))
+        ->assertOk()
+        ->assertSee('Marketing')
+        ->assertSee('media@etb-lodz.pl');
+});
