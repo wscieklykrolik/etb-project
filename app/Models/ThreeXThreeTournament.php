@@ -14,10 +14,15 @@ class ThreeXThreeTournament extends Model
     public const STATUS_UPCOMING = 'upcoming';
 
     public const STATUS_FINISHED = 'finished';
+
     public const TYPE_PARTICIPATING = 'participating';
+
     public const TYPE_ORGANIZED = 'organized';
+
     public const REGISTRATION_NONE = 'none';
+
     public const REGISTRATION_EXTERNAL = 'external';
+
     public const REGISTRATION_INTERNAL = 'internal';
 
     protected $fillable = [

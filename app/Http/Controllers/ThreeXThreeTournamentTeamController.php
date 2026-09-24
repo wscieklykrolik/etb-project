@@ -12,9 +12,7 @@ use Illuminate\View\View;
 
 class ThreeXThreeTournamentTeamController extends Controller
 {
-    public function __construct(private readonly ThreeXThreeTournamentTeamService $teamService)
-    {
-    }
+    public function __construct(private readonly ThreeXThreeTournamentTeamService $teamService) {}
 
     public function store(StoreThreeXThreeTournamentTeamRequest $request, ThreeXThreeTournament $tournament): RedirectResponse
     {
@@ -29,6 +27,7 @@ class ThreeXThreeTournamentTeamController extends Controller
             ->route('three-x-three.tournaments.show', $tournament)
             ->with('success', 'Drużyna została zgłoszona do turnieju.');
     }
+
     public function show(ThreeXThreeTournamentTeam $team, ThreeXThreeTournamentFlowService $flowService): View
     {
         $team->load(['tournament', 'players']);

@@ -12,9 +12,7 @@ use Illuminate\Validation\Rule;
 
 class AcademyGroupController extends Controller
 {
-    public function __construct(private readonly AdminNotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly AdminNotificationService $notificationService) {}
 
     public function store(Request $request): RedirectResponse
     {

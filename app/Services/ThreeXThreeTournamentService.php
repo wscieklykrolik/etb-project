@@ -71,7 +71,7 @@ class ThreeXThreeTournamentService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private function normalizeRegistrationData(array $data): array

@@ -9,8 +9,8 @@ use Illuminate\Http\UploadedFile;
 class ClubSectionService
 {
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, UploadedFile> $photos
+     * @param  array<string, mixed>  $data
+     * @param  array<int, UploadedFile>  $photos
      */
     public function update(ClubSection $section, array $data, array $photos): ClubSection
     {

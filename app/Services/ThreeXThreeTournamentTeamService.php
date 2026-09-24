@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 class ThreeXThreeTournamentTeamService
 {
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function register(ThreeXThreeTournament $tournament, int $userId, array $data, ?UploadedFile $logo): ThreeXThreeTournamentTeam
     {

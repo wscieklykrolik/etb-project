@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 
 class FaqQuestionController extends Controller
 {
-    public function __construct(private readonly AdminNotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly AdminNotificationService $notificationService) {}
 
     public function store(Request $request): RedirectResponse
     {

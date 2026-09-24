@@ -12,6 +12,7 @@ class AcademyTraining extends Model
     use HasFactory;
 
     public const STATUS_SCHEDULED = 'scheduled';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [

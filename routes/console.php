@@ -32,6 +32,7 @@ Artisan::command('media:sync {source=public} {destination=s3} {--force}', functi
         if (! $this->option('force') && $destinationDisk->exists($path)) {
             $skipped++;
             $bar->advance();
+
             continue;
         }
 
@@ -40,6 +41,7 @@ Artisan::command('media:sync {source=public} {destination=s3} {--force}', functi
         if ($stream === false) {
             $failed++;
             $bar->advance();
+
             continue;
         }
 

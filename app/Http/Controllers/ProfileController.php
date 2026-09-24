@@ -8,8 +8,10 @@ use App\Models\AcademyGroup;
 use App\Models\AcademyTraining;
 use App\Models\AdminNotification;
 use App\Models\AppSetting;
+use App\Models\Category;
 use App\Models\ClubSection;
 use App\Models\FaqQuestion;
+use App\Models\ImportantPage;
 use App\Models\LeagueStanding;
 use App\Models\News;
 use App\Models\Order;
@@ -175,7 +177,7 @@ class ProfileController extends Controller
             'orders' => Order::count(),
             'products' => Product::count(),
             'publishedProducts' => Product::where('is_published', true)->count(),
-            'categories' => \App\Models\Category::count(),
+            'categories' => Category::count(),
             'filterGroups' => ProductFilterGroup::count(),
         ];
         $users = $user->role === User::ROLE_ADMIN
@@ -223,7 +225,7 @@ class ProfileController extends Controller
             'academyTrainingDate' => $academyTrainingDate,
             'academyCalendarNotes' => $academyCalendarNotes,
             'faqQuestions' => $faqQuestions,
-            'importantPages' => \App\Models\ImportantPage::query()->get()->keyBy('slug'),
+            'importantPages' => ImportantPage::query()->get()->keyBy('slug'),
             'adminNotifications' => $adminNotifications,
             'notificationHistory' => $notificationHistory,
             'unreadNotificationsCount' => $unreadNotificationsCount,

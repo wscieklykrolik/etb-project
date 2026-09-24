@@ -7,8 +7,8 @@ use App\Http\Requests\UpdateNewsRequest;
 use App\Models\News;
 use App\Services\AdminNotificationService;
 use App\Services\NewsService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class NewsController extends Controller

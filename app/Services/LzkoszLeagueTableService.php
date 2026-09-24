@@ -14,7 +14,9 @@ use RuntimeException;
 class LzkoszLeagueTableService
 {
     public const LEAGUE_ID = 215;
+
     public const SEASON = '2025/2026';
+
     public const SOURCE_URL = 'https://lzkosz.pl/liga/215/tabela.html';
 
     public function sync(): int
@@ -33,7 +35,7 @@ class LzkoszLeagueTableService
      */
     public function parse(string $html): Collection
     {
-        $document = new DOMDocument();
+        $document = new DOMDocument;
 
         libxml_use_internal_errors(true);
         $document->loadHTML('<?xml encoding="utf-8" ?>'.$html);
@@ -86,7 +88,7 @@ class LzkoszLeagueTableService
     }
 
     /**
-     * @param Collection<int, array<string, mixed>> $rows
+     * @param  Collection<int, array<string, mixed>>  $rows
      */
     private function storeRows(Collection $rows): int
     {

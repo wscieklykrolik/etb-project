@@ -7,6 +7,10 @@ it('renders ETB first with its logo for home and away matches', function (bool $
     AppSetting::setValue('club_logo', 'logos/etb.png');
     $match = TeamMatch::factory()->create([
         'is_home' => $isHome,
+        'status' => TeamMatch::STATUS_UPCOMING,
+        'match_date' => now()->addWeek(),
+        'our_score' => null,
+        'opponent_score' => null,
         'opponent_name' => 'Rywal',
         'opponent_logo' => 'logos/rywal.png',
         'home_logo' => null,

@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
 
 class AcademyMessageController extends Controller
 {
-    public function __construct(private readonly AdminNotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly AdminNotificationService $notificationService) {}
 
     public function store(Request $request, AcademyGroup $group): RedirectResponse
     {

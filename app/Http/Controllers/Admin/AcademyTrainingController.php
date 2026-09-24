@@ -14,9 +14,7 @@ use Illuminate\Validation\Rule;
 
 class AcademyTrainingController extends Controller
 {
-    public function __construct(private readonly AdminNotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly AdminNotificationService $notificationService) {}
 
     public function store(Request $request): RedirectResponse
     {
@@ -166,8 +164,8 @@ class AcademyTrainingController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array{repeat_weekly: bool, repeat_until: string|null} $recurrence
+     * @param  array<string, mixed>  $data
+     * @param  array{repeat_weekly: bool, repeat_until: string|null}  $recurrence
      * @return array<int, AcademyTraining>
      */
     private function createTrainings(array $data, array $recurrence): array

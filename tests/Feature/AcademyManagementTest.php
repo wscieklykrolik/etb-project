@@ -5,6 +5,7 @@ use App\Models\AcademyTraining;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 it('shows academy groups and trainings on the public academy page', function () {
     $group = AcademyGroup::query()->create([
@@ -480,7 +481,6 @@ it('rejects black and white academy group colors but allows manual yellow', func
     ]);
 });
 
-
 it('lets an admin change a recurring series while preserving a single-training exception', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
     $group = AcademyGroup::query()->create([
@@ -548,7 +548,7 @@ it('lets an admin change a recurring series while preserving a single-training e
 it('lets an admin delete only future occurrences of a recurring series', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
     $group = AcademyGroup::query()->create(['name' => 'Kadeci U15M', 'code' => 'U15M', 'color' => '#22c55e', 'is_active' => true]);
-    $seriesId = (string) \Illuminate\Support\Str::uuid();
+    $seriesId = (string) Str::uuid();
     $past = AcademyTraining::query()->create(['academy_group_id' => $group->id, 'starts_at' => now()->subWeek(), 'status' => AcademyTraining::STATUS_SCHEDULED, 'recurrence_series_id' => $seriesId]);
     $future = AcademyTraining::query()->create(['academy_group_id' => $group->id, 'starts_at' => now()->addWeek(), 'status' => AcademyTraining::STATUS_SCHEDULED, 'recurrence_series_id' => $seriesId]);
 

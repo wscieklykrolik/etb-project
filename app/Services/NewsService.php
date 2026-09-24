@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Http\Requests\StoreNewsRequest;
 use App\Models\News;
 use App\Support\MediaStorage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class NewsService
 {
@@ -87,16 +90,16 @@ class NewsService
 
     public function publishNow(News $news): News
     {
-        $rules = (new \App\Http\Requests\StoreNewsRequest)->rules();
+        $rules = (new StoreNewsRequest)->rules();
         unset($rules['gallery'], $rules['gallery.*'], $rules['main_image']);
-        \Illuminate\Support\Facades\Validator::make($news->getAttributes(), $rules)->validate();
+        Validator::make($news->getAttributes(), $rules)->validate();
         if ($news->type === News::TYPE_GALLERY && ! $news->images()->exists()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'gallery' => 'Dodaj przynajmniej jedno zdjęcie do galerii przed publikacją.',
             ]);
         }
         if ($news->type === News::TYPE_VIDEO && ! $news->youtubeEmbedUrl()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'video_url' => 'Podaj link do filmu z YouTube.',
             ]);
         }
@@ -128,7 +131,7 @@ class NewsService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private function normalizeData(array $data): array

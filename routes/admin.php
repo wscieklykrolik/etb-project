@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\AdminMatchController;
-use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AcademyCalendarNoteController;
 use App\Http\Controllers\Admin\AcademyGroupController;
 use App\Http\Controllers\Admin\AcademyMessageController;
 use App\Http\Controllers\Admin\AcademyTrainerController;
 use App\Http\Controllers\Admin\AcademyTrainingController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminMatchController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ClubSectionController;
 use App\Http\Controllers\Admin\ExportController;
@@ -15,25 +15,28 @@ use App\Http\Controllers\Admin\FaqQuestionController;
 use App\Http\Controllers\Admin\LeagueTableController;
 use App\Http\Controllers\Admin\MatchSuggestionController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ProductFilterController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductFilterController;
+use App\Http\Controllers\Admin\ShopSettingsController;
 use App\Http\Controllers\Admin\SiteLogoController;
-use App\Http\Controllers\Admin\TicketPageController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentDrawController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentGroupController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentMatchController;
+use App\Http\Controllers\Admin\TicketPageController;
 use App\Http\Controllers\Admin\UserEmailExportController;
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\Admin\UserSearchController;
-use App\Http\Controllers\SponsorController;
+use App\Http\Controllers\ImportantPageController;
 use App\Http\Controllers\SponsorCategoryController;
+use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\TeamStaffController;
 use App\Http\Controllers\ThreeXThreeMemberController;
 use App\Http\Controllers\ThreeXThreeTournamentController;
+use App\Http\Middleware\EnsureLegacyShop;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:admin,employee'])->group(function () {
-    Route::put('/admin/important-pages/{slug}', [\App\Http\Controllers\ImportantPageController::class, 'update'])->name('admin.important-pages.update');
+    Route::put('/admin/important-pages/{slug}', [ImportantPageController::class, 'update'])->name('admin.important-pages.update');
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::middleware('can:manage-matches')->group(function () {
         Route::get('/admin/matches/create', [AdminMatchController::class, 'create'])->name('admin.matches.create');
@@ -102,7 +105,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::resource('/admin/orders', OrderController::class)->names('admin.orders')->only(['index', 'show']);
     Route::patch('/admin/orders/{order}/transition', [OrderController::class, 'transition'])->name('admin.orders.transition');
     Route::get('/admin/orders/{order}/invoice', [OrderController::class, 'downloadInvoice'])->name('admin.orders.invoice');
-    Route::post('/admin/orders/{order}/label', [OrderController::class, 'generateLabel'])->middleware(\App\Http\Middleware\EnsureLegacyShop::class)->name('admin.orders.label');
+    Route::post('/admin/orders/{order}/label', [OrderController::class, 'generateLabel'])->middleware(EnsureLegacyShop::class)->name('admin.orders.label');
     Route::get('/admin/export/jpk', [ExportController::class, 'jpk'])->name('admin.export.jpk');
 });
 
@@ -115,7 +118,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/shop-settings', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'edit'])->name('admin.shop-settings.edit');
-    Route::put('/admin/shop-settings', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'update'])->name('admin.shop-settings.update');
-    Route::patch('/admin/shop-settings/mode', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'mode'])->name('admin.shop-settings.mode');
+    Route::get('/admin/shop-settings', [ShopSettingsController::class, 'edit'])->name('admin.shop-settings.edit');
+    Route::put('/admin/shop-settings', [ShopSettingsController::class, 'update'])->name('admin.shop-settings.update');
+    Route::patch('/admin/shop-settings/mode', [ShopSettingsController::class, 'mode'])->name('admin.shop-settings.mode');
 });

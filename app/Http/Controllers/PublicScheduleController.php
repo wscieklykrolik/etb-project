@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TeamMatch;
 use App\Models\LeagueStanding;
+use App\Models\TeamMatch;
 use App\Models\ThreeXThreeTournament;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -48,7 +48,6 @@ class PublicScheduleController extends Controller
             ->get();
 
         $leagueStandings = $this->leagueStandings();
-
 
         $participatingUpcomingTournaments = ThreeXThreeTournament::query()
             ->with('categories')

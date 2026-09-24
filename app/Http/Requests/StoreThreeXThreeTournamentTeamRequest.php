@@ -35,7 +35,7 @@ class StoreThreeXThreeTournamentTeamRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                new ProfanityFree(),
+                new ProfanityFree,
                 Rule::unique('three_x_three_tournament_teams', 'name')
                     ->where('three_x_three_tournament_id', $tournament?->id),
             ],

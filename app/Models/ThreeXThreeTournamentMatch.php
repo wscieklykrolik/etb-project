@@ -11,6 +11,7 @@ class ThreeXThreeTournamentMatch extends Model
     use HasFactory;
 
     public const STAGE_GROUP = 'group';
+
     public const STAGE_PLAYOFF = 'playoff';
 
     protected $fillable = [

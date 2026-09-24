@@ -11,8 +11,11 @@ use Illuminate\Http\Request;
 class TicketPageController extends Controller
 {
     private const IMAGE_KEY = 'tickets_page_image';
+
     private const BODY_KEY = 'tickets_page_body';
+
     private const BUTTON_URL_KEY = 'tickets_page_button_url';
+
     private const BUTTON_LABEL_KEY = 'tickets_page_button_label';
 
     public function update(Request $request): RedirectResponse

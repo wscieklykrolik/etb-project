@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\News;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreNewsRequest extends FormRequest
 {

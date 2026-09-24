@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\ImportantPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class BrowserPageTitle
 
         return match ($routeName) {
             'home' => 'Strona główna',
-            'important-pages.show' => \App\Models\ImportantPage::PAGES[$parameters['slug'] ?? ''] ?? 'Informacje',
+            'important-pages.show' => ImportantPage::PAGES[$parameters['slug'] ?? ''] ?? 'Informacje',
             'dashboard' => 'Panel użytkownika',
             'profile.edit' => 'Panel konta',
             'login' => 'Logowanie',
