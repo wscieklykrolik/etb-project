@@ -94,6 +94,20 @@
         </div>
     @endif
 
+    @if ($training?->recurrence_series_id)
+        <fieldset class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <legend class="px-1 text-sm font-bold text-slate-700">Zakres zmiany</legend>
+            <label class="mt-2 flex items-start gap-3 text-sm">
+                <input type="radio" name="edit_scope" value="single" x-model="academyTrainingScope" class="mt-1 rounded border-slate-300 text-yellow-500">
+                <span><strong>Tylko ten trening</strong><span class="block text-slate-500">Edytujesz dokładnie termin wskazany w kalendarzu.</span></span>
+            </label>
+            <label class="mt-3 flex items-start gap-3 text-sm">
+                <input type="radio" name="edit_scope" value="series" x-model="academyTrainingScope" class="mt-1 rounded border-slate-300 text-yellow-500">
+                <span><strong>Ten i wszystkie kolejne treningi z serii</strong><span class="block text-slate-500">Nowa data określa dzień tygodnia oraz pierwszy zmieniony termin.</span></span>
+            </label>
+        </fieldset>
+    @endif
+
     <div>
         <label class="text-sm font-bold text-slate-700">Opis treningu</label>
         <textarea name="description" rows="3" class="mt-1 w-full rounded-lg border-slate-300">{{ old('description', $training?->description) }}</textarea>

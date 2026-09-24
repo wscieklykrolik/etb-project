@@ -9,6 +9,7 @@ use App\Services\AdminNotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AcademyTrainingController extends Controller
@@ -34,7 +35,17 @@ class AcademyTrainingController extends Controller
 
     public function update(Request $request, AcademyTraining $training): RedirectResponse
     {
-        $training->update($this->validated($request));
+        $data = $this->validated($request);
+
+        if ($request->input('edit_scope') === 'series' && $training->recurrence_series_id) {
+            $updatedCount = $this->updateSeries($training, $data);
+            $this->notificationService->record($request->user(), 'updated', $training, "Seria treningów akademii: {$training->group?->code}");
+
+            return redirect()->route('profile.edit', ['section' => 'academy'])
+                ->with('success', "Zaktualizowano {$updatedCount} przyszłych treningów z serii.");
+        }
+
+        $training->update($data);
         $this->notificationService->record($request->user(), 'updated', $training, "Trening akademii: {$training->group?->code}");
 
         return redirect()->route('profile.edit', ['section' => 'academy'])->with('success', 'Trening akademii został zaktualizowany.');
@@ -76,6 +87,31 @@ class AcademyTrainingController extends Controller
         $this->notificationService->recordDeleted(request()->user(), AcademyTraining::class, $id, $label);
 
         return redirect()->route('profile.edit', ['section' => 'academy'])->with('success', 'Trening został usunięty.');
+    }
+
+    public function destroySeries(AcademyTraining $training): RedirectResponse
+    {
+        abort_unless(request()->user()?->role === User::ROLE_ADMIN, 403);
+        abort_unless($training->recurrence_series_id, 404);
+
+        $futureTrainings = AcademyTraining::query()
+            ->where('recurrence_series_id', $training->recurrence_series_id)
+            ->where('starts_at', '>=', now()->startOfDay())
+            ->get();
+
+        foreach ($futureTrainings as $futureTraining) {
+            $futureTraining->delete();
+        }
+
+        $this->notificationService->recordDeleted(
+            request()->user(),
+            AcademyTraining::class,
+            $training->id,
+            "Seria treningów akademii: {$training->group?->code}"
+        );
+
+        return redirect()->route('profile.edit', ['section' => 'academy'])
+            ->with('success', "Usunięto {$futureTrainings->count()} przyszłych treningów z serii.");
     }
 
     /**
@@ -143,12 +179,14 @@ class AcademyTrainingController extends Controller
             : $start;
 
         $trainings = [];
+        $seriesId = $recurrence['repeat_weekly'] ? (string) Str::uuid() : null;
         $occurrenceStart = $start;
         $occurrenceEnd = $end;
 
         while ($occurrenceStart->lessThanOrEqualTo($repeatUntil)) {
             $trainings[] = AcademyTraining::query()->create([
                 ...$data,
+                'recurrence_series_id' => $seriesId,
                 'starts_at' => $occurrenceStart,
                 'ends_at' => $occurrenceEnd,
             ]);
@@ -162,5 +200,32 @@ class AcademyTrainingController extends Controller
         }
 
         return $trainings;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function updateSeries(AcademyTraining $anchor, array $data): int
+    {
+        $targetStart = CarbonImmutable::parse($data['starts_at']);
+        $targetEnd = filled($data['ends_at'] ?? null) ? CarbonImmutable::parse($data['ends_at']) : null;
+        $sharedData = collect($data)->except(['starts_at', 'ends_at', 'status', 'cancelled_reason'])->all();
+        $futureTrainings = AcademyTraining::query()
+            ->where('recurrence_series_id', $anchor->recurrence_series_id)
+            ->where('starts_at', '>=', $anchor->starts_at->startOfDay())
+            ->orderBy('starts_at')
+            ->get();
+
+        foreach ($futureTrainings as $futureTraining) {
+            $weeksFromAnchor = intdiv($anchor->starts_at->startOfDay()->diffInDays($futureTraining->starts_at->startOfDay()), 7);
+
+            $futureTraining->update([
+                ...$sharedData,
+                'starts_at' => $targetStart->addWeeks($weeksFromAnchor),
+                'ends_at' => $targetEnd?->addWeeks($weeksFromAnchor),
+            ]);
+        }
+
+        return $futureTrainings->count();
     }
 }

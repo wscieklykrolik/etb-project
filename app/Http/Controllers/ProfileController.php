@@ -144,6 +144,14 @@ class ProfileController extends Controller
             ->orderByDesc('starts_at')
             ->take(80)
             ->get();
+        $academyTrainingSeries = AcademyTraining::query()
+            ->with('group')
+            ->whereNotNull('recurrence_series_id')
+            ->where('starts_at', '>=', now()->startOfDay())
+            ->orderBy('starts_at')
+            ->get()
+            ->unique('recurrence_series_id')
+            ->values();
         $academyCalendarNotes = AcademyCalendarNote::query()
             ->orderByDesc('starts_on')
             ->take(50)
@@ -211,6 +219,7 @@ class ProfileController extends Controller
             'defaultHomeLogo' => AppSetting::getValue('default_home_logo'),
             'academyGroups' => $academyGroups,
             'academyTrainings' => $academyTrainings,
+            'academyTrainingSeries' => $academyTrainingSeries,
             'academyTrainingDate' => $academyTrainingDate,
             'academyCalendarNotes' => $academyCalendarNotes,
             'faqQuestions' => $faqQuestions,

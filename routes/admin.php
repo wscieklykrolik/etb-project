@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductFilterController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SiteLogoController;
+use App\Http\Controllers\Admin\TicketPageController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentDrawController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentGroupController;
 use App\Http\Controllers\Admin\ThreeXThreeTournamentMatchController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\ThreeXThreeTournamentController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:admin,employee'])->group(function () {
+    Route::put('/admin/important-pages/{slug}', [\App\Http\Controllers\ImportantPageController::class, 'update'])->name('admin.important-pages.update');
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::middleware('can:manage-matches')->group(function () {
         Route::get('/admin/matches/create', [AdminMatchController::class, 'create'])->name('admin.matches.create');
@@ -44,6 +46,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::patch('/admin/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('admin.notifications.read');
     Route::patch('/admin/notifications/{notification}/accept', [AdminNotificationController::class, 'accept'])->name('admin.notifications.accept');
     Route::delete('/admin/notifications/{notification}', [AdminNotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+    Route::put('/admin/tickets-page', [TicketPageController::class, 'update'])->name('admin.tickets-page.update');
     Route::put('/admin/club-sections/{section}', [ClubSectionController::class, 'update'])->name('admin.club-sections.update');
     Route::patch('/admin/club-sections/{section}/images/{image}', [ClubSectionController::class, 'updateImage'])->name('admin.club-sections.images.update');
     Route::delete('/admin/club-sections/{section}/images/{image}', [ClubSectionController::class, 'destroyImage'])->name('admin.club-sections.images.destroy');
@@ -57,6 +60,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::patch('/admin/academy/trainings/{training}/cancel', [AcademyTrainingController::class, 'cancel'])->name('admin.academy.trainings.cancel');
     Route::patch('/admin/academy/trainings/{training}/restore', [AcademyTrainingController::class, 'restore'])->name('admin.academy.trainings.restore');
     Route::delete('/admin/academy/trainings/{training}', [AcademyTrainingController::class, 'destroy'])->name('admin.academy.trainings.destroy');
+    Route::delete('/admin/academy/training-series/{training}', [AcademyTrainingController::class, 'destroySeries'])->name('admin.academy.training-series.destroy');
     Route::post('/admin/academy/calendar-notes', [AcademyCalendarNoteController::class, 'store'])->name('admin.academy.calendar-notes.store');
     Route::delete('/admin/academy/calendar-notes/{note}', [AcademyCalendarNoteController::class, 'destroy'])->name('admin.academy.calendar-notes.destroy');
     Route::get('/admin/academy/trainers/suggestions', [AcademyTrainerController::class, 'suggestions'])->name('admin.academy.trainers.suggestions');
@@ -98,7 +102,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::resource('/admin/orders', OrderController::class)->names('admin.orders')->only(['index', 'show']);
     Route::patch('/admin/orders/{order}/transition', [OrderController::class, 'transition'])->name('admin.orders.transition');
     Route::get('/admin/orders/{order}/invoice', [OrderController::class, 'downloadInvoice'])->name('admin.orders.invoice');
-    Route::post('/admin/orders/{order}/label', [OrderController::class, 'generateLabel'])->name('admin.orders.label');
+    Route::post('/admin/orders/{order}/label', [OrderController::class, 'generateLabel'])->middleware(\App\Http\Middleware\EnsureLegacyShop::class)->name('admin.orders.label');
     Route::get('/admin/export/jpk', [ExportController::class, 'jpk'])->name('admin.export.jpk');
 });
 
@@ -108,4 +112,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/admin/users/{user}/role', [UserRoleController::class, 'update'])->name('admin.users.role.update');
     Route::get('/admin/users/search', UserSearchController::class)->name('admin.users.search');
     Route::get('/admin/users/emails/export', UserEmailExportController::class)->name('admin.users.emails.export');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/shop-settings', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'edit'])->name('admin.shop-settings.edit');
+    Route::put('/admin/shop-settings', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'update'])->name('admin.shop-settings.update');
+    Route::patch('/admin/shop-settings/mode', [\App\Http\Controllers\Admin\ShopSettingsController::class, 'mode'])->name('admin.shop-settings.mode');
 });

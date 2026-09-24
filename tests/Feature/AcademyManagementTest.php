@@ -479,3 +479,82 @@ it('rejects black and white academy group colors but allows manual yellow', func
         'color' => '#facc15',
     ]);
 });
+
+
+it('lets an admin change a recurring series while preserving a single-training exception', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $group = AcademyGroup::query()->create([
+        'name' => 'Juniorzy U17M',
+        'code' => 'U17M',
+        'color' => '#3b82f6',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.academy.trainings.store'), [
+        'academy_group_id' => $group->id,
+        'training_date' => '2026-10-06',
+        'start_time' => '17:00',
+        'end_time' => '18:30',
+        'title' => 'Trening wtorkowy',
+        'location' => 'Hala ETB',
+        'description' => 'Stała jednostka.',
+        'status' => AcademyTraining::STATUS_SCHEDULED,
+        'repeat_weekly' => '1',
+        'repeat_until' => '2026-10-20',
+    ])->assertRedirect(route('profile.edit', ['section' => 'academy']));
+
+    $series = AcademyTraining::query()->orderBy('starts_at')->get();
+    expect($series)->toHaveCount(3);
+    $seriesId = $series->first()->recurrence_series_id;
+    expect($seriesId)->not->toBeNull()->and($series->pluck('recurrence_series_id')->unique())->toHaveCount(1);
+
+    $exception = $series->first();
+    $this->actingAs($admin)->patch(route('admin.academy.trainings.update', $exception), [
+        'academy_group_id' => $group->id,
+        'training_date' => '2026-10-06',
+        'start_time' => '16:00',
+        'end_time' => '17:00',
+        'title' => 'Dodatkowy trening',
+        'location' => 'Sala dodatkowa',
+        'description' => 'Wyjątek.',
+        'status' => AcademyTraining::STATUS_SCHEDULED,
+        'edit_scope' => 'single',
+    ])->assertRedirect(route('profile.edit', ['section' => 'academy']));
+
+    $anchor = $series->get(1);
+    $this->actingAs($admin)->patch(route('admin.academy.trainings.update', $anchor), [
+        'academy_group_id' => $group->id,
+        'training_date' => '2026-10-15',
+        'start_time' => '18:00',
+        'end_time' => '19:30',
+        'title' => 'Trening czwartkowy',
+        'location' => 'Nowa hala',
+        'description' => 'Zmieniony stały plan.',
+        'status' => AcademyTraining::STATUS_SCHEDULED,
+        'edit_scope' => 'series',
+    ])->assertRedirect(route('profile.edit', ['section' => 'academy']));
+
+    expect($exception->fresh()->starts_at->format('Y-m-d H:i'))->toBe('2026-10-06 16:00')
+        ->and($exception->fresh()->title)->toBe('Dodatkowy trening');
+    $changed = AcademyTraining::query()->where('recurrence_series_id', $seriesId)->orderBy('starts_at')->get();
+    expect($changed->get(1)->starts_at->format('Y-m-d H:i'))->toBe('2026-10-15 18:00')
+        ->and($changed->get(2)->starts_at->format('Y-m-d H:i'))->toBe('2026-10-22 18:00')
+        ->and($changed->get(2)->location)->toBe('Nowa hala');
+
+    $panel = $this->actingAs($admin)->get(route('profile.edit', ['section' => 'academy']));
+    $panel->assertOk()->assertSee('Stały plan treningów')->assertSee('Edytuj serię')->assertSee('Tylko ten trening');
+});
+
+it('lets an admin delete only future occurrences of a recurring series', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $group = AcademyGroup::query()->create(['name' => 'Kadeci U15M', 'code' => 'U15M', 'color' => '#22c55e', 'is_active' => true]);
+    $seriesId = (string) \Illuminate\Support\Str::uuid();
+    $past = AcademyTraining::query()->create(['academy_group_id' => $group->id, 'starts_at' => now()->subWeek(), 'status' => AcademyTraining::STATUS_SCHEDULED, 'recurrence_series_id' => $seriesId]);
+    $future = AcademyTraining::query()->create(['academy_group_id' => $group->id, 'starts_at' => now()->addWeek(), 'status' => AcademyTraining::STATUS_SCHEDULED, 'recurrence_series_id' => $seriesId]);
+
+    $this->actingAs($admin)->delete(route('admin.academy.training-series.destroy', $future))
+        ->assertRedirect(route('profile.edit', ['section' => 'academy']));
+
+    $this->assertDatabaseHas('academy_trainings', ['id' => $past->id]);
+    $this->assertDatabaseMissing('academy_trainings', ['id' => $future->id]);
+});

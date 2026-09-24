@@ -16,6 +16,7 @@ class AcademyTraining extends Model
 
     protected $fillable = [
         'academy_group_id',
+        'recurrence_series_id',
         'title',
         'starts_at',
         'ends_at',

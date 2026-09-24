@@ -269,6 +269,7 @@ window.adminPanel = function adminPanel(config) {
         openModal: config.initialModal || null,
         matchFilter: 'all',
         newsFilter: 'all',
+        academyTrainingScope: 'single',
         publishAction: null,
         panelSearch: '',
         notificationsOpen: false,

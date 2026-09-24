@@ -100,8 +100,39 @@
             @endforelse
         </div>
 
+        <div class="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div>
+                <h3 class="font-black">Stały plan treningów</h3>
+                <p class="mt-1 text-sm text-slate-600">Jedna pozycja oznacza całą serię. Edycja zmienia wskazany termin i wszystkie kolejne treningi z tej serii.</p>
+            </div>
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                @forelse ($academyTrainingSeries as $training)
+                    <article data-admin-search x-show="!sectionQuery || $el.textContent.toLowerCase().includes(sectionQuery.toLowerCase())" class="rounded-lg border border-slate-200 bg-white p-4">
+                        <p class="text-xs font-black uppercase text-slate-500">{{ $training->group?->code }} · {{ $training->starts_at?->locale('pl')->translatedFormat('l') }}</p>
+                        <h4 class="mt-1 text-lg font-black">{{ $training->timeRange() }}</h4>
+                        <p class="text-sm font-semibold text-slate-700">{{ $training->title ?: 'Trening' }}</p>
+                        <p class="mt-1 text-sm text-slate-600">{{ $training->location ?: 'Brak miejsca' }} · {{ $training->trainer_name ?: 'Brak trenera' }}</p>
+                        @if ($training->description)
+                            <p class="mt-2 text-sm text-slate-600">{{ $training->description }}</p>
+                        @endif
+                        <p class="mt-3 text-xs text-slate-500">Pierwszy przyszły termin: {{ $training->starts_at?->format('d.m.Y') }}</p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-yellow-50" @click="academyTrainingScope = 'series'; openModal = 'academy-training-edit-{{ $training->id }}'">Edytuj serię</button>
+                            <form method="POST" action="{{ route('admin.academy.training-series.destroy', $training) }}" onsubmit="return confirm('Usunąć wszystkie przyszłe treningi z tej serii?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50">Usuń serię</button>
+                            </form>
+                        </div>
+                    </article>
+                @empty
+                    <p class="rounded-lg border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600 md:col-span-2 xl:col-span-3">Brak serii treningów. Zaznacz „Powtarzaj trening co tydzień” podczas dodawania treningu.</p>
+                @endforelse
+            </div>
+        </div>
+
         <div class="space-y-4">
-            <h3 class="font-black">Ostatnie i nadchodzace treningi</h3>
+            <h3 class="font-black">Ostatnie i nadchodzące treningi</h3>
             <form method="GET" action="{{ route('profile.edit') }}" class="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <input type="hidden" name="section" value="academy">
                 <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
@@ -130,7 +161,7 @@
                             <span class="rounded-full px-2 py-1 text-xs font-black {{ $training->isCancelled() ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800' }}">{{ $training->statusLabel() }}</span>
                         </div>
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-yellow-50" @click="openModal = 'academy-training-edit-{{ $training->id }}'">Edytuj</button>
+                            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-yellow-50" @click="academyTrainingScope = 'single'; openModal = 'academy-training-edit-{{ $training->id }}'">Edytuj</button>
                             @if ($training->isCancelled())
                                 <form method="POST" action="{{ route('admin.academy.trainings.restore', $training) }}">
                                     @csrf
@@ -293,7 +324,7 @@
     </div>
 @endforeach
 
-@foreach ($academyTrainings as $training)
+@foreach ($academyTrainings->concat($academyTrainingSeries)->unique('id') as $training)
     <div x-show="openModal === 'academy-training-edit-{{ $training->id }}'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">
             <h4 class="mb-4 text-lg font-black">Edytuj trening</h4>
