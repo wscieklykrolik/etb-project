@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_filter_option_id')->constrained()->cascadeOnDelete();
 
-            $table->primary(['product_id', 'product_filter_option_id']);
+            $table->primary(['product_id', 'product_filter_option_id'], 'product_filter_product_pk');
         });
     }
 

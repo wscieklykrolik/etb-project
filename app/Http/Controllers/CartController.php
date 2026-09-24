@@ -56,7 +56,7 @@ class CartController extends Controller
             );
         }
 
-        return redirect()->route('cart.index')->with('success', __('Koszyk zaktualizowany.'));
+        return redirect()->route($request->boolean('order') ? 'message-order.show' : 'cart.index')->with('success', __('Koszyk zaktualizowany.'));
     }
 
     public function remove(Request $request): RedirectResponse

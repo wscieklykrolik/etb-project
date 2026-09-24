@@ -61,7 +61,7 @@
             </aside>
 
             <div class="space-y-6">
-                <section class="rounded-lg border-2 border-black bg-white p-4 text-slate-950 shadow-xl sm:p-5" x-data="{ training: null, day: null }">
+                <section class="rounded-lg border-2 border-black bg-white p-4 text-slate-950 shadow-xl sm:p-5" x-data="{ training: null, day: null }" @keydown.escape.window="training = null; day = null">
                     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 class="text-xl font-black">Kalendarz treningów</h2>
@@ -73,13 +73,13 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-7 border border-black bg-black text-center text-xs font-black uppercase text-yellow-400">
+                    <div class="hidden xl:grid grid-cols-7 border border-black bg-black text-center text-xs font-black uppercase text-yellow-400">
                         @foreach (['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'] as $dayName)
                             <div class="border-r border-yellow-400/30 px-2 py-2 last:border-r-0">{{ $dayName }}</div>
                         @endforeach
                     </div>
 
-                    <div class="grid grid-cols-1 border-x border-black sm:grid-cols-7">
+                    <div class="grid grid-cols-1 border-x border-t border-black xl:grid-cols-7">
                         @foreach ($days as $day)
                             @php($dayTrainings = $trainingsByDay->get($day->format('Y-m-d'), collect()))
                             @php($dayNotes = $calendarNotes->filter(fn ($note) => $note->starts_on->lte($day) && $note->ends_on->gte($day))->values())
@@ -112,9 +112,9 @@
                                     'source' => 'Nager.Date',
                                 ]] : [],
                             ])
-                            <div data-academy-calendar-day="{{ $day->format('Y-m-d') }}" data-academy-holiday="{{ $dayHoliday ? '1' : '0' }}" class="min-h-32 border-b border-r border-black p-2 last:border-r-0 {{ $dayBaseClasses }}">
+                            <div data-academy-calendar-day="{{ $day->format('Y-m-d') }}" data-academy-holiday="{{ $dayHoliday ? '1' : '0' }}" class="min-h-12 xl:min-h-32 border-b border-r border-black p-2 last:border-r-0 {{ $dayBaseClasses }} {{ $day->month !== $month->month ? 'max-xl:hidden' : '' }}">
                                 <div class="mb-2 flex items-center justify-between">
-                                    <span class="text-sm font-black">{{ $day->format('j') }}</span>
+                                    <span class="text-sm font-black"><span class="xl:hidden">{{ $day->translatedFormat('l, j.m') }}</span><span class="hidden xl:inline">{{ $day->format('j') }}</span></span>
                                     @if ($dayItemCount > 0)
                                         <span class="text-[11px] font-bold {{ $isRedCalendarDay ? 'text-red-400' : 'text-slate-500' }}">{{ $dayItemCount }}</span>
                                     @endif
@@ -168,7 +168,7 @@
                     </div>
 
                     <div x-show="training" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                        <div class="w-full max-w-xl rounded-lg border-2 border-yellow-400 bg-black p-6 text-yellow-400 shadow-2xl" @click.outside="training = null">
+                        <div class="max-h-[90dvh] overflow-y-auto w-full max-w-xl rounded-lg border-2 border-yellow-400 bg-black p-4 sm:p-6 text-yellow-400 shadow-2xl" @click.outside="training = null">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
                                     <p class="text-sm font-black uppercase text-yellow-200" x-text="training?.code"></p>
@@ -231,7 +231,7 @@
                                     <template x-if="!day?.trainings?.length">
                                         <p class="rounded-lg border border-yellow-400/40 p-4 text-sm text-yellow-100">Brak treningów w tym dniu.</p>
                                     </template>
-                                    <template x-for="training in day.trainings" :key="`${training.code}-${training.time}-${training.title}`">
+                                    <template x-for="training in (day?.trainings ?? [])" :key="`${training.code}-${training.time}-${training.title}`">
                                         <article class="rounded-lg bg-yellow-400 p-4 text-black" :style="`border-left: 0.5rem solid ${training.color}`">
                                             <div class="flex flex-wrap items-start justify-between gap-3">
                                                 <div>

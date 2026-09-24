@@ -3,7 +3,7 @@
 .env
 .env.*
 !.env.example
-!.env.railway.example
+
 .env.backup
 .env.production
 .env.render
@@ -27,3 +27,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 composer.phar
+/artifacts

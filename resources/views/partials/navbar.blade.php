@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-3 border-b border-zinc-300 bg-zinc-200 px-4 py-2 text-sm text-zinc-900 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
+<div class="etb-utility-bar flex flex-col gap-3 border-b border-zinc-300 bg-zinc-200 px-4 py-2 text-sm text-zinc-900 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
     <div class="font-semibold text-zinc-800">Eat The Ball - oficjalna strona</div>
 
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -46,73 +46,64 @@
     </div>
 </div>
 
-<nav class="bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null }">
+<nav aria-label="Nawigacja główna" class="etb-navigation bg-zinc-100 text-zinc-900 shadow-md border-b border-zinc-300" x-data="{ open: null, menuOpen: false }" @click.outside="open = null" @keydown.escape.stop="if (open) { $refs[open + 'Toggle'].focus(); open = null } else { menuOpen = false; $refs.menuToggle.focus() }">
     <div class="mx-auto max-w-[108rem] px-4 py-4 sm:px-6">
-        <div class="grid gap-4 xl:grid-cols-[12rem_minmax(24rem,1fr)_27rem_15rem] xl:items-center">
-            <a href="{{ route('home') }}" class="ajax-link flex h-24 w-full items-center justify-center p-1">
-                <x-site-logo :url="$clubLogoUrl" image-class="max-h-full max-w-full object-contain" fallback="ETB Łódź" fallback-class="text-center text-3xl font-black text-zinc-800" />
+        <div class="etb-header-grid">
+            <a href="{{ route('home') }}" class="etb-header-logo ajax-link flex items-center justify-center p-1">
+                <x-site-logo :url="$clubLogoUrl" image-class="max-h-full max-w-full object-contain" fallback="ETB" fallback-class="text-center text-2xl font-black text-zinc-800" />
             </a>
 
-            <div class="min-w-0">
-                <a href="{{ route('home') }}" class="ajax-link inline-flex min-h-14 items-center">
-                    <span class="text-3xl font-extrabold text-zinc-800">ETB Łódź</span>
-                </a>
-
-                <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-base sm:text-lg lg:gap-6">
-                    <div class="relative" @mouseenter="open='news'" @mouseleave="open=null">
-                        <a href="{{ route('news.index') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Aktualności</a>
-                    </div>
-
-                    <div class="relative" @mouseenter="open='club'" @mouseleave="open=null">
-                        <a href="{{ route('club') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Klub</a>
-                        <div x-show="open==='club'" x-transition class="dropdown-panel">
-                            <a class="ajax-link" href="{{ route('club.history') }}">Historia</a>
-                            <a class="ajax-link" href="{{ route('club.board') }}">Władze klubu</a>
-                            <a class="ajax-link" href="{{ route('club.venue') }}">Obiekt</a>
-                            <a class="ajax-link" href="{{ route('club.business') }}">Oferta biznesowa</a>
-                            <a class="ajax-link" href="{{ route('club.success') }}">Sukcesy</a>
-                            <a class="ajax-link" href="{{ route('club.sponsors') }}">Sponsorzy</a>
+            <div class="etb-header-title">
+                <a href="{{ route('home') }}" class="ajax-link text-xl font-extrabold sm:text-3xl">ETB Łódź</a>
+            </div>
+            <button type="button" x-ref="menuToggle" class="etb-menu-toggle rounded-lg border border-zinc-400 px-3 py-2 font-bold" @click="menuOpen = !menuOpen; open = null" :aria-expanded="menuOpen.toString()" aria-controls="etb-primary-menu">
+                <i data-lucide="menu" class="h-5 w-5" aria-hidden="true"></i>
+                <span x-text="menuOpen ? 'Zamknij' : 'Menu'">Menu</span>
+            </button>
+            <div id="etb-primary-menu" class="etb-primary-menu" :class="{ 'is-open': menuOpen }">
+                <a href="{{ route('news.index') }}" class="etb-nav-link ajax-link">Aktualności</a>
+                @php
+                    $navigationGroups = [
+                        'club' => ['Klub', [
+                            ['club', 'O klubie'], ['club.history', 'Historia'], ['club.board', 'Władze klubu'],
+                            ['club.venue', 'Obiekt'], ['club.business', 'Oferta biznesowa'],
+                            ['club.success', 'Sukcesy'], ['club.sponsors', 'Sponsorzy'],
+                        ]],
+                        'schedule' => ['Rozgrywki', [
+                            ['schedule', 'Terminarz'], ['schedule.third-league', 'III liga mężczyzn ŁZKosz'],
+                            ['schedule.lzkosz', 'Terminarz ŁZKosz'], ['schedule.table', 'Tabela'],
+                            ['schedule.3x3', 'Terminarz 3x3'], ['schedule.3x3.tournaments', 'Turnieje 3x3'],
+                        ]],
+                        'team' => ['Drużyna', [
+                            ['team', 'O drużynie'], ['team.players', 'Zawodnicy'],
+                            ['team.staff', 'Sztab szkoleniowy'], ['team.3x3', 'Drużyna 3x3'],
+                        ]],
+                        'contact' => ['Kontakt', [['contact', 'Kontakt'], ['contact', 'Marketing', '#marketing']]],
+                    ];
+                @endphp
+                @foreach ($navigationGroups as $key => [$label, $links])
+                    <div class="etb-nav-group" @focusout="if (!$el.contains($event.relatedTarget) && open === '{{ $key }}') open = null">
+                        <button type="button" x-ref="{{ $key }}Toggle" class="etb-nav-link" @click="open = open === '{{ $key }}' ? null : '{{ $key }}'" :aria-expanded="(open === '{{ $key }}').toString()" aria-controls="etb-menu-{{ $key }}">
+                            {{ $label }}
+                            <i data-lucide="chevron-down" class="h-4 w-4 transition-transform" :class="{ 'rotate-180': open === '{{ $key }}' }" aria-hidden="true"></i>
+                        </button>
+                        <div id="etb-menu-{{ $key }}" x-cloak x-show="open === '{{ $key }}'" class="dropdown-panel">
+                            @foreach ($links as $link)
+                                <a class="ajax-link" href="{{ route($link[0]) }}{{ $link[2] ?? '' }}">{{ $link[1] }}</a>
+                            @endforeach
                         </div>
                     </div>
-
-                    <div class="relative" @mouseenter="open='schedule'" @mouseleave="open=null">
-                        <a href="{{ route('schedule') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Rozgrywki</a>
-                        <div x-show="open==='schedule'" x-transition class="dropdown-panel">
-                            <a class="ajax-link" href="{{ route('schedule') }}">Terminarz</a>
-                            <a class="ajax-link" href="{{ route('schedule.third-league') }}">III liga mężczyzn ŁZKosz</a>
-                            <a class="ajax-link" href="{{ route('schedule.lzkosz') }}">Terminarz ŁZKosz</a>
-                            <a class="ajax-link" href="{{ route('schedule.table') }}">Tabela</a>
-                            <a class="ajax-link" href="{{ route('schedule.3x3') }}">Terminarz 3x3</a>
-                            <a class="ajax-link" href="{{ route('schedule.3x3.tournaments') }}">Turnieje 3x3</a>
-                        </div>
-                    </div>
-
-                    <div class="relative" @mouseenter="open='team'" @mouseleave="open=null">
-                        <a href="{{ route('team') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Drużyna</a>
-                        <div x-show="open==='team'" x-transition class="dropdown-panel">
-                            <a class="ajax-link" href="{{ route('team.players') }}">Zawodnicy</a>
-                            <a class="ajax-link" href="{{ route('team.staff') }}">Sztab szkoleniowy</a>
-                            <a class="ajax-link" href="{{ route('team.3x3') }}">Drużyna 3x3</a>
-                        </div>
-                    </div>
-
-                    <div class="relative" @mouseenter="open='contact'" @mouseleave="open=null">
-                        <a href="{{ route('contact') }}" class="ajax-link font-semibold text-black transition-colors hover:text-yellow-400">Kontakt</a>
-                        <div x-show="open==='contact'" x-transition class="dropdown-panel">
-                            <a class="ajax-link" href="{{ route('contact') }}">Kontakt</a>
-                            <a class="ajax-link" href="{{ route('contact') }}#marketing">Marketing</a>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
-            <div class="flex w-full flex-col gap-3">
+            <div class="etb-header-actions flex w-full min-w-0 flex-col gap-3">
                 <form id="etb-site-search" class="relative flex w-full min-w-0 items-stretch gap-2" role="search" autocomplete="off" onsubmit="event.preventDefault(); etbSearch()">
                     <div class="relative min-w-0 flex-1 rounded border border-zinc-300 bg-white text-sm shadow-sm transition focus-within:border-yellow-400 focus-within:ring-2 focus-within:ring-yellow-400/70">
                         <div id="etb-search-ghost" class="etb-search-ghost pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre px-3 text-zinc-400" aria-hidden="true"></div>
                         <input
                             id="etb-search"
                             type="search"
+                            aria-label="Szukaj na stronie"
                             autocomplete="off"
                             placeholder="Szukaj na stronie..."
                             aria-autocomplete="list"
@@ -126,7 +117,7 @@
                         <i data-lucide="search" class="w-4 h-4"></i> Szukaj
                     </button>
                 </form>
-                <div class="grid w-full grid-cols-3 gap-2">
+                <div class="etb-quick-links grid w-full grid-cols-3 gap-2">
                     <a href="{{ route('tickets') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 bg-yellow-400 px-3 py-2 text-sm font-semibold text-black">
                         <i data-lucide="ticket" class="w-4 h-4"></i> Bilety
                     </a>
@@ -141,7 +132,8 @@
                 </div>
             </div>
 
-            <div class="flex min-h-24 items-center justify-end p-3 text-right">
+            @if ($titleSponsorLogoUrl)
+            <div class="etb-header-sponsor flex items-center justify-center p-2">
                 @if ($titleSponsorLogoUrl && $titleSponsorUrl)
                     <a href="{{ $titleSponsorUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex max-h-20 w-full items-center justify-end">
                         <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="" />
@@ -150,6 +142,7 @@
                     <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-20 max-w-full object-contain" fallback="" />
                 @endif
             </div>
+            @endif
         </div>
     </div>
 </nav>

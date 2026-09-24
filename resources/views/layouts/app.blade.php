@@ -15,13 +15,16 @@
 @unless(trim($__env->yieldContent('hide_footer')) === 'true')
     @include('partials.footer')
 @endunless
+@include('partials.google-analytics')
+@stack('cookie-scripts')
+@include('partials.cookie-consent')
 @php
     $flashType = collect(['success', 'error', 'warning', 'info'])->first(fn ($type) => session()->has($type));
     $flashMessage = $flashType ? session($flashType) : null;
     if (! $flashMessage && session('status')) { $flashType = 'success'; $flashMessage = session('status'); }
 @endphp
 @if ($flashMessage)
-<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.opacity.duration.300ms class="fixed top-4 right-4 z-[60]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.opacity.duration.300ms class="fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-[60]">
     <div @class([
         'flex items-start gap-3 rounded-lg px-4 py-3 text-white shadow-lg',
         'bg-green-600' => $flashType === 'success',

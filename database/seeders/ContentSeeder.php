@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\BasketballPosition;
 use App\Models\AppSetting;
 use App\Models\Category;
 use App\Models\News;
@@ -11,18 +10,22 @@ use App\Models\Player;
 use App\Models\Product;
 use App\Models\ProductFilterGroup;
 use App\Models\ProductFilterOption;
-use App\Models\ProductVariantSize;
 use App\Models\Sponsor;
 use App\Models\SportsHall;
 use App\Models\TeamMatch;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ContentSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Dane demonstracyjne można tworzyć wyłącznie lokalnie lub w testach.');
+        }
+
         $admin = User::where('email', 'admin@example.com')->first();
 
         if (! $admin) {
@@ -42,7 +45,7 @@ class ContentSeeder extends Seeder
     private function seedSettings(): void
     {
         AppSetting::setValue('club_name', 'ETB Łódź');
-        AppSetting::setValue('club_email', 'biuro@etb-lodz.pl');
+        AppSetting::setValue('club_email', 'etb.3x3@gmail.com');
         AppSetting::setValue('club_phone', '+48 42 123 45 67');
         AppSetting::setValue('club_address', 'ul. Koszykowa 1, 90-001 Łódź');
         AppSetting::setValue('facebook_url', 'https://www.facebook.com/p/Eat-The-Ball-61572240317030/');
@@ -467,7 +470,7 @@ class ContentSeeder extends Seeder
             'Kolekcja' => ['Oficjalny merch', 'Sezon 2025/2026'],
         ])->flatMap(function (array $options, string $groupName) {
             $group = ProductFilterGroup::updateOrCreate(
-                ['slug' => \Illuminate\Support\Str::slug($groupName)],
+                ['slug' => Str::slug($groupName)],
                 ['name' => $groupName, 'sort_order' => 0, 'is_active' => true],
             );
 
@@ -475,7 +478,7 @@ class ContentSeeder extends Seeder
                 $option = ProductFilterOption::updateOrCreate(
                     [
                         'product_filter_group_id' => $group->id,
-                        'slug' => \Illuminate\Support\Str::slug($optionName),
+                        'slug' => Str::slug($optionName),
                     ],
                     ['name' => $optionName, 'sort_order' => $index, 'is_active' => true],
                 );
@@ -589,7 +592,7 @@ class ContentSeeder extends Seeder
             unset($data['variants']);
 
             $product = Product::updateOrCreate(
-                ['slug' => \Illuminate\Support\Str::slug($data['name'])],
+                ['slug' => Str::slug($data['name'])],
                 $data,
             );
 
@@ -605,16 +608,16 @@ class ContentSeeder extends Seeder
 
             if ($data['category_id'] === $categoryKoszulki->id) {
                 $filters[] = 'Koszulka';
-                $filters[] = \Illuminate\Support\Str::contains($data['name'], 'meczowa') ? 'Mecz' : 'Trening';
+                $filters[] = Str::contains($data['name'], 'meczowa') ? 'Mecz' : 'Trening';
             } elseif ($data['category_id'] === $categoryAkcesoria->id) {
                 $filters[] = 'Akcesoria';
-                $filters[] = \Illuminate\Support\Str::contains($data['name'], ['Opaska', 'Bidon']) ? 'Trening' : 'Na co dzień';
+                $filters[] = Str::contains($data['name'], ['Opaska', 'Bidon']) ? 'Trening' : 'Na co dzień';
             } else {
                 $filters[] = 'Gadżet';
                 $filters[] = 'Kibic';
             }
 
-            if (\Illuminate\Support\Str::contains($data['name'], '2025/2026')) {
+            if (Str::contains($data['name'], '2025/2026')) {
                 $filters[] = 'Sezon 2025/2026';
             }
 

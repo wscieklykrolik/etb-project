@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::create('three_x_three_tournament_teams', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('three_x_three_tournament_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('three_x_three_tournament_id')->constrained(indexName: '3x3_team_tournament_fk')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->string('category');
@@ -31,7 +31,7 @@ return new class extends Migration
 
         Schema::create('three_x_three_tournament_team_players', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('three_x_three_tournament_team_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('three_x_three_tournament_team_id')->constrained(indexName: '3x3_player_team_fk')->cascadeOnDelete();
             $table->string('name');
             $table->unsignedTinyInteger('sort_order')->default(0);
             $table->timestamps();
@@ -39,7 +39,7 @@ return new class extends Migration
 
         Schema::create('three_x_three_tournament_groups', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('three_x_three_tournament_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('three_x_three_tournament_id')->constrained(indexName: '3x3_group_tournament_fk')->cascadeOnDelete();
             $table->string('name');
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
@@ -49,7 +49,7 @@ return new class extends Migration
 
         Schema::create('three_x_three_tournament_matches', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('three_x_three_tournament_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('three_x_three_tournament_id')->constrained(indexName: '3x3_match_tournament_fk')->cascadeOnDelete();
             $table->foreignId('group_id')->nullable()->constrained('three_x_three_tournament_groups')->nullOnDelete();
             $table->foreignId('team_one_id')->nullable()->constrained('three_x_three_tournament_teams')->nullOnDelete();
             $table->foreignId('team_two_id')->nullable()->constrained('three_x_three_tournament_teams')->nullOnDelete();

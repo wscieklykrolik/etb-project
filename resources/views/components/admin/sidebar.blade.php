@@ -8,6 +8,8 @@ $groups = [
         ['label' => 'Pytania i odpowiedzi', 'route' => 'profile.edit', 'params' => ['section' => 'faq'], 'icon' => 'circle-help', 'active' => null],
     ],
     'Zarządzanie' => [
+        ['label' => 'Bilety', 'route' => 'profile.edit', 'params' => ['section' => 'tickets'], 'icon' => 'ticket', 'active' => null],
+        ['label' => 'Ważne linki', 'route' => 'profile.edit', 'params' => ['section' => 'important-links'], 'icon' => 'link', 'active' => null],
         ['label' => 'Klub', 'route' => 'profile.edit', 'params' => ['section' => 'club-content'], 'icon' => 'building-2', 'active' => null],
         ['label' => 'Aktualności', 'route' => 'profile.edit', 'params' => ['section' => 'news'], 'icon' => 'newspaper', 'active' => null],
         ['label' => 'Akademia', 'route' => 'profile.edit', 'params' => ['section' => 'academy'], 'icon' => 'graduation-cap', 'active' => null],

@@ -1,5 +1,5 @@
 @echo off
 
-cd /d D:\Php Storm\etb
+cd /d "%~dp0.."
 
-composer dev
+composer run dev

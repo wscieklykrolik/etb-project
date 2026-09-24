@@ -1,0 +1,158 @@
+name: Weryfikacja i staging Hostinger
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostinger-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Testy (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, mysql]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: etb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      DB_CONNECTION: ${{ matrix.database }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: ${{ matrix.database == 'mysql' && 'etb_test' || ':memory:' }}
+      DB_USERNAME: root
+      DB_PASSWORD: ''
+      DB_URL: ''
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      POLISH_HOLIDAYS_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, pdo_sqlite, sqlite3, dom, xml, fileinfo, curl, gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Zależności według lockfile
+        run: |
+          composer validate --no-check-publish
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          composer audit --locked --no-dev
+          npm ci
+          npm audit --audit-level=high
+      - name: Build produkcyjny
+        run: npm run build
+      - name: Konfiguracja wyłącznie testowa
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: Migracje i testy na jednorazowej bazie CI
+        run: |
+          php artisan migrate --force
+          php artisan test --compact
+      - name: Zgodność cache i składni skryptów
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan config:clear
+          php artisan route:clear
+          bash -n scripts/deploy-staging.sh scripts/queue-staging.sh
+
+  package:
+    name: Paczka z produkcyjnym frontendem
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci && npm run build
+      - name: Paczka bez sekretów, uploadów i zależności developerskich
+        run: |
+          test -s public/build/manifest.json
+          test ! -e public/hot
+          mkdir -p artifacts
+          tar -czf artifacts/release.tar.gz app bootstrap config database lang resources routes public scripts artisan composer.json composer.lock
+          cd artifacts
+          sha256sum release.tar.gz > release.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: etb-${{ github.sha }}
+          path: artifacts/release.tar.gz*
+          retention-days: 14
+          if-no-files-found: error
+
+  deploy:
+    name: Wdrożenie test.eattheball.pl
+    needs: package
+    # Domyślnie wyłączone. Bez konfiguracji w GitHub nie łączy się z hostingiem.
+    if: >-
+      vars.HOSTINGER_STAGING_ENABLED == 'true' &&
+      github.ref_name == (vars.HOSTINGER_STAGING_BRANCH || 'main')
+    runs-on: ubuntu-latest
+    environment: staging
+    concurrency:
+      group: hostinger-staging-deploy
+      cancel-in-progress: false
+    env:
+      SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+      SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
+      SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+      SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: etb-${{ github.sha }}
+          path: artifacts
+      - name: Przesłanie zweryfikowanego wydania i instalacja stagingu
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9.-]+$ && "$SSH_USER" =~ ^[a-zA-Z0-9_]+$ && "$SSH_PORT" =~ ^[0-9]+$ ]]
+          test -n "$SSH_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/etb_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/etb_key ~/.ssh/known_hosts
+          release_id="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          target="$SSH_USER@$SSH_HOST"
+          ssh_opts=(-i ~/.ssh/etb_key -p "$SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          ssh "${ssh_opts[@]}" "$target" "mkdir -p apps/etb-staging/incoming/$release_id"
+          scp -i ~/.ssh/etb_key -P "$SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            artifacts/release.tar.gz artifacts/release.tar.gz.sha256 scripts/deploy-staging.sh \
+            "$target:apps/etb-staging/incoming/$release_id/"
+          ssh "${ssh_opts[@]}" "$target" "bash apps/etb-staging/incoming/$release_id/deploy-staging.sh $release_id"

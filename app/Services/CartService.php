@@ -132,6 +132,7 @@ class CartService
                 return (object) [
                     'product' => $item->product,
                     'variant' => $item->variantSize,
+                    'variant_size_id' => $item->variant_size_id,
                     'qty' => $item->qty,
                     'unit_price_grosze' => $item->unit_price_grosze,
                     'subtotal_grosze' => $item->subtotal(),
@@ -146,6 +147,7 @@ class CartService
             return (object) [
                 'product' => $product,
                 'variant' => $variant,
+                'variant_size_id' => $data['variant_size_id'],
                 'qty' => $data['qty'],
                 'unit_price_grosze' => $data['unit_price_grosze'],
                 'subtotal_grosze' => $data['qty'] * $data['unit_price_grosze'],

@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Dane demonstracyjne można tworzyć wyłącznie lokalnie lub w testach.');
+        }
+
         $this->call(CategorySeeder::class);
 
         $seedUsers = [

@@ -3,6 +3,7 @@
 @section('content')
 <div class="mx-auto max-w-5xl px-6 py-10 text-white">
     <h1 class="mb-6 text-3xl font-black">{{ __('Koszyk') }}</h1>
+    @foreach($errors->all() as $error)<p role="alert" class="mb-4 rounded-lg bg-red-100 p-3 text-red-800">{{ $error }}</p>@endforeach
 
     @if($items->isEmpty())
         <div class="rounded-lg border border-zinc-700 bg-white p-8 text-center text-zinc-950">
@@ -60,7 +61,7 @@
                             <span class="font-bold text-zinc-500 lg:hidden">Suma: </span>
                             {{ number_format($item->subtotal_grosze / 100, 2, ',', '') }} zł
                         </div>
-                        <form method="POST" action="{{ route('cart.remove') }}" class="lg:text-right">
+                        <form method="POST" action="{{ route('cart.remove') }}" data-analytics-event="remove_from_cart" class="lg:text-right">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $item->product->id }}">
                             <input type="hidden" name="variant_size_id" value="{{ $item->variant?->id }}">
@@ -79,12 +80,23 @@
                 <button type="submit" form="cart-update" class="rounded-lg border border-zinc-300 px-4 py-2 font-bold text-white hover:border-yellow-400 hover:text-yellow-400">
                     {{ __('Aktualizuj koszyk') }}
                 </button>
+                @if(\App\Support\ShopSettings::legacy())
                 <a href="{{ route('checkout.shipping') }}" class="rounded-lg bg-yellow-400 px-6 py-2 font-black text-black hover:bg-yellow-300">
                     {{ __('Przejdź do kasy') }} →
                 </a>
+                @else
+                    <button type="submit" form="cart-update" name="order" value="1" class="rounded-lg bg-yellow-400 px-6 py-2 font-black text-black hover:bg-yellow-300">Zamów →</button>
+                @endif
             </div>
         </div>
     @endif
 </div>
 @endsection
 
+@if($items->isNotEmpty())
+    @push('cookie-scripts')
+        @include('partials.analytics-event', [
+            'eventName' => 'view_cart',
+        ])
+    @endpush
+@endif

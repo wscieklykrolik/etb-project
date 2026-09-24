@@ -18,13 +18,35 @@
 
     <article class="mt-8 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-2xl">
         @if ($news->type === \App\Models\News::TYPE_VIDEO && $news->youtubeEmbedUrl())
-            <div class="aspect-video bg-black">
-                <iframe
-                    src="{{ $news->youtubeEmbedUrl() }}"
-                    title="{{ $news->title }}"
-                    class="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen></iframe>
+            @php
+                $privacyEnhancedYoutubeUrl = str_replace('www.youtube.com', 'www.youtube-nocookie.com', $news->youtubeEmbedUrl());
+            @endphp
+            <div
+                class="aspect-video bg-black"
+                data-cookie-embed
+                data-cookie-category="marketing"
+            >
+                <template data-cookie-embed-content>
+                    <iframe
+                        data-cookie-src="{{ $privacyEnhancedYoutubeUrl }}"
+                        title="{{ $news->title }}"
+                        class="h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+                </template>
+                <template data-cookie-placeholder-content>
+                    <div data-cookie-placeholder class="flex h-full flex-col items-center justify-center px-5 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400 text-black" aria-hidden="true">
+                            <i data-lucide="shield-check" class="h-6 w-6"></i>
+                        </div>
+                        <h2 class="mt-4 text-xl font-black text-white">Film YouTube jest zablokowany</h2>
+                        <p class="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Aby wyświetlić materiał, włącz kategorię „Marketingowe i multimedia zewnętrzne”. Po zgodzie przeglądarka połączy się z usługą YouTube.</p>
+                        <button type="button" onclick="window.dispatchEvent(new CustomEvent('etb:open-cookie-settings'))" class="mt-4 rounded-xl border border-yellow-400 px-4 py-2.5 text-sm font-black text-yellow-300 transition hover:bg-yellow-400 hover:text-black">
+                            Otwórz ustawienia cookies
+                        </button>
+                    </div>
+                </template>
             </div>
         @elseif ($news->type === \App\Models\News::TYPE_ARTICLE && $news->main_image_path)
             <img src="{{ \App\Support\MediaStorage::url($news->main_image_path) }}" alt="{{ $news->title }}" class="aspect-[16/7] w-full object-cover">
@@ -70,7 +92,7 @@
     </article>
 
     <div x-show="image" x-cloak x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8" @click="close()">
-        <div class="relative w-full max-w-5xl rounded-lg border border-zinc-700 bg-zinc-950 p-3 shadow-2xl sm:p-4" @click.stop>
+        <div class="relative max-h-[95dvh] overflow-y-auto w-full max-w-5xl rounded-lg border border-zinc-700 bg-zinc-950 p-3 shadow-2xl sm:p-4" @click.stop>
             <button type="button" class="absolute right-3 top-3 z-10 rounded-full bg-black/70 p-2 text-white transition hover:bg-yellow-400 hover:text-black" @click="close()" aria-label="Zamknij podgląd">
                 <i data-lucide="x" class="h-5 w-5"></i>
             </button>
@@ -80,8 +102,8 @@
                     <i data-lucide="chevron-left" class="h-7 w-7"></i>
                 </button>
 
-                <div class="flex min-h-[18rem] flex-1 items-center justify-center rounded bg-black sm:min-h-[28rem]">
-                    <img :src="image" alt="Powiększone zdjęcie galerii" class="max-h-[72vh] max-w-full rounded object-contain">
+                <div class="etb-gallery-image flex min-w-0 flex-1 items-center justify-center rounded bg-black ">
+                    <img :src="image" alt="Powiększone zdjęcie galerii" class="max-h-[65dvh] max-w-full rounded object-contain">
                 </div>
 
                 <button type="button" x-show="hasMultipleImages" class="hidden rounded-full bg-white/10 p-3 text-white transition hover:bg-yellow-400 hover:text-black sm:inline-flex" @click="next()" aria-label="Następne zdjęcie">

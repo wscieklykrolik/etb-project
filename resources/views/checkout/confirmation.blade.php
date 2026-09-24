@@ -59,3 +59,11 @@
     </div>
 </div>
 @endsection
+
+@if($order->isPaid())
+    @push('cookie-scripts')
+        @include('partials.analytics-event', [
+            'eventName' => 'purchase',
+        ])
+    @endpush
+@endif

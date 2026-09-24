@@ -13,7 +13,9 @@ it('renders public navigation routes without server errors', function () {
         'club.sponsors',
         'club.contact',
         'contact',
+        'cookies.policy',
         'schedule',
+        'schedule.third-league',
         'schedule.lzkosz',
         'schedule.table',
         'schedule.3x3',
@@ -30,7 +32,13 @@ it('renders public navigation routes without server errors', function () {
 
     $this->get(route('schedule.3x3.team'))->assertRedirect('/team/3x3');
     $this->get(route('schedule.3x3.tournaments'))->assertRedirect('/schedule/3x3');
-    $this->get(route('schedule.third-league'))->assertRedirect('https://www.lzkosz.pl/liga/215.html');
+    $this->get(route('schedule.third-league'))
+        ->assertOk()
+        ->assertSee('Oficjalna strona ŁZKosz otworzy się w nowej karcie.')
+        ->assertSee('Strona ETB pozostanie otwarta tutaj.')
+        ->assertSee('href="https://www.lzkosz.pl/liga/215.html"', false)
+        ->assertSee('target="_blank"', false)
+        ->assertSee('rel="noopener noreferrer"', false);
 });
 
 it('shows team as a separate navigation item and contact dropdown for contact and marketing', function () {

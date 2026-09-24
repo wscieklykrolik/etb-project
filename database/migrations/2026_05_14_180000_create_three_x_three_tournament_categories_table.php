@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('three_x_three_tournament_categories', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('three_x_three_tournament_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('three_x_three_tournament_id')->constrained(indexName: '3x3_category_tournament_fk')->cascadeOnDelete();
             $table->string('category');
             $table->timestamps();
 

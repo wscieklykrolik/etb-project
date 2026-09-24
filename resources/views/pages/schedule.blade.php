@@ -31,10 +31,12 @@
             'sectionId' => 'third-league',
             'eyebrow' => 'Rozgrywki',
             'title' => 'III liga mężczyzn ŁZKosz',
-            'description' => 'Sekcja z odnośnikiem do rozgrywek ligowych ŁZKosz.',
-            'panelText' => 'Po uzupełnieniu treści można tu dodać opis ligi, najważniejsze komunikaty i materiały dla kibiców.',
+            'description' => 'Wyniki, terminarz i szczegóły spotkań znajdziesz w oficjalnym serwisie rozgrywek.',
+            'panelTitle' => 'III liga w oficjalnym serwisie ŁZKosz',
+            'panelText' => 'Przejdź do aktualnych informacji o rozgrywkach i sprawdź, co czeka naszą drużynę.',
             'actionUrl' => 'https://www.lzkosz.pl/liga/215.html',
-            'actionLabel' => 'Otwórz stronę ŁZKosz',
+            'actionLabel' => 'Otwórz III ligę w ŁZKosz',
+            'externalAction' => true,
         ])
 
         @include('pages.partials.schedule-lzkosz-section', [

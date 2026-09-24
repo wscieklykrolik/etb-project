@@ -1,6 +1,7 @@
 <?php
 
 use App\Contracts\PaymentGatewayInterface;
+use App\Models\AppSetting;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    AppSetting::setValue('shop_order_mode', 'legacy');
     $this->user = User::factory()->create();
     $this->product = Product::factory()->create([
         'price_grosze' => 2999,

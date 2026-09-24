@@ -8,11 +8,21 @@
         + (int) (request('availability') === 'in_stock')
         + (int) filled(request('min_price'))
         + (int) filled(request('max_price'));
+    $analyticsProducts = $products->values()->map(fn ($product, $index) => [
+        'item_id' => (string) $product->id,
+        'item_name' => $product->name,
+        'item_category' => $product->category?->name,
+        'item_list_id' => 'shop',
+        'item_list_name' => 'Sklep ETB',
+        'index' => $index + 1,
+        'price' => round($product->price_grosze / 100, 2),
+        'quantity' => 1,
+    ])->all();
 @endphp
 
 <div class="bg-black text-white">
     <section class="border-b border-zinc-800/50 bg-zinc-950 py-12">
-        <div class="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+        <div class="mx-auto grid max-w-7xl gap-8 px-6 xl:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
             <div class="flex h-32 w-32 shrink-0 items-center justify-center rounded-lg bg-white p-4">
                 <x-site-logo :url="$shopLogoUrl" alt="Logo sklepu" image-class="max-h-full max-w-full object-contain" fallback="Sklep" fallback-class="text-center text-sm font-black uppercase tracking-wide text-black" />
             </div>
@@ -22,7 +32,7 @@
                 <p class="mt-4 max-w-2xl text-base text-zinc-400">Koszulki, akcesoria i gadżety klubowe z aktualną dostępnością oraz filtrami.</p>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2 lg:w-[28rem]">
+            <div class="grid gap-3 sm:grid-cols-2 xl:col-span-2 xl:justify-self-end xl:w-[28rem]">
                 <a href="{{ route('cart.index') }}" class="relative inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-5 py-3 text-sm font-black uppercase text-black transition hover:bg-white">
                     <i data-lucide="shopping-cart" class="h-4 w-4"></i>
                     Koszyk
@@ -49,6 +59,8 @@
                     @endif
                 </div>
 
+                <details class="etb-shop-filters mt-4" data-responsive-details>
+                    <summary>Filtry i sortowanie ({{ $activeFiltersCount }})</summary>
                 <form method="GET" action="{{ route('shop.index') }}" class="mt-6 space-y-6">
                     <div>
                         <label for="sort" class="block text-xs font-bold uppercase tracking-wide text-zinc-500">Sortowanie</label>
@@ -134,6 +146,7 @@
                         Zastosuj filtry
                     </button>
                 </form>
+                </details>
             </aside>
 
             <div>
@@ -155,7 +168,16 @@
                 @else
                     <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                         @foreach($products as $product)
-                            <a href="{{ route('shop.show', $product) }}" class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
+                            <a
+                                href="{{ route('shop.show', $product) }}"
+                                data-analytics-event="select_item"
+                                data-analytics-parameters="{{ json_encode([
+                                    'item_list_id' => 'shop',
+                                    'item_list_name' => 'Sklep ETB',
+                                    'items' => [$analyticsProducts[$loop->index]],
+                                ]) }}"
+                                class="group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5"
+                            >
                                 <div class="aspect-square overflow-hidden bg-zinc-800 flex items-center justify-center">
                                     @if($product->images && $img = $product->images[0] ?? null)
                                         <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
@@ -194,4 +216,15 @@
     </section>
 </div>
 @endsection
+
+@push('cookie-scripts')
+    @include('partials.analytics-event', [
+        'eventName' => 'view_item_list',
+        'eventParameters' => [
+            'item_list_id' => 'shop',
+            'item_list_name' => 'Sklep ETB',
+            'items' => $analyticsProducts,
+        ],
+    ])
+@endpush
 

@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
     'password' => [
         'min_length' => (int) env('PASSWORD_MIN_LENGTH', 15),
         'max_length' => (int) env('PASSWORD_MAX_LENGTH', 128),

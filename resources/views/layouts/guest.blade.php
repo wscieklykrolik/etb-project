@@ -12,7 +12,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-black text-white">
+    <body class="etb-auth font-sans antialiased bg-black text-white">
         @php
             $authImages = [
                 'images/auth/tlo_ETB0.jpeg',
@@ -39,7 +39,7 @@
             >
             <div class="absolute inset-0 bg-black/45"></div>
 
-            <div class="relative z-10 flex min-h-screen items-center justify-center p-6">
+            <div class="relative z-10 flex min-h-screen items-center justify-center p-3 sm:p-6">
             <div class="w-full max-w-5xl grid lg:grid-cols-2 overflow-hidden rounded-xl border-4 border-yellow-400 shadow-2xl shadow-black/60">
                 <div class="hidden lg:flex bg-zinc-900 border-r-4 border-yellow-400 p-10 items-center justify-center">
                     <div class="w-full h-full min-h-96 flex items-center justify-center px-6">
@@ -47,7 +47,7 @@
                     </div>
                 </div>
 
-                <div class="bg-yellow-400 p-6 sm:p-10">
+                <div class="min-w-0 bg-yellow-400 p-4 sm:p-10">
                     <div class="mb-6 flex items-center gap-3">
                         <a href="/" class="flex h-10 w-10 shrink-0 items-center justify-center">
                             <x-site-logo :url="$authLogoUrl" alt="Logo panelu logowania" image-class="max-h-10 max-w-10 object-contain" fallback="" />

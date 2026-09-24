@@ -13,7 +13,7 @@
 @section('content')
 <div class="bg-black text-white">
     <section
-        class="relative min-h-[560px] overflow-hidden bg-zinc-950 text-white"
+        class="etb-hero relative min-h-[420px] sm:min-h-[560px] overflow-hidden bg-zinc-950 text-white"
         x-data="{ active: 0, total: {{ max($heroNews->count(), 1) }} }"
         x-init="setInterval(() => active = (active + 1) % total, 5000)"
     >
@@ -43,7 +43,7 @@
             <div class="absolute inset-0 bg-zinc-950">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,#facc15_0%,transparent_40%),radial-gradient(circle_at_bottom_left,#facc15_0%,transparent_30%)] opacity-20"></div>
             </div>
-            <div class="relative mx-auto flex min-h-[560px] max-w-7xl items-end px-6 pb-16">
+            <div class="relative mx-auto flex min-h-[420px] sm:min-h-[560px] max-w-7xl items-end px-6 pb-20 pt-12">
                 <div>
                     <span class="inline-block rounded-full bg-yellow-400 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-black">ETB Łódź</span>
                     <h1 class="mt-4 max-w-4xl text-4xl font-black uppercase leading-tight md:text-6xl">Oficjalna strona klubu</h1>
@@ -53,9 +53,10 @@
         @endforelse
 
         @if($heroNews->count() > 1)
-            <div class="absolute bottom-8 right-6 flex gap-3 md:right-20">
+            <div class="absolute bottom-4 inset-x-4 flex flex-wrap justify-end gap-2 md:right-20">
                 @foreach($heroNews as $item)
-                    <button type="button" class="h-1.5 w-12 rounded-full bg-white/25 transition-all hover:bg-white/50" :class="{ 'bg-yellow-400 w-16': active === {{ $loop->index }} }" @click="active = {{ $loop->index }}">
+                    <button type="button" class="flex h-11 w-11 items-center justify-center rounded focus-visible:ring-2 focus-visible:ring-yellow-400" :aria-pressed="active === {{ $loop->index }}" @click="active = {{ $loop->index }}">
+                        <span class="h-1.5 w-full rounded-full" :class="active === {{ $loop->index }} ? 'bg-yellow-400' : 'bg-white/40'" aria-hidden="true"></span>
                         <span class="sr-only">{{ $item->title }}</span>
                     </button>
                 @endforeach
@@ -226,13 +227,19 @@
             <div class="mx-auto max-w-7xl px-6">
                 <div class="max-w-3xl">
                     <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Pytania i odpowiedzi</p>
-                    <h2 class="mt-2 text-4xl font-black uppercase">Najczęstsze pytania</h2>
+                    <h2 id="faq-heading" class="mt-2 text-4xl font-black uppercase">Najczęstsze pytania</h2>
                     <p class="mt-4 text-sm leading-relaxed text-zinc-400">Odpowiedzi na pytania, które najczęściej pojawiają się przed kontaktem z klubem, akademią i pierwszą drużyną ETB.</p>
                 </div>
 
-                <div class="mt-8 divide-y divide-zinc-800 rounded-xl border border-zinc-800 bg-zinc-950/70">
+                @if($faqQuestions->count() > 5)
+                    <p id="faq-scroll-hint" class="mt-6 text-sm text-zinc-400">Przewiń listę, aby zobaczyć kolejne pytania. Kliknij pytanie, aby przeczytać odpowiedź.</p>
+                @endif
+                <div class="faq-list mt-8 divide-y divide-zinc-800 rounded-xl border border-zinc-800 bg-zinc-950/70"
+                     @if($faqQuestions->count() > 5)
+                         data-faq-scroll tabindex="0" role="region" aria-labelledby="faq-heading" aria-describedby="faq-scroll-hint"
+                     @endif>
                     @foreach($faqQuestions as $question)
-                        <details class="group p-6" {{ $loop->first ? 'open' : '' }}>
+                        <details class="group p-6">
                             <summary class="flex cursor-pointer list-none items-start justify-between gap-4 text-left">
                                 <h3 class="text-lg font-black text-white">{{ $question->question }}</h3>
                                 <span class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black transition group-open:rotate-45">+</span>

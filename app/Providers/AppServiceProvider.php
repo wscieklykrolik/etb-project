@@ -8,12 +8,13 @@ use App\Models\AppSetting;
 use App\Models\SponsorCategory;
 use App\Models\User;
 use App\Rules\NotCommonPassword;
-use App\Support\BrowserPageTitle;
-use App\Support\MediaStorage;
 use App\Services\DpdShippingProvider;
 use App\Services\InPostShippingProvider;
 use App\Services\OrderNotificationService;
 use App\Services\Przelewy24Gateway;
+use App\Support\BrowserPageTitle;
+use App\Support\MediaStorage;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -37,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        TrustProxies::at(config('security.trusted_proxies') ?: []);
+
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
@@ -60,7 +63,11 @@ class AppServiceProvider extends ServiceProvider
         );
 
         View::composer('*', function ($view): void {
-            static $logoData = null;
+            if (str_starts_with($view->name(), 'errors')) {
+                return;
+            }
+
+            $logoData = request()->attributes->get('shared_logo_data');
 
             if ($logoData === null) {
                 $legacySiteLogoPath = AppSetting::getValue('site_logo');
@@ -70,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
                 $academyLogoPath = AppSetting::getValue('academy_logo');
                 $shopLogoPath = AppSetting::getValue('shop_logo');
                 $ticketsLogoPath = AppSetting::getValue('tickets_logo');
+                $ticketsPageImagePath = AppSetting::getValue('tickets_page_image');
                 $adminLogoPath = AppSetting::getValue('admin_logo');
                 $authLogoPath = AppSetting::getValue('auth_logo');
                 $browserLogoPath = AppSetting::getValue('browser_logo');
@@ -89,6 +97,11 @@ class AppServiceProvider extends ServiceProvider
                     'shopLogoUrl' => MediaStorage::url($shopLogoPath),
                     'ticketsLogoPath' => $ticketsLogoPath,
                     'ticketsLogoUrl' => MediaStorage::url($ticketsLogoPath),
+                    'ticketsPageImagePath' => $ticketsPageImagePath,
+                    'ticketsPageImageUrl' => MediaStorage::url($ticketsPageImagePath),
+                    'ticketsPageBody' => AppSetting::getValue('tickets_page_body'),
+                    'ticketsPageButtonUrl' => AppSetting::getValue('tickets_page_button_url'),
+                    'ticketsPageButtonLabel' => AppSetting::getValue('tickets_page_button_label'),
                     'adminLogoPath' => $adminLogoPath,
                     'adminLogoUrl' => MediaStorage::url($adminLogoPath),
                     'authLogoPath' => $authLogoPath,
@@ -104,6 +117,8 @@ class AppServiceProvider extends ServiceProvider
                     'siteLogoPath' => $clubLogoPath,
                     'siteLogoUrl' => MediaStorage::url($clubLogoPath),
                 ];
+
+                request()->attributes->set('shared_logo_data', $logoData);
             }
 
             foreach ($logoData as $key => $value) {

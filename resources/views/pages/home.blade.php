@@ -5,7 +5,7 @@
 
     <section class="max-w-7xl mx-auto px-6 py-10 space-y-10">
         <div x-data="materialsCarousel(@js($latestArticles))" x-init="start()">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-wrap gap-3 items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold">Najnowsze materiały</h2>
                 <div class="flex gap-2">
                     <template x-for="(chunk, index) in chunks" :key="index">
@@ -15,7 +15,7 @@
                     </template>
                 </div>
             </div>
-            <div class="grid md:grid-cols-4 gap-4">
+            <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <template x-for="item in visibleItems" :key="item.title + item.date">
                     <article class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
                         <span class="text-xs uppercase tracking-wider text-yellow-400" x-text="item.category"></span>

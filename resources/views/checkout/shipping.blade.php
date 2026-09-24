@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('checkout.shipping') }}" class="space-y-6" x-data="{
+    <form method="POST" action="{{ route('checkout.shipping') }}" data-analytics-event="add_shipping_info" class="space-y-6" x-data="{
         method: @js($selectedMethod),
         lockerName: @js(old('address.locker_name', '')),
         lockerAddress: @js(old('address.locker_address', '')),
@@ -184,3 +184,9 @@
     </form>
 </div>
 @endsection
+
+@push('cookie-scripts')
+    @include('partials.analytics-event', [
+        'eventName' => 'begin_checkout',
+    ])
+@endpush

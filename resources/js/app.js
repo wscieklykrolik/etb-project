@@ -18,6 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.setAttribute('role', 'region');
         wrapper.setAttribute('aria-label', 'Tabela — przewiń w poziomie, aby zobaczyć wszystkie kolumny');
     });
+    document.querySelectorAll('[data-faq-scroll]').forEach((list) => {
+        const items = Array.from(list.children).slice(0, 5);
+        const summaries = items.map((item) => item.querySelector('summary'));
+        const updateHeight = () => {
+            const listStyle = getComputedStyle(list);
+            const height = items.reduce((total, item, index) => {
+                const style = getComputedStyle(item);
+                return total + summaries[index].getBoundingClientRect().height
+                    + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+                    + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+            }, parseFloat(listStyle.borderTopWidth) + parseFloat(listStyle.borderBottomWidth));
+            list.style.setProperty('--faq-list-height', `${Math.ceil(height)}px`);
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        summaries.forEach((summary) => observer.observe(summary));
+    });
     const wideScreen = window.matchMedia('(min-width: 1024px)');
     document.querySelectorAll('[data-responsive-details]').forEach((details) => {
         const sync = () => { details.open = wideScreen.matches; };

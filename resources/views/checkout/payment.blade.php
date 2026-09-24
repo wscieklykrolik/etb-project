@@ -45,7 +45,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('checkout.place') }}" class="text-center">
+    <form method="POST" action="{{ route('checkout.place') }}" data-analytics-event="add_payment_info" class="text-center">
         @csrf
         <button type="submit" class="inline-flex items-center gap-3 rounded-lg bg-yellow-400 px-8 py-4 text-lg font-black text-black hover:bg-yellow-300">
             <i data-lucide="credit-card" class="h-6 w-6"></i>

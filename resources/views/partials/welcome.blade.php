@@ -16,7 +16,7 @@
 
 @if($nextMatch)
 
-    <section class="relative h-[60vh] flex items-center">
+    <section class="relative min-h-[24rem] py-10 sm:min-h-[60vh] flex items-center">
 
         <!-- TŁO -->
         <div class="absolute inset-0">
@@ -60,7 +60,7 @@
             </div>
 
             <!-- BUTTONY -->
-            <div class="flex gap-4">
+            <div class="flex flex-wrap gap-4">
 
                 @if($isLive && $nextMatch->stream_link)
                     <a href="{{ $nextMatch->stream_link }}" target="_blank"
@@ -80,7 +80,7 @@
 
 @else
 
-    <div class="h-[60vh] flex items-center justify-center text-white text-2xl">
+    <div class="min-h-[16rem] px-4 py-12 flex items-center justify-center text-center text-white text-2xl">
         Brak zaplanowanych meczów
     </div>
 

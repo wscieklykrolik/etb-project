@@ -60,7 +60,7 @@ it('shows public article and photo author signatures on a news detail page', fun
     $response->assertSee('Autor zdjęć: Piotr Wiśniewski');
 });
 
-it('embeds youtube videos on the public news page', function () {
+it('blocks youtube videos until marketing cookies are accepted', function () {
     $author = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
     $news = News::query()->create([
@@ -77,7 +77,10 @@ it('embeds youtube videos on the public news page', function () {
     $response = $this->get(route('news.show', $news));
 
     $response->assertOk();
-    $response->assertSee('https://www.youtube.com/embed/dQw4w9WgXcQ', false);
+    $response->assertSee('data-cookie-category="marketing"', false);
+    $response->assertSee('data-cookie-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"', false);
+    $response->assertDontSee('src="https://www.youtube.com/embed/dQw4w9WgXcQ"', false);
+    $response->assertSee('Film YouTube jest zablokowany');
     $response->assertSee('Wywiad po meczu');
 });
 

@@ -15,6 +15,7 @@ class BrowserPageTitle
 
         return match ($routeName) {
             'home' => 'Strona główna',
+            'important-pages.show' => \App\Models\ImportantPage::PAGES[$parameters['slug'] ?? ''] ?? 'Informacje',
             'dashboard' => 'Panel użytkownika',
             'profile.edit' => 'Panel konta',
             'login' => 'Logowanie',
@@ -53,6 +54,8 @@ class BrowserPageTitle
             'shop.index' => 'Sklep',
             'shop.show' => self::parameterTitle($parameters, 'product', 'name', 'Produkt'),
             'cart.index' => 'Koszyk',
+            'message-order.show', 'message-order.generate' => 'Zamów przez wiadomość',
+            'admin.shop-settings.edit' => 'Ustawienia zamówień',
             'checkout.shipping' => 'Dostawa',
             'checkout.payment' => 'Płatność',
             'checkout.confirmation' => 'Potwierdzenie zamówienia',

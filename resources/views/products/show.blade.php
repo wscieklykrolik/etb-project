@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $analyticsProduct = [
+        'item_id' => (string) $product->id,
+        'item_name' => $product->name,
+        'item_category' => $product->category?->name,
+        'price' => round($product->price_grosze / 100, 2),
+        'quantity' => 1,
+    ];
+@endphp
 <div class="min-h-screen bg-black text-white">
     <section class="py-16">
         <div class="mx-auto max-w-7xl px-6">
@@ -56,7 +65,18 @@
                     @endif
 
                     <div class="mt-10">
-                        <form action="{{ route('cart.add') }}" method="POST" class="flex flex-wrap items-end gap-4">
+                        <form
+                            action="{{ route('cart.add') }}"
+                            method="POST"
+                            data-analytics-event="add_to_cart"
+                            data-analytics-quantity-field="qty"
+                            data-analytics-parameters="{{ json_encode([
+                                'currency' => 'PLN',
+                                'value' => round($product->price_grosze / 100, 2),
+                                'items' => [$analyticsProduct],
+                            ]) }}"
+                            class="flex flex-wrap items-end gap-4"
+                        >
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             @if($product->variantSizes->isNotEmpty())
@@ -84,4 +104,15 @@
     </section>
 </div>
 @endsection
+
+@push('cookie-scripts')
+    @include('partials.analytics-event', [
+        'eventName' => 'view_item',
+        'eventParameters' => [
+            'currency' => 'PLN',
+            'value' => round($product->price_grosze / 100, 2),
+            'items' => [$analyticsProduct],
+        ],
+    ])
+@endpush
 
