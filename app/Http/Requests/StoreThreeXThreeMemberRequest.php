@@ -22,6 +22,7 @@ class StoreThreeXThreeMemberRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'role' => ['required', 'string', 'max:255'],
+            'birth_year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
             'description' => ['nullable', 'string', 'max:5000'],
             'is_coach' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],

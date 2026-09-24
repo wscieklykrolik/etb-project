@@ -42,6 +42,7 @@ return [
     'url' => 'Pole :attribute musi być prawidłowym adresem URL.',
 
     'attributes' => [
+        'birth_year' => 'rok urodzenia',
         'accepted_privacy' => 'polityka prywatności',
         'accepted_terms' => 'regulamin',
         'category' => 'kategoria',

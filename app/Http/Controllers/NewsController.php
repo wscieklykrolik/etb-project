@@ -8,6 +8,7 @@ use App\Models\News;
 use App\Services\AdminNotificationService;
 use App\Services\NewsService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class NewsController extends Controller
@@ -48,7 +49,7 @@ class NewsController extends Controller
         return view('news.create');
     }
 
-    public function store(StoreNewsRequest $request): RedirectResponse
+    public function store(StoreNewsRequest $request): RedirectResponse|JsonResponse
     {
         $data = $request->safe()->except(['main_image', 'gallery']);
         $gallery = $request->file('gallery', []);
@@ -56,7 +57,13 @@ class NewsController extends Controller
         $news = $this->newsService->create($data, $request->user()->id, $request->file('main_image'), $gallery);
         $this->notificationService->record($request->user(), 'created', $news, "Aktualność: {$news->title}");
 
-        return redirect()->route('profile.edit', ['section' => 'news'])->with('success', 'Aktualność została zapisana.');
+        if ($request->expectsJson()) {
+            $request->session()->flash('success', $news->is_draft ? 'Wersja robocza została zapisana.' : 'Aktualność została zapisana.');
+
+            return response()->json(['redirect' => route('profile.edit', ['section' => 'news'])]);
+        }
+
+        return redirect()->route('profile.edit', ['section' => 'news'])->with('success', $news->is_draft ? 'Wersja robocza została zapisana.' : 'Aktualność została zapisana.');
     }
 
     public function edit(News $news): View
@@ -66,7 +73,7 @@ class NewsController extends Controller
         return view('news.edit', compact('news'));
     }
 
-    public function update(UpdateNewsRequest $request, News $news): RedirectResponse
+    public function update(UpdateNewsRequest $request, News $news): RedirectResponse|JsonResponse
     {
         $data = $request->safe()->except(['main_image', 'gallery']);
         $gallery = $request->file('gallery', []);
@@ -74,7 +81,13 @@ class NewsController extends Controller
         $this->newsService->update($news, $data, $request->file('main_image'), $gallery);
         $this->notificationService->record($request->user(), 'updated', $news, "Aktualność: {$news->title}");
 
-        return redirect()->route('profile.edit', ['section' => 'news'])->with('success', 'Aktualność została zaktualizowana.');
+        if ($request->expectsJson()) {
+            $request->session()->flash('success', $news->is_draft ? 'Wersja robocza została zapisana.' : 'Aktualność została zapisana.');
+
+            return response()->json(['redirect' => route('profile.edit', ['section' => 'news'])]);
+        }
+
+        return redirect()->route('profile.edit', ['section' => 'news'])->with('success', $news->is_draft ? 'Wersja robocza została zapisana.' : 'Aktualność została zaktualizowana.');
     }
 
     public function destroy(News $news): RedirectResponse

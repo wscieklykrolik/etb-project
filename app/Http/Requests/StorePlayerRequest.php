@@ -21,7 +21,7 @@ class StorePlayerRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:255'],
             'number' => ['required', 'integer', 'min:0', 'max:99'],
             'position' => ['required', 'string', Rule::in(array_keys(BasketballPosition::options()))],
-            'date_of_birth' => ['required', 'date', 'before:today'],
+            'birth_year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
             'height' => ['nullable', 'integer', 'min:100', 'max:250'],
             'weight' => ['nullable', 'integer', 'min:40', 'max:200'],
             'description' => ['nullable', 'string', 'max:5000'],

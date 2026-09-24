@@ -1,7 +1,13 @@
 @php
     $item = $item ?? null;
-    $selectedType = old('type', $item?->type ?? \App\Models\News::TYPE_ARTICLE);
+    $formKey = $item ? 'news-edit-'.$item->id : 'news-create';
+    $submitted = old('_news_form') === $formKey;
+    $field = fn ($key, $default = null) => $submitted ? old($key, $default) : $default;
+    $selectedType = $field('type', $item?->type ?? \App\Models\News::TYPE_ARTICLE);
 @endphp
+
+<input type="hidden" name="_news_form" value="{{ $formKey }}">
+<input type="hidden" name="save_as_draft" value="0">
 
 <div class="space-y-4" x-data="{ type: @js($selectedType) }">
     <div>
@@ -36,39 +42,40 @@
 
     <label class="block">
         <span class="text-sm font-medium text-gray-700">Tytuł</span>
-        <input name="title" required value="{{ old('title', $item?->title) }}" class="mt-1 w-full rounded border-gray-300">
+        <input name="title" required value="{{ $field('title', $item?->title) }}" class="mt-1 w-full rounded border-gray-300">
     </label>
 
     <label class="block" x-show="type === 'article'">
         <span class="text-sm font-medium text-gray-700">Treść</span>
-        <textarea name="content" rows="8" :required="type === 'article'" class="mt-1 w-full rounded border-gray-300">{{ old('content', $item?->content) }}</textarea>
+        <textarea name="content" rows="8" :required="type === 'article'" class="mt-1 w-full rounded border-gray-300">{{ $field('content', $item?->content) }}</textarea>
     </label>
 
     <label class="block">
         <span class="text-sm font-medium text-gray-700">Krótki opis</span>
-        <textarea name="excerpt" rows="3" :required="type !== 'article'" class="mt-1 w-full rounded border-gray-300">{{ old('excerpt', $item?->excerpt) }}</textarea>
+        <textarea name="excerpt" rows="3" :required="type !== 'article'" class="mt-1 w-full rounded border-gray-300">{{ $field('excerpt', $item?->excerpt) }}</textarea>
     </label>
 
     <div class="grid gap-4 md:grid-cols-2">
         <label class="block" x-show="type === 'article'">
             <span class="text-sm font-medium text-gray-700">Autor artykułu</span>
-            <input name="article_author" value="{{ old('article_author', $item?->article_author) }}" class="mt-1 w-full rounded border-gray-300">
+            <input name="article_author" value="{{ $field('article_author', $item?->article_author) }}" class="mt-1 w-full rounded border-gray-300">
         </label>
 
         <label class="block" x-show="type === 'article' || type === 'gallery'">
             <span class="text-sm font-medium text-gray-700">Autor zdjęć</span>
-            <input name="photo_author" value="{{ old('photo_author', $item?->photo_author) }}" class="mt-1 w-full rounded border-gray-300">
+            <input name="photo_author" value="{{ $field('photo_author', $item?->photo_author) }}" class="mt-1 w-full rounded border-gray-300">
         </label>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">
         <label class="block">
             <span class="text-sm font-medium text-gray-700">Data publikacji</span>
-            <input name="publish_at" type="datetime-local" value="{{ old('publish_at', $item?->publish_at?->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded border-gray-300">
+            <input name="publish_at" type="datetime-local" value="{{ $field('publish_at', $item?->publish_at?->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded border-gray-300">
         </label>
 
         <label class="flex items-center gap-2 rounded border border-gray-200 p-3">
-            <input name="is_visible" type="checkbox" value="1" class="rounded border-gray-300 text-yellow-500" @checked(old('is_visible', $item?->is_visible ?? true))>
+            <input name="is_visible" type="hidden" value="0">
+            <input name="is_visible" type="checkbox" value="1" class="rounded border-gray-300 text-yellow-500" @checked($field('is_visible', ($item?->is_draft ? true : ($item?->is_visible ?? true))))>
             <span class="text-sm font-medium text-gray-700">Widoczne publicznie</span>
         </label>
 
@@ -80,11 +87,48 @@
 
     <label class="block" x-show="type === 'video'">
         <span class="text-sm font-medium text-gray-700">Link do filmu YouTube</span>
-        <input name="video_url" type="url" :required="type === 'video'" value="{{ old('video_url', $item?->video_url) }}" placeholder="https://www.youtube.com/watch?v=..." class="mt-1 w-full rounded border-gray-300">
+        <input name="video_url" type="url" :required="type === 'video'" value="{{ $field('video_url', $item?->video_url) }}" placeholder="https://www.youtube.com/watch?v=..." class="mt-1 w-full rounded border-gray-300">
     </label>
 
-    <label class="block" x-show="type === 'article' || type === 'gallery'">
+    <div x-data="newsGallery()" x-show="type === 'article' || type === 'gallery'">
+    <label class="block">
         <span class="text-sm font-medium text-gray-700" x-text="type === 'gallery' ? 'Galeria zdjęć, maksymalnie 100 plików' : 'Dodatkowa galeria zdjęć, maksymalnie 100 plików'"></span>
-        <input name="gallery[]" type="file" accept="image/*" multiple class="mt-1 w-full rounded border border-gray-300 bg-white text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold">
+        <input x-ref="galleryInput" @change="addFiles($event)" name="gallery[]" type="file" accept="image/*" multiple class="mt-1 w-full rounded border border-gray-300 bg-white text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold">
     </label>
+        <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <template x-for="(image, index) in selectedImages" :key="image.url">
+                <div class="rounded border border-gray-200 p-2">
+                    <img :src="image.url" :alt="image.file.name" class="h-28 w-full rounded object-cover">
+                    <button type="button" @click="removeFile(index)" class="mt-2 text-sm font-semibold text-red-700">Usuń zdjęcie</button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    @if ($item?->main_image_path)
+        <div x-show="type === 'article'" class="rounded border border-gray-200 p-3">
+            <img src="{{ \App\Support\MediaStorage::url($item->main_image_path) }}" alt="Zdjęcie główne" class="h-32 w-48 rounded object-cover">
+            <label class="mt-2 flex items-center gap-2 text-sm">
+                <input type="checkbox" name="remove_main_image" value="1" @checked($field('remove_main_image', false))>
+                Usuń zdjęcie główne
+            </label>
+        </div>
+    @endif
+
+    @if ($item && $item->images->isNotEmpty())
+        <div>
+            <p class="text-sm text-gray-600">Zaznaczone zdjęcia zostaną usunięte po zapisaniu zmian.</p>
+            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                @foreach ($item->images as $image)
+                    <label class="block rounded border border-gray-200 p-2">
+                        <img src="{{ \App\Support\MediaStorage::url($image->path) }}" alt="Zdjęcie {{ $loop->iteration }} w galerii" class="h-28 w-full rounded object-cover">
+                        <span class="mt-2 flex items-center gap-2 text-sm text-red-700">
+                            <input type="checkbox" name="remove_images[]" value="{{ $image->id }}" @checked(in_array($image->id, $field('remove_images', [])))>
+                            Usuń zdjęcie
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>

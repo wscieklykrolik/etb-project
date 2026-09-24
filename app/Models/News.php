@@ -29,6 +29,7 @@ class News extends Model
         'author_id',
         'publish_at',
         'is_visible',
+        'is_draft',
         'main_image_path',
     ];
 
@@ -37,6 +38,7 @@ class News extends Model
         return [
             'publish_at' => 'datetime',
             'is_visible' => 'boolean',
+            'is_draft' => 'boolean',
         ];
     }
 
@@ -135,28 +137,28 @@ class News extends Model
 
     public function isScheduled(): bool
     {
-        return $this->publish_at !== null && $this->publish_at->isFuture();
+        return ! $this->is_draft && $this->publish_at !== null && $this->publish_at->isFuture();
     }
 
     public function isPubliclyVisible(): bool
     {
-        return $this->is_visible && ($this->publish_at === null || $this->publish_at->isPast());
+        return ! $this->is_draft && $this->is_visible && ($this->publish_at === null || $this->publish_at->isPast());
     }
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_visible', true);
+        return $query->where('is_draft', false)->where('is_visible', true);
     }
 
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where(function (Builder $query): void {
+        return $query->where('is_draft', false)->where(function (Builder $query): void {
             $query->whereNull('publish_at')->orWhere('publish_at', '<=', now());
         });
     }
 
     public function scopeScheduled(Builder $query): Builder
     {
-        return $query->where('is_visible', true)->where('publish_at', '>', now());
+        return $query->where('is_draft', false)->where('is_visible', true)->where('publish_at', '>', now());
     }
 }

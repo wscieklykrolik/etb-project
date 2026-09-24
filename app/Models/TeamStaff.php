@@ -12,6 +12,7 @@ class TeamStaff extends Model
     protected $table = 'team_staff';
 
     protected $fillable = [
+        'birth_year',
         'name',
         'role',
         'description',
@@ -22,6 +23,7 @@ class TeamStaff extends Model
     protected function casts(): array
     {
         return [
+            'birth_year' => 'integer',
             'sort_order' => 'integer',
         ];
     }

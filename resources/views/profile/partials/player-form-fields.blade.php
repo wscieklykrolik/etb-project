@@ -30,8 +30,8 @@
     </label>
 
     <label class="block">
-        <span class="text-sm font-medium text-gray-700">Data urodzenia</span>
-        <input name="date_of_birth" type="date" required value="{{ old('date_of_birth', $player?->date_of_birth?->format('Y-m-d')) }}" class="mt-1 w-full rounded border-gray-300">
+        <span class="text-sm font-medium text-gray-700">Rok urodzenia (opcjonalnie)</span>
+        <input name="birth_year" type="number" min="1900" max="{{ now()->year }}" step="1" placeholder="np. 2003" value="{{ old('birth_year', $player?->birth_year ?? $player?->date_of_birth?->year) }}" class="mt-1 w-full rounded border-gray-300">
     </label>
 
     <label class="block">

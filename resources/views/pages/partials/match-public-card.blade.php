@@ -1,11 +1,10 @@
 @php
     use App\Models\TeamMatch;
 
-    $logo = $match?->opponent_logo ?: $match?->opponent?->logo_path;
     $isFeatured = $featured ?? false;
 
     $cardClasses = $isFeatured
-        ? 'scale-[1.03] border-yellow-400 bg-yellow-400 p-6 text-black shadow-2xl shadow-yellow-400/20 hover:-translate-y-2 hover:border-white hover:bg-yellow-300 lg:scale-105 lg:p-7'
+        ? 'border-yellow-400 bg-yellow-400 p-6 text-black shadow-2xl shadow-yellow-400/20 hover:-translate-y-2 hover:border-white hover:bg-yellow-300 lg:scale-105 lg:p-7'
         : 'border-zinc-800 bg-zinc-950 p-5 text-white shadow-xl hover:-translate-y-1 hover:border-yellow-400/70';
 
     $labelClasses = $isFeatured ? 'text-black' : 'text-yellow-400';
@@ -23,27 +22,14 @@
         <p class="mb-4 text-xs font-black uppercase tracking-[0.2em] {{ $labelClasses }}">{{ $label }}</p>
     @endisset
 
-    <div class="flex items-start justify-between gap-4">
-        <div class="flex items-center gap-4">
-            <div class="flex h-16 w-16 items-center justify-center rounded bg-white p-2">
-                @if ($logo)
-                    <img src="{{ \App\Support\MediaStorage::url($logo) }}" alt="{{ $match->opponent_name }}" class="max-h-full max-w-full object-contain">
-                @else
-                    <span class="text-xs font-black text-zinc-500">LOGO</span>
-                @endif
-            </div>
-            <div>
-                <h3 class="{{ $isFeatured ? 'text-2xl' : 'text-xl' }} font-black {{ $titleClasses }}">{{ $match->opponent_name }}</h3>
-                <p class="text-sm font-semibold {{ $metaClasses }}">{{ $match->is_home ? 'Domowy' : 'Wyjazdowy' }} · {{ $match->location }}</p>
-            </div>
-        </div>
+    <h3 class="sr-only">ETB kontra {{ $match->opponent_name }}</h3>
+    <x-match-teams :match="$match" class="{{ $titleClasses }}" />
+    <p class="mt-4 text-sm font-semibold {{ $metaClasses }}">{{ $match->is_home ? 'Domowy' : 'Wyjazdowy' }} · {{ $match->location }}</p>
+    <span class="mt-3 inline-block rounded px-2 py-1 text-xs font-bold uppercase {{ $badgeClasses }}">
+        {{ $match->status === TeamMatch::STATUS_FINISHED ? 'Zakończony' : 'Nadchodzący' }}
+    </span>
 
-        <span class="rounded px-2 py-1 text-xs font-bold uppercase {{ $badgeClasses }}">
-            {{ $match->status === TeamMatch::STATUS_FINISHED ? 'Zakończony' : 'Nadchodzący' }}
-        </span>
-    </div>
-
-    <div class="mt-6 flex items-end justify-between gap-4">
+    <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-sm uppercase tracking-widest {{ $dateClasses }}">{{ $match->match_date?->format('d.m.Y') }}</p>
             <p class="mt-1 {{ $isFeatured ? 'text-3xl' : 'text-2xl' }} font-black {{ $timeClasses }}">{{ $match->match_date?->format('H:i') }}</p>

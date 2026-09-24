@@ -10,6 +10,7 @@ class ThreeXThreeMember extends Model
     use HasFactory;
 
     protected $fillable = [
+        'birth_year',
         'name',
         'role',
         'description',
@@ -21,6 +22,7 @@ class ThreeXThreeMember extends Model
     protected function casts(): array
     {
         return [
+            'birth_year' => 'integer',
             'is_coach' => 'boolean',
             'sort_order' => 'integer',
         ];

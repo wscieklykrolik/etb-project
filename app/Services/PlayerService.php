@@ -28,6 +28,12 @@ class PlayerService
      */
     public function update(Player $player, array $data, ?UploadedFile $photo): Player
     {
+        // Keep the legacy date only while it agrees with the submitted year.
+        if (array_key_exists('birth_year', $data) && $player->date_of_birth
+            && (int) $data['birth_year'] !== $player->date_of_birth->year) {
+            $data['date_of_birth'] = null;
+        }
+
         $data['publish_description'] = (bool) ($data['publish_description'] ?? false);
         $data['is_starting_five'] = (bool) ($data['is_starting_five'] ?? false);
         $oldPath = null;

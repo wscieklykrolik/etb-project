@@ -36,88 +36,12 @@
      x-data="adminPanel({
         currentAccount: @js(['name' => $user->name, 'email' => $user->email, 'role' => $user->role]),
         unreadCount: @js($unreadNotificationsCount),
+        initialModal: @js($errors->any() ? old('_news_form') : null),
      })"
-     @keydown.escape.window="openModal = null">
+     @keydown.escape.window="closeModal()">
     @if ($isPanelUser)
         <div class="grid min-h-screen bg-slate-100 lg:grid-cols-[18rem_1fr]">
-            <aside class="bg-slate-950 text-white">
-                <div class="sticky top-0 flex h-screen flex-col overflow-hidden px-5 py-6">
-                    <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-3">
-                        <x-site-logo :url="$adminLogoUrl" alt="Logo panelu admina" image-class="h-11 w-11 rounded-full bg-white object-contain p-1 ring-1 ring-yellow-300" fallback-class="flex h-11 w-11 items-center justify-center rounded-full bg-yellow-400 text-xl font-black text-black" />
-                        <span>
-                            <span class="block text-xl font-black leading-5 text-yellow-400">ETB Łódź</span>
-                            <span class="block text-xs font-bold uppercase tracking-[0.22em] text-white">Admin</span>
-                        </span>
-                    </a>
-
-                    <nav class="admin-side-nav mt-8 min-h-0 flex-1 space-y-6 overflow-y-auto pr-1 text-sm">
-                        <div>
-                            <a href="{{ $sectionUrl('dashboard') }}" class="{{ $activeSection === 'dashboard' ? 'flex items-center gap-3 rounded-lg bg-yellow-400 px-4 py-3 font-black text-black' : 'flex items-center gap-3 rounded-lg px-4 py-3 font-black text-slate-200 transition hover:bg-yellow-400 hover:text-black' }}">
-                                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
-                                Pulpit
-                            </a>
-                            <div class="mt-3 space-y-1">
-                                <a href="{{ $sectionUrl('notifications-history') }}" class="{{ $sectionClasses('notifications-history') }}"><i data-lucide="history" class="h-4 w-4"></i>Historia zmian</a>
-                                <a href="{{ $sectionUrl('faq') }}" class="{{ $sectionClasses('faq') }}"><i data-lucide="circle-help" class="h-4 w-4"></i>Pytania i odpowiedzi</a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Zarządzanie</p>
-                            <div class="mt-3 space-y-1">
-                                @if ($isAdmin)
-                                    <a href="{{ $sectionUrl('users') }}" class="{{ $sectionClasses('users') }}"><i data-lucide="users" class="h-4 w-4"></i>Użytkownicy</a>
-                                @endif
-                                <a href="{{ $sectionUrl('club-content') }}" class="{{ $sectionClasses('club-content') }}"><i data-lucide="building-2" class="h-4 w-4"></i>Klub</a>
-                                <a href="{{ $sectionUrl('news') }}" class="{{ $sectionClasses('news') }}"><i data-lucide="newspaper" class="h-4 w-4"></i>Aktualności</a>
-                                <a href="{{ $sectionUrl('academy') }}" class="{{ $sectionClasses('academy') }}"><i data-lucide="graduation-cap" class="h-4 w-4"></i>Akademia</a>
-                                <a href="{{ $sectionUrl('sponsors') }}" class="{{ $sectionClasses('sponsors') }}"><i data-lucide="handshake" class="h-4 w-4"></i>Sponsorzy</a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Terminarz</p>
-                            <div class="mt-3 space-y-1">
-                                <a href="{{ $sectionUrl('matches') }}" class="{{ $sectionClasses('matches') }}"><i data-lucide="calendar-days" class="h-4 w-4"></i>Mecze</a>
-                                <a href="{{ route('schedule.lzkosz') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="calendar" class="h-4 w-4"></i>Terminarz ŁZKosz</a>
-                                <a href="{{ $sectionUrl('league-table') }}" class="{{ $sectionClasses('league-table') }}"><i data-lucide="table-2" class="h-4 w-4"></i>Tabela ligi</a>
-                                <a href="{{ route('schedule.3x3') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="calendar-range" class="h-4 w-4"></i>Terminarz 3x3</a>
-                                <a href="{{ $sectionUrl('tournaments') }}" class="{{ $sectionClasses('tournaments') }}"><i data-lucide="trophy" class="h-4 w-4"></i>Turnieje 3x3</a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Skład</p>
-                            <div class="mt-3 space-y-1">
-                                <a href="{{ $sectionUrl('players') }}" class="{{ $sectionClasses('players') }}"><i data-lucide="user-round" class="h-4 w-4"></i>Zawodnicy</a>
-                                <a href="{{ $sectionUrl('staff') }}" class="{{ $sectionClasses('staff') }}"><i data-lucide="user-cog" class="h-4 w-4"></i>Sztab szkoleniowy</a>
-                                <a href="{{ $sectionUrl('three-x-three') }}" class="{{ $sectionClasses('three-x-three') }}"><i data-lucide="circle-dot" class="h-4 w-4"></i>Drużyna 3x3</a>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Sklep</p>
-                            <div class="mt-3 space-y-1">
-                                <a href="{{ $sectionUrl('shop') }}" class="{{ $sectionClasses('shop') }}"><i data-lucide="store" class="h-4 w-4"></i>Podsumowanie sklepu</a>
-                                <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="shopping-cart" class="h-4 w-4"></i>Zamówienia</a>
-                                <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="package" class="h-4 w-4"></i>Produkty</a>
-                                <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="tags" class="h-4 w-4"></i>Kategorie</a>
-                                <a href="{{ route('admin.product-filters.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 transition hover:bg-yellow-400 hover:text-black"><i data-lucide="sliders-horizontal" class="h-4 w-4"></i>Filtry sklepu</a>
-                            </div>
-                        </div>
-                    </nav>
-
-                    <div class="shrink-0 border-t border-white/10 pt-5">
-                        <a href="{{ $sectionUrl('account') }}" class="{{ $sectionClasses('account') }}"><i data-lucide="settings" class="h-4 w-4"></i>Profil</a>
-                        <form method="POST" action="{{ route('logout') }}" class="mt-1">
-                            @csrf
-                            <button class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-200 transition hover:bg-yellow-400 hover:text-black">
-                                <i data-lucide="log-out" class="h-4 w-4"></i>
-                                Wyloguj
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </aside>
+            @include('partials.admin-sidebar')
 
             <div class="bg-slate-100">
                 <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-950 px-4 py-4 text-white shadow-sm sm:px-6 lg:px-8">
@@ -415,6 +339,55 @@
                         </section>
                     @endif
 
+                    <section id="tickets" class="{{ $activeSection === 'tickets' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h2 class="text-xl font-black">Bilety</h2>
+                                <p class="text-sm text-slate-600">Ustaw treść, grafikę oraz przycisk widoczny na publicznej stronie biletów.</p>
+                            </div>
+                            <a href="{{ route('tickets') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold hover:bg-yellow-50">
+                                <i data-lucide="external-link" class="h-4 w-4"></i>Zobacz stronę
+                            </a>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.tickets-page.update') }}" enctype="multipart/form-data" class="space-y-5" x-data="{ preview: null }">
+                            @csrf
+                            @method('PUT')
+
+                            <div>
+                                <label for="tickets-page-body" class="mb-2 block text-sm font-bold">Treść</label>
+                                <textarea id="tickets-page-body" name="body" rows="8" maxlength="100000" class="w-full rounded-lg border-slate-300 text-sm" placeholder="Wpisz tekst widoczny na stronie biletów...">{{ old('body', $ticketsPageBody) }}</textarea>
+                            </div>
+
+                            <div class="grid gap-4 lg:grid-cols-2">
+                                <div>
+                                    <label for="tickets-page-button-url" class="mb-2 block text-sm font-bold">Link przycisku</label>
+                                    <input id="tickets-page-button-url" name="button_url" type="url" value="{{ old('button_url', $ticketsPageButtonUrl) }}" placeholder="https://..." class="w-full rounded-lg border-slate-300 text-sm">
+                                </div>
+                                <div>
+                                    <label for="tickets-page-button-label" class="mb-2 block text-sm font-bold">Podpis przycisku</label>
+                                    <input id="tickets-page-button-label" name="button_label" value="{{ old('button_label', $ticketsPageButtonLabel) }}" maxlength="80" placeholder="np. Kup bilet online" class="w-full rounded-lg border-slate-300 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                <label for="tickets-page-image" class="mb-2 block text-sm font-bold">Grafika strony biletów</label>
+                                @if ($ticketsPageImageUrl)
+                                    <img src="{{ $ticketsPageImageUrl }}" alt="Grafika strony biletów" class="mb-3 max-h-72 max-w-full rounded-lg object-contain">
+                                    <label class="mb-3 flex items-center gap-2 text-sm">
+                                        <input type="checkbox" name="remove_image" value="1" @checked(old('remove_image')) class="rounded border-slate-300 text-yellow-500 focus:ring-yellow-400">
+                                        Usuń obecną grafikę
+                                    </label>
+                                @endif
+                                <input id="tickets-page-image" type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" @change="if (preview) URL.revokeObjectURL(preview); preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" class="block w-full min-w-0 rounded-lg border border-slate-300 bg-white p-3 text-sm">
+                                <template x-if="preview"><img :src="preview" alt="Podgląd wybranej grafiki" class="mt-4 max-h-72 max-w-full rounded-lg object-contain"></template>
+                            </div>
+
+                            <button class="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 font-bold text-black hover:bg-yellow-300">
+                                <i data-lucide="save" class="h-4 w-4"></i>Zapisz stronę biletów
+                            </button>
+                        </form>
+                    </section>
                     @if ($isAdmin)
                         <section id="users" class="{{ $activeSection === 'users' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm" x-data="adminUserSearch(@js(route('admin.users.search')), {
                             role: @js($userRoleFilter),
@@ -698,14 +671,15 @@
                                     <option value="all">Wszystkie</option>
                                     <option value="published">Opublikowane</option>
                                     <option value="scheduled">Zaplanowane</option>
+                                    <option value="draft">Wersje robocze</option>
                                 </select>
                                 <button type="button" class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" @click="openModal = 'news-create'">Dodaj aktualność</button>
                             </div>
                         </div>
 
                         <div class="grid gap-6 xl:grid-cols-2">
-                            @foreach ([['items' => $publishedNews, 'type' => 'published', 'title' => 'Opublikowane'], ['items' => $scheduledNews, 'type' => 'scheduled', 'title' => 'Zaplanowane']] as $group)
-                                <div x-show="newsFilter === 'all' || newsFilter === '{{ $group['type'] }}'">
+                            @foreach ([['items' => $publishedNews, 'type' => 'published', 'title' => 'Opublikowane'], ['items' => $scheduledNews, 'type' => 'scheduled', 'title' => 'Zaplanowane'], ['items' => $draftNews, 'type' => 'draft', 'title' => 'Wersje robocze — do opublikowania']] as $group)
+                                <div class="{{ $group['type'] === 'draft' ? 'xl:col-span-2' : '' }}" x-show="newsFilter === 'all' || newsFilter === '{{ $group['type'] }}'">
                                     <h3 class="mb-3 font-black">{{ $group['title'] }}</h3>
                                     <div class="admin-scroll-list space-y-3">
                                         @forelse ($group['items'] as $item)
@@ -718,8 +692,8 @@
                                                         <div class="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-xs font-black uppercase text-slate-500">{{ $item->type === \App\Models\News::TYPE_VIDEO ? 'Wideo' : 'ETB' }}</div>
                                                     @endif
                                                     <div class="min-w-0 flex-1">
-                                                        <h4 class="font-black">{{ $item->title }}</h4>
-                                                        <p class="text-sm text-slate-600">{{ $item->typeLabel() }} · {{ $item->publish_at?->format('d.m.Y H:i') ?? 'Publikacja natychmiastowa' }}</p>
+                                                        <h4 class="font-black">{{ $item->title ?: 'Wersja robocza bez tytułu' }}</h4>
+                                                        <p class="text-sm text-slate-600">{{ $item->typeLabel() }} · {{ $group['type'] === 'draft' ? 'Nieopublikowana wersja robocza' : ($item->publish_at?->format('d.m.Y H:i') ?? 'Publikacja natychmiastowa') }}</p>
                                                         <div class="mt-3 flex flex-wrap gap-2">
                                                             <a href="{{ route('admin.news.preview', $item) }}" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-yellow-50">Podgląd</a>
                                                             @if ($group['type'] === 'scheduled')
@@ -850,6 +824,7 @@
                     @include('profile.partials.academy-admin')
 
                     @include('profile.partials.faq-admin')
+                    @include('profile.partials.important-links-admin')
 
                     <section id="sponsors" class="{{ $activeSection === 'sponsors' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1014,6 +989,9 @@
                         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-black">Sklep i zarządzanie</h2>
+                                @if(auth()->user()->isAdmin())
+                                    <a href="{{ route('admin.shop-settings.edit') }}" class="mt-2 inline-flex rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-black">Ustawienia zamówień</a>
+                                @endif
                                 <p class="text-sm text-slate-600">Produkty, zamówienia, kategorie oraz filtry sklepu w jednym miejscu.</p>
                             </div>
                             <a href="{{ route('shop.index') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black hover:bg-yellow-50">
@@ -1100,15 +1078,20 @@
             </div>
         @endforeach
 
-        <div x-show="openModal === 'news-create'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">
+        <div x-data="newsEditor({ saveOnClose: true })" @close-news-editor.window="if (openModal === 'news-create') closeEditor()" x-show="openModal === 'news-create'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="if (openModal === 'news-create') closeEditor()">
                 <h4 class="mb-4 text-lg font-black">Dodaj aktualność</h4>
-                <form method="POST" action="{{ route('news.store') }}" enctype="multipart/form-data" class="space-y-4">
+                <p class="mb-4 text-sm text-slate-600">Zamknięcie rozpoczętego wpisu zapisze go jako wersję roboczą. Przyszła data publikacji zaplanuje wpis.</p>
+                <div x-show="errors.length" x-cloak role="alert" class="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                        <template x-for="(error, index) in errors" :key="index"><p x-text="error"></p></template>
+                    </div>
+                    <p x-show="submitting" x-cloak role="status" class="mb-3 text-sm">Zapisywanie wpisu…</p>
+                    <form x-ref="editorForm" @submit.prevent="submitEditor()" method="POST" action="{{ route('news.store') }}" enctype="multipart/form-data" class="space-y-4">
                     @csrf
-                    @include('profile.partials.news-form-fields')
+                    @include('profile.partials.news-form-fields', ['item' => null])
                     <div class="flex justify-between">
-                        <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold" @click="openModal = null">Anuluj</button>
-                        <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz</button>
+                        <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold" @click="closeEditor()" :disabled="submitting">Zamknij</button>
+                        <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" :disabled="submitting">Zapisz i opublikuj</button>
                     </div>
                 </form>
             </div>
@@ -1127,17 +1110,21 @@
             </div>
         </div>
 
-        @foreach ($publishedNews->concat($scheduledNews) as $item)
-            <div x-show="openModal === 'news-edit-{{ $item->id }}'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">
+        @foreach ($publishedNews->concat($scheduledNews)->concat($draftNews) as $item)
+            <div x-data="newsEditor({ saveOnClose: @js($item->is_draft || ! $item->is_visible), existing: true })" @close-news-editor.window="if (openModal === 'news-edit-{{ $item->id }}') closeEditor()" x-show="openModal === 'news-edit-{{ $item->id }}'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="if (openModal === 'news-edit-{{ $item->id }}') closeEditor()">
                     <h4 class="mb-4 text-lg font-black">Edytuj aktualność</h4>
-                    <form method="POST" action="{{ route('news.update', $item) }}" enctype="multipart/form-data" class="space-y-4">
+                    <div x-show="errors.length" x-cloak role="alert" class="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                        <template x-for="(error, index) in errors" :key="index"><p x-text="error"></p></template>
+                    </div>
+                    <p x-show="submitting" x-cloak role="status" class="mb-3 text-sm">Zapisywanie wpisu…</p>
+                    <form x-ref="editorForm" @submit.prevent="submitEditor()" method="POST" action="{{ route('news.update', $item) }}" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         @method('PUT')
                         @include('profile.partials.news-form-fields', ['item' => $item])
                         <div class="flex justify-between">
-                            <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold" @click="openModal = null">Anuluj</button>
-                            <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz zmiany</button>
+                            <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold" @click="closeEditor()" :disabled="submitting">Zamknij</button>
+                            <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" :disabled="submitting">{{ $item->is_draft ? 'Zapisz i opublikuj' : 'Zapisz zmiany' }}</button>
                         </div>
                     </form>
                 </div>
@@ -1491,4 +1478,3 @@
     @endif
 </div>
 @endsection
-

@@ -15,6 +15,7 @@ class Player extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'birth_year',
         'first_name',
         'last_name',
         'number',
@@ -34,6 +35,7 @@ class Player extends Model
     protected function casts(): array
     {
         return [
+            'birth_year' => 'integer',
             'date_of_birth' => 'date',
             'number' => 'integer',
             'height' => 'integer',

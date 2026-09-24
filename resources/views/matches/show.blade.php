@@ -5,15 +5,11 @@
 @section('content')
     <div class="mx-auto max-w-3xl px-6 py-10">
         <article class="rounded-lg border bg-white p-6 shadow-sm">
-            <div class="flex gap-4">
-                @if ($match->opponent_logo)
-                    <img src="{{ \App\Support\MediaStorage::url($match->opponent_logo) }}"
-                         alt="Logo przeciwnika {{ $match->opponent_name }}"
-                         class="h-20 w-20 rounded object-contain ring-1 ring-gray-200">
-                @endif
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <x-match-teams :match="$match" class="max-w-xs text-gray-950" />
 
                 <div>
-                    <h1 class="text-3xl font-bold">{{ $match->opponent_name }}</h1>
+                    <h1 class="text-3xl font-bold">ETB kontra {{ $match->opponent_name }}</h1>
                     <p class="mt-2 text-gray-600">{{ $match->is_home ? 'Mecz u siebie' : 'Mecz wyjazdowy' }}</p>
                 </div>
             </div>

@@ -9,19 +9,15 @@
         <div class="space-y-4">
             @forelse($matches as $match)
                 <article class="rounded-lg border bg-white p-5 shadow-sm">
-                    <div class="flex gap-4">
-                        @if ($match->opponent_logo)
-                            <img src="{{ \App\Support\MediaStorage::url($match->opponent_logo) }}"
-                                 alt="Logo przeciwnika {{ $match->opponent_name }}"
-                                 class="h-16 w-16 rounded object-contain ring-1 ring-gray-200">
-                        @endif
+                    <div class="flex flex-col gap-4 sm:flex-row">
+                <x-match-teams :match="$match" class="max-w-xs text-gray-950" />
 
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
                                     <h2 class="text-xl font-semibold">
                                         <a class="hover:underline" href="{{ route('matches.show', $match) }}">
-                                            {{ $match->opponent_name }}
+                                            ETB kontra {{ $match->opponent_name }}
                                         </a>
                                     </h2>
                                     <p class="text-sm text-gray-600">{{ $match->match_date->format('d.m.Y H:i') }}</p>

@@ -44,7 +44,9 @@ class ProfileController extends Controller
             'dashboard',
             'users',
             'matches',
+            'tickets',
             'club-content',
+            'important-links',
             'academy',
             'faq',
             'news',
@@ -85,6 +87,14 @@ class ProfileController extends Controller
             ->with(['author', 'images'])
             ->scheduled()
             ->orderBy('publish_at')
+            ->get();
+
+        $draftNews = News::query()
+            ->with(['author', 'images'])
+            ->where(function ($query): void {
+                $query->where('is_draft', true)->orWhere('is_visible', false);
+            })
+            ->latest('updated_at')
             ->get();
 
         $players = Player::query()
@@ -189,6 +199,7 @@ class ProfileController extends Controller
             'finishedMatches' => $finishedMatches,
             'publishedNews' => $publishedNews,
             'scheduledNews' => $scheduledNews,
+            'draftNews' => $draftNews,
             'players' => $players,
             'staff' => $staff,
             'threeXThreeMembers' => $threeXThreeMembers,
@@ -203,6 +214,7 @@ class ProfileController extends Controller
             'academyTrainingDate' => $academyTrainingDate,
             'academyCalendarNotes' => $academyCalendarNotes,
             'faqQuestions' => $faqQuestions,
+            'importantPages' => \App\Models\ImportantPage::query()->get()->keyBy('slug'),
             'adminNotifications' => $adminNotifications,
             'notificationHistory' => $notificationHistory,
             'unreadNotificationsCount' => $unreadNotificationsCount,

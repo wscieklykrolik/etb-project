@@ -4,6 +4,28 @@ import { createIcons, icons } from 'lucide';
 
 window.Alpine = Alpine;
 
+// Keep wide tables inside their own scroll area, including editorial content.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#app-main table').forEach((table) => {
+        let wrapper = table.parentElement;
+        if (!wrapper.classList.contains('overflow-x-auto') && !wrapper.classList.contains('etb-table-scroll')) {
+            wrapper = document.createElement('div');
+            table.before(wrapper);
+            wrapper.append(table);
+        }
+        wrapper.classList.add('etb-table-scroll');
+        wrapper.tabIndex = 0;
+        wrapper.setAttribute('role', 'region');
+        wrapper.setAttribute('aria-label', 'Tabela — przewiń w poziomie, aby zobaczyć wszystkie kolumny');
+    });
+    const wideScreen = window.matchMedia('(min-width: 1024px)');
+    document.querySelectorAll('[data-responsive-details]').forEach((details) => {
+        const sync = () => { details.open = wideScreen.matches; };
+        sync();
+        wideScreen.addEventListener('change', sync);
+    });
+});
+
 window.adminUserSearch = function adminUserSearch(searchUrl, filters = {}) {
     return {
         query: '',
@@ -154,9 +176,97 @@ window.newsLightbox = function newsLightbox(images = []) {
     };
 };
 
+window.newsEditor = function newsEditor(config = {}) {
+    return {
+        submitting: false,
+        errors: [],
+        initialValues: '',
+        init() {
+            this.$nextTick(() => { this.initialValues = this.signature(); });
+        },
+        signature() {
+            return JSON.stringify([...new FormData(this.$refs.editorForm).entries()]
+                .filter(([key]) => !['_token', 'save_as_draft'].includes(key))
+                .map(([key, value]) => [key, value instanceof File ? (value.size ? [value.name, value.size, value.lastModified] : null) : value]));
+        },
+        hasContent() {
+            const data = new FormData(this.$refs.editorForm);
+            return ['title', 'content', 'excerpt', 'video_url', 'article_author', 'photo_author']
+                .some((key) => String(data.get(key) || '').trim() !== '')
+                || [...data.values()].some((value) => value instanceof File && value.size > 0);
+        },
+        closeEditor() {
+            if (this.submitting) return;
+            if (config.saveOnClose && (config.existing ? this.signature() !== this.initialValues : this.hasContent())) {
+                this.submitEditor(true);
+                return;
+            }
+            if (config.returnUrl) {
+                window.location.assign(config.returnUrl);
+            } else {
+                this.openModal = null;
+            }
+        },
+        async submitEditor(draft = false) {
+            if (this.submitting) return;
+            this.submitting = true;
+            this.errors = [];
+            const form = this.$refs.editorForm;
+            const data = new FormData(form);
+            data.set('save_as_draft', draft ? '1' : '0');
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { Accept: 'application/json' },
+                    body: data,
+                });
+                if (!response.ok) {
+                    const result = await response.json().catch(() => ({}));
+                    this.errors = response.status === 422
+                        ? Object.values(result.errors || {}).flat()
+                        : ['Nie udało się zapisać wpisu. Spróbuj ponownie.'];
+                    if (!this.errors.length) this.errors = ['Nie udało się zapisać wpisu. Spróbuj ponownie.'];
+                    this.submitting = false;
+                    return;
+                }
+                const result = await response.json();
+                window.location.assign(result.redirect);
+            } catch {
+                this.errors = ['Nie udało się zapisać wpisu. Sprawdź połączenie i spróbuj ponownie.'];
+                this.submitting = false;
+            }
+        },
+    };
+};
+
+window.newsGallery = function newsGallery() {
+    return {
+        selectedImages: [],
+        addFiles(event) {
+            for (const file of event.target.files) {
+                this.selectedImages.push({ file, url: URL.createObjectURL(file) });
+            }
+            this.syncFiles();
+        },
+        removeFile(index) {
+            URL.revokeObjectURL(this.selectedImages[index].url);
+            this.selectedImages.splice(index, 1);
+            this.syncFiles();
+        },
+        syncFiles() {
+            const transfer = new DataTransfer();
+            this.selectedImages.forEach((image) => transfer.items.add(image.file));
+            this.$refs.galleryInput.files = transfer.files;
+        },
+        destroy() {
+            this.selectedImages.forEach((image) => URL.revokeObjectURL(image.url));
+        },
+    };
+};
+
 window.adminPanel = function adminPanel(config) {
     return {
-        openModal: null,
+        openModal: config.initialModal || null,
         matchFilter: 'all',
         newsFilter: 'all',
         publishAction: null,
@@ -172,6 +282,13 @@ window.adminPanel = function adminPanel(config) {
         },
         init() {
             this.savedAccounts = this.readSavedAccounts();
+        },
+        closeModal() {
+            if (this.openModal === 'news-create' || this.openModal?.startsWith('news-edit-')) {
+                window.dispatchEvent(new CustomEvent('close-news-editor'));
+            } else {
+                this.openModal = null;
+            }
         },
         readSavedAccounts() {
             try {
@@ -291,6 +408,295 @@ window.academyTrainerForm = function academyTrainerForm(config) {
                 clearInterval(this.progressTimer);
                 this.progressTimer = null;
             }
+        },
+    };
+};
+
+const COOKIE_CONSENT_CONFIG = {
+    name: 'etb_cookie_consent',
+    version: 1,
+    maxAge: 60 * 60 * 24 * 180,
+    categories: ['functional', 'analytics', 'marketing'],
+};
+
+const optionalCookiePatterns = {
+    functional: [/^etb_preferences$/],
+    analytics: [/^_ga/, /^_gid$/, /^_gat/, /^_gcl_au$/, /^_hj/, /^AMP_TOKEN$/, /^_pk_/],
+    marketing: [/^_fbp$/, /^fr$/, /^IDE$/, /^NID$/, /^ANONCHK$/, /^MUID$/, /^VISITOR_INFO1_LIVE$/, /^YSC$/, /^PREF$/],
+};
+
+const necessaryOnlyConsent = () => ({
+    necessary: true,
+    functional: false,
+    analytics: false,
+    marketing: false,
+});
+
+let activeCookieConsent = necessaryOnlyConsent();
+
+function readCookieConsent() {
+    const prefix = `${COOKIE_CONSENT_CONFIG.name}=`;
+    const rawValue = document.cookie
+        .split(';')
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(prefix))
+        ?.slice(prefix.length);
+
+    if (!rawValue) return null;
+
+    try {
+        const stored = JSON.parse(decodeURIComponent(rawValue));
+        if (stored.version !== COOKIE_CONSENT_CONFIG.version || typeof stored.categories !== 'object') {
+            return null;
+        }
+
+        return {
+            version: stored.version,
+            acceptedAt: stored.acceptedAt,
+            categories: {
+                necessary: true,
+                functional: stored.categories.functional === true,
+                analytics: stored.categories.analytics === true,
+                marketing: stored.categories.marketing === true,
+            },
+        };
+    } catch {
+        return null;
+    }
+}
+
+function writeCookieConsent(categories) {
+    const value = encodeURIComponent(JSON.stringify({
+        version: COOKIE_CONSENT_CONFIG.version,
+        acceptedAt: new Date().toISOString(),
+        categories,
+    }));
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+
+    document.cookie = `${COOKIE_CONSENT_CONFIG.name}=${value}; Max-Age=${COOKIE_CONSENT_CONFIG.maxAge}; Path=/; SameSite=Lax${secure}`;
+}
+
+function removeCookie(name) {
+    const encodedName = encodeURIComponent(name);
+    const hostname = window.location.hostname;
+    const domains = hostname && hostname !== 'localhost'
+        ? ['', `; Domain=${hostname}`, `; Domain=.${hostname}`]
+        : [''];
+
+    domains.forEach((domain) => {
+        document.cookie = `${encodedName}=; Max-Age=0; Path=/; SameSite=Lax${domain}`;
+    });
+}
+
+function clearCookiesForDisabledCategories(categories) {
+    const disabledPatterns = COOKIE_CONSENT_CONFIG.categories
+        .filter((category) => !categories[category])
+        .flatMap((category) => optionalCookiePatterns[category] || []);
+
+    if (disabledPatterns.length === 0) return;
+
+    document.cookie.split(';').forEach((part) => {
+        const name = decodeURIComponent(part.split('=')[0].trim());
+        if (disabledPatterns.some((pattern) => pattern.test(name))) {
+            removeCookie(name);
+        }
+    });
+}
+
+function activateConsentScripts(categories) {
+    document.querySelectorAll('script[type="text/plain"][data-cookie-category]').forEach((blockedScript) => {
+        const category = blockedScript.dataset.cookieCategory;
+        if (!categories[category] || blockedScript.dataset.cookieActivated === 'true') return;
+
+        const script = document.createElement('script');
+        Array.from(blockedScript.attributes).forEach((attribute) => {
+            if (['type', 'data-cookie-category', 'data-cookie-type', 'data-cookie-src', 'data-cookie-activated'].includes(attribute.name)) return;
+            script.setAttribute(attribute.name, attribute.value);
+        });
+        script.type = blockedScript.dataset.cookieType || 'text/javascript';
+        if (blockedScript.dataset.cookieSrc) script.src = blockedScript.dataset.cookieSrc;
+        script.textContent = blockedScript.textContent;
+        blockedScript.dataset.cookieActivated = 'true';
+        blockedScript.after(script);
+    });
+}
+
+function updateConsentEmbeds(categories) {
+    document.querySelectorAll('[data-cookie-embed][data-cookie-category]').forEach((container) => {
+        const allowed = categories[container.dataset.cookieCategory] === true;
+        const loadedContent = container.querySelector('[data-cookie-loaded]');
+        const placeholder = container.querySelector('[data-cookie-placeholder]');
+
+        if (allowed && !loadedContent) {
+            placeholder?.remove();
+            const template = container.querySelector('template[data-cookie-embed-content]');
+            if (!template) return;
+
+            const content = template.content.cloneNode(true);
+            content.querySelectorAll('[data-cookie-src]').forEach((element) => {
+                element.setAttribute('src', element.dataset.cookieSrc);
+                element.setAttribute('data-cookie-loaded', 'true');
+                element.removeAttribute('data-cookie-src');
+            });
+            container.appendChild(content);
+            return;
+        }
+
+        if (!allowed && loadedContent) {
+            loadedContent.remove();
+        }
+
+        if (!allowed && !container.querySelector('[data-cookie-placeholder]')) {
+            const template = container.querySelector('template[data-cookie-placeholder-content]');
+            if (template) container.appendChild(template.content.cloneNode(true));
+        }
+    });
+
+    window.reinitializeUi?.();
+}
+
+function applyCookieConsent(categories) {
+    activeCookieConsent = { ...necessaryOnlyConsent(), ...categories, necessary: true };
+    clearCookiesForDisabledCategories(activeCookieConsent);
+    activateConsentScripts(activeCookieConsent);
+    updateConsentEmbeds(activeCookieConsent);
+    window.dispatchEvent(new CustomEvent('etb:cookie-consent-changed', {
+        detail: { ...activeCookieConsent },
+    }));
+}
+
+window.etbCookieConsent = {
+    has(category) {
+        return category === 'necessary' || activeCookieConsent[category] === true;
+    },
+};
+
+window.etbAnalytics = {
+    track(eventName, parameters = {}) {
+        if (!window.etbCookieConsent.has('analytics') || typeof window.gtag !== 'function') return;
+        window.gtag('event', eventName, parameters);
+    },
+};
+
+function analyticsParametersFrom(element) {
+    try {
+        return JSON.parse(element.dataset.analyticsParameters || '{}');
+    } catch {
+        return {};
+    }
+}
+
+document.addEventListener('click', (event) => {
+    const trackedElement = event.target.closest('[data-analytics-event]');
+    if (!trackedElement || trackedElement.tagName === 'FORM') return;
+
+    window.etbAnalytics.track(
+        trackedElement.dataset.analyticsEvent,
+        analyticsParametersFrom(trackedElement),
+    );
+});
+
+document.addEventListener('submit', (event) => {
+    const trackedForm = event.target.closest('form[data-analytics-event]');
+    if (!trackedForm) return;
+
+    const parameters = analyticsParametersFrom(trackedForm);
+    const quantityField = trackedForm.dataset.analyticsQuantityField;
+    const shippingField = trackedForm.dataset.analyticsShippingField;
+
+    if (quantityField && Array.isArray(parameters.items) && parameters.items[0]) {
+        const quantity = Math.max(1, Number(trackedForm.elements[quantityField]?.value || 1));
+        parameters.items[0].quantity = quantity;
+        if (typeof parameters.items[0].price === 'number') {
+            parameters.value = Number((parameters.items[0].price * quantity).toFixed(2));
+        }
+    }
+
+    if (shippingField) {
+        parameters.shipping_tier = trackedForm.querySelector(`[name="${shippingField}"]:checked`)?.value || undefined;
+    }
+
+    window.etbAnalytics.track(trackedForm.dataset.analyticsEvent, parameters);
+});
+
+window.cookieConsentManager = function cookieConsentManager() {
+    return {
+        initialized: false,
+        hasChoice: false,
+        showBanner: false,
+        showPreferences: false,
+        savedNotice: false,
+        noticeTimer: null,
+        preferences: necessaryOnlyConsent(),
+        init() {
+            const stored = readCookieConsent();
+            this.hasChoice = stored !== null;
+            this.preferences = stored ? { ...stored.categories } : necessaryOnlyConsent();
+            this.showBanner = !stored;
+            this.initialized = true;
+            applyCookieConsent(this.preferences);
+        },
+        reopenBanner() {
+            this.showPreferences = false;
+            this.savedNotice = false;
+            this.showBanner = true;
+            this.$nextTick(() => this.$refs.bannerHeading?.focus());
+        },
+        openPreferences() {
+            this.preferences = { ...activeCookieConsent };
+            this.showPreferences = true;
+            this.showBanner = false;
+            this.$nextTick(() => this.$refs.preferencesHeading?.focus());
+        },
+        closePreferences() {
+            if (!this.showPreferences) return;
+            this.showPreferences = false;
+            this.showBanner = !this.hasChoice;
+        },
+        acceptAll() {
+            this.persist({
+                necessary: true,
+                functional: true,
+                analytics: true,
+                marketing: true,
+            });
+        },
+        rejectOptional() {
+            this.persist(necessaryOnlyConsent());
+        },
+        savePreferences() {
+            this.persist({
+                necessary: true,
+                functional: this.preferences.functional === true,
+                analytics: this.preferences.analytics === true,
+                marketing: this.preferences.marketing === true,
+            });
+        },
+        persist(categories) {
+            const revoked = COOKIE_CONSENT_CONFIG.categories
+                .some((category) => activeCookieConsent[category] && !categories[category]);
+
+            writeCookieConsent(categories);
+            this.preferences = { ...categories };
+            this.hasChoice = true;
+            this.showBanner = false;
+            this.showPreferences = false;
+
+            if (revoked) {
+                clearCookiesForDisabledCategories(categories);
+                window.location.reload();
+                return;
+            }
+
+            applyCookieConsent(categories);
+            this.showSavedNotice();
+        },
+        showSavedNotice() {
+            if (this.noticeTimer) window.clearTimeout(this.noticeTimer);
+            this.savedNotice = true;
+            this.noticeTimer = window.setTimeout(() => {
+                this.savedNotice = false;
+            }, 3500);
         },
     };
 };
@@ -558,6 +964,7 @@ function initializeSiteSearch() {
     const goTo = (item) => {
         if (!item) return;
         input.value = item.label;
+        window.etbAnalytics.track('search');
         window.location.href = item.url;
     };
 
@@ -624,6 +1031,8 @@ window.etbSearch = function etbSearch() {
 
     const query = input.value.trim();
     if (!query) return;
+
+    window.etbAnalytics.track('search');
 
     const result = getSearchMatches(query)[0];
 

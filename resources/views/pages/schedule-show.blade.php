@@ -1,24 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-@php($logo = $match->opponent_logo ?: $match->opponent?->logo_path)
 <section class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
     <a href="{{ url()->previous() }}" class="text-sm font-semibold text-yellow-400 hover:text-yellow-300">← Wróć</a>
 
-    <article class="mt-8 rounded-lg border border-zinc-800 bg-zinc-950 p-8 shadow-2xl">
+    <article class="mt-8 rounded-lg border border-zinc-800 bg-zinc-950 p-4 sm:p-8 shadow-2xl">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div class="flex items-center gap-5">
-                <div class="flex h-24 w-24 items-center justify-center rounded bg-white p-3">
-                    @if ($logo)
-                        <img src="{{ \App\Support\MediaStorage::url($logo) }}" alt="{{ $match->opponent_name }}" class="max-h-full max-w-full object-contain">
-                    @else
-                        <span class="text-xs font-black text-zinc-500">LOGO</span>
-                    @endif
-                </div>
-                <div>
-                    <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">{{ $match->is_home ? 'Mecz domowy' : 'Mecz wyjazdowy' }}</p>
-                    <h1 class="mt-2 text-4xl font-black text-white">ETB - {{ $match->opponent_name }}</h1>
-                </div>
+            <div class="w-full md:max-w-lg">
+                <p class="mb-5 text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">{{ $match->is_home ? 'Mecz domowy' : 'Mecz wyjazdowy' }}</p>
+                <h1 class="sr-only">ETB - {{ $match->opponent_name }}</h1>
+                <x-match-teams :match="$match" class="text-white" />
             </div>
 
             <div class="text-left md:text-right">
