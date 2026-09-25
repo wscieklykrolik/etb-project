@@ -22,7 +22,7 @@
         <p class="mb-4 text-xs font-black uppercase tracking-[0.2em] {{ $labelClasses }}">{{ $label }}</p>
     @endisset
 
-    <h3 class="sr-only">ETB kontra {{ $match->opponent_name }}</h3>
+    <h3 class="sr-only">{{ $publicTeamName }} kontra {{ $match->opponent_name }}</h3>
     <x-match-teams :match="$match" class="{{ $titleClasses }}" />
     <p class="mt-4 text-sm font-semibold {{ $metaClasses }}">{{ $match->is_home ? 'Domowy' : 'Wyjazdowy' }} · {{ $match->location }}</p>
     <span class="mt-3 inline-block rounded px-2 py-1 text-xs font-bold uppercase {{ $badgeClasses }}">
@@ -46,4 +46,3 @@
     </div>
 </a>
 @endif
-

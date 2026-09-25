@@ -3,7 +3,7 @@
 @section('content')
 <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="mb-10">
-        <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">Drużyna ETB</p>
+        <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">Drużyna {{ $publicTeamName }}</p>
         <h1 class="mt-2 text-4xl font-black text-white">Drużyna</h1>
         <p class="mt-4 max-w-3xl text-zinc-300">Zawodnicy, sztab szkoleniowy i drużyna 3x3 w jednym przewijanym widoku.</p>
     </div>

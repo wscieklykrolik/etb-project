@@ -10,9 +10,9 @@
 <div {{ $attributes->class(['grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3']) }}>
     <div class="flex min-w-0 flex-col items-center gap-2 text-center" data-team="etb">
         <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-white p-2">
-            <x-site-logo :url="$ourLogoUrl" alt="Logo ETB" image-class="max-h-full max-w-full object-contain" fallback-class="text-lg font-black text-zinc-900" />
+            <x-site-logo :url="$ourLogoUrl" :alt="'Logo '.$publicTeamName" image-class="max-h-full max-w-full object-contain" fallback-class="text-lg font-black text-zinc-900" />
         </div>
-        <span class="break-words text-base font-black">ETB</span>
+        <span class="break-words text-base font-black">{{ $publicTeamName }}</span>
     </div>
     <span class="pt-5 text-lg font-black" aria-label="kontra">–</span>
     <div class="flex min-w-0 flex-col items-center gap-2 text-center" data-team="opponent">

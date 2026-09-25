@@ -36,6 +36,7 @@ it('lets an admin upload separate logos for every marked site area', function ()
 
         if ($logo === 'title-sponsor') {
             $payload['url'] = 'https://sponsor.example.com';
+            $payload['team_name'] = 'ETB Sponsor Testowy';
         }
 
         $this->actingAs($admin)->patch(route('admin.site-logos.update', $logo), $payload)->assertRedirect();
@@ -52,6 +53,7 @@ it('lets an admin upload separate logos for every marked site area', function ()
         ->assertSee('Eat The Ball - oficjalna strona')
         ->assertSee('ETB Łódź')
         ->assertSee('Logo sponsora tytularnego')
+        ->assertSee('Skład ETB Sponsor Testowy')
         ->assertSee('logos/', false);
 
     $this->get(route('news.index'))
@@ -101,13 +103,32 @@ it('lets an admin remove a selected site logo without deleting the others', func
     Storage::disk('media')->put('logos/sponsor.png', 'logo');
     AppSetting::setValue('club_logo', 'logos/klub.png');
     AppSetting::setValue('title_sponsor_logo', 'logos/sponsor.png');
+    AppSetting::setValue('public_team_name', 'ETB Stary Sponsor');
 
     $this->actingAs($admin)->delete(route('admin.site-logos.destroy', 'title-sponsor'))->assertRedirect();
 
     expect(AppSetting::getValue('title_sponsor_logo'))->toBeNull();
+    expect(AppSetting::getValue('public_team_name'))->toBeNull();
     expect(AppSetting::getValue('club_logo'))->toBe('logos/klub.png');
     Storage::disk('media')->assertMissing('logos/sponsor.png');
     Storage::disk('media')->assertExists('logos/klub.png');
+});
+
+it('lets an admin save a public team name without uploading a title sponsor logo', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $this->actingAs($admin)->patch(route('admin.site-logos.update', 'title-sponsor'), [
+        'team_name' => 'ETB Sponsor Bez Logo',
+        'url' => 'https://sponsor.example.com',
+    ])->assertRedirect();
+
+    expect(AppSetting::getValue('public_team_name'))->toBe('ETB Sponsor Bez Logo')
+        ->and(AppSetting::getValue('title_sponsor_url'))->toBe('https://sponsor.example.com')
+        ->and(AppSetting::getValue('title_sponsor_logo'))->toBeNull();
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Skład ETB Sponsor Bez Logo');
 });
 
 it('uses the previous site logo as the club logo fallback and migrates it on upload', function () {

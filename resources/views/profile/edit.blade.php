@@ -240,6 +240,7 @@
                                 'path' => $titleSponsorLogoPath,
                                 'fallback' => 'Sponsor tytularny',
                                 'link' => $titleSponsorUrl,
+                                'teamName' => $publicTeamName,
                             ],
                             [
                                 'id' => 'academy',
@@ -319,17 +320,20 @@
                                             <form method="POST" action="{{ route('admin.site-logos.update', $managedLogo['id']) }}" enctype="multipart/form-data" class="space-y-2">
                                                 @csrf
                                                 @method('PATCH')
-                                                <input name="logo" type="file" accept="image/*" @required(! $managedLogo['path']) class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
+                                                <input name="logo" type="file" accept="image/*" @required(! $managedLogo['path'] && $managedLogo['id'] !== 'title-sponsor') class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
                                                 @if ($managedLogo['id'] === 'title-sponsor')
+                                                    <label for="public-team-name" class="block text-sm font-bold text-slate-700">Publiczna nazwa drużyny</label>
+                                                    <input id="public-team-name" name="team_name" type="text" value="{{ old('team_name', $managedLogo['teamName'] ?? 'ETB') }}" maxlength="80" required placeholder="np. ETB Nazwa Sponsora" class="w-full rounded border border-slate-300 bg-white text-sm">
+                                                    <p class="text-xs text-slate-500">Pełna nazwa wyświetlana przy meczach i składzie.</p>
                                                     <input name="url" type="url" value="{{ old('url', $managedLogo['link'] ?? '') }}" placeholder="Link sponsora" class="w-full rounded border border-slate-300 bg-white text-sm">
                                                 @endif
-                                                <button class="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz logo</button>
+                                                <button class="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">{{ $managedLogo['id'] === 'title-sponsor' ? 'Zapisz dane sponsora' : 'Zapisz logo' }}</button>
                                             </form>
                                             @if ($managedLogo['path'])
                                                 <form method="POST" action="{{ route('admin.site-logos.destroy', $managedLogo['id']) }}" onsubmit="return confirm('Usunąć ten logotyp?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">Usuń logo</button>
+                                                    <button class="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">{{ $managedLogo['id'] === 'title-sponsor' ? 'Usuń logo i dane sponsora' : 'Usuń logo' }}</button>
                                                 </form>
                                             @endif
                                         </div>

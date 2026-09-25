@@ -92,8 +92,7 @@ class HomeController extends Controller
 
         return view('home', [
             'heroNews' => $latestNews->take(5),
-            'featuredArticles' => $latestNews->slice(5, 2),
-            'moreArticles' => $latestNews->slice(7, 4),
+            'latestArticles' => $latestNews->take(4),
             'lastFinishedMatch' => $lastFinishedMatch,
             'upcomingMatches' => $upcomingMatches,
             'startingFive' => $startingFive,

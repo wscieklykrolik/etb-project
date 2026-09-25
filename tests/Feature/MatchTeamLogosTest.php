@@ -5,6 +5,7 @@ use App\Models\TeamMatch;
 
 it('renders ETB first with its logo for home and away matches', function (bool $isHome) {
     AppSetting::setValue('club_logo', 'logos/etb.png');
+    AppSetting::setValue('public_team_name', 'ETB Sponsor Testowy');
     $match = TeamMatch::factory()->create([
         'is_home' => $isHome,
         'status' => TeamMatch::STATUS_UPCOMING,
@@ -22,6 +23,7 @@ it('renders ETB first with its logo for home and away matches', function (bool $
     foreach ([route('home'), route('schedule'), route('schedule.matches.show', $match)] as $url) {
         $this->get($url)
             ->assertOk()
+            ->assertSee('ETB Sponsor Testowy')
             ->assertSeeInOrder(['data-team="etb"', 'logos/etb.png', 'data-team="opponent"', 'logos/rywal.png'], false);
     }
 })->with([true, false]);

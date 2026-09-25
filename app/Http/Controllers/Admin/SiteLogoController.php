@@ -19,8 +19,9 @@ class SiteLogoController extends Controller
         ],
         'title-sponsor' => [
             'key' => 'title_sponsor_logo',
-            'label' => 'Logo sponsora tytularnego',
+            'label' => 'Dane sponsora tytularnego',
             'link_key' => 'title_sponsor_url',
+            'name_key' => 'public_team_name',
         ],
         'academy' => [
             'key' => 'academy_logo',
@@ -61,8 +62,14 @@ class SiteLogoController extends Controller
         $config = $this->logoConfig($logo);
 
         $request->validate([
-            'logo' => [Rule::requiredIf(! AppSetting::getValue($config['key'])), 'nullable', 'image', 'max:2048'],
+            'logo' => [
+                Rule::requiredIf(! isset($config['name_key']) && ! AppSetting::getValue($config['key'])),
+                'nullable',
+                'image',
+                'max:2048',
+            ],
             'url' => ['nullable', 'url', 'max:255'],
+            'team_name' => [Rule::requiredIf(isset($config['name_key'])), 'nullable', 'string', 'max:80'],
         ]);
 
         if ($request->hasFile('logo')) {
@@ -82,6 +89,10 @@ class SiteLogoController extends Controller
             }
         }
 
+        if (isset($config['name_key'])) {
+            AppSetting::setValue($config['name_key'], $request->string('team_name')->trim()->toString());
+        }
+
         return back()->with('success', $config['label'].' zostało zaktualizowane.');
     }
 
@@ -93,6 +104,7 @@ class SiteLogoController extends Controller
         AppSetting::query()->where('key', $config['key'])->delete();
         $this->forgetLegacySetting($config);
         $this->forgetLinkSetting($config);
+        $this->forgetNameSetting($config);
         $this->deleteStoredPaths($oldPaths);
 
         return back()->with('success', $config['label'].' zostało usunięte.');
@@ -127,6 +139,13 @@ class SiteLogoController extends Controller
     {
         if (isset($config['link_key'])) {
             AppSetting::query()->where('key', $config['link_key'])->delete();
+        }
+    }
+
+    private function forgetNameSetting(array $config): void
+    {
+        if (isset($config['name_key'])) {
+            AppSetting::query()->where('key', $config['name_key'])->delete();
         }
     }
 

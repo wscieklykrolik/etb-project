@@ -5,7 +5,7 @@
 
 <section @if($sectionId) id="{{ $sectionId }}" @endif class="scroll-mt-28">
     <div class="mb-10">
-        <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">Drużyna ETB</p>
+        <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">Drużyna {{ $publicTeamName }}</p>
         @if ($headingLevel === 1)
             <h1 class="mt-2 text-4xl font-black text-white">Zawodnicy</h1>
         @else

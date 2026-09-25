@@ -8,7 +8,7 @@
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div class="w-full md:max-w-lg">
                 <p class="mb-5 text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">{{ $match->is_home ? 'Mecz domowy' : 'Mecz wyjazdowy' }}</p>
-                <h1 class="sr-only">ETB - {{ $match->opponent_name }}</h1>
+                <h1 class="sr-only">{{ $publicTeamName }} - {{ $match->opponent_name }}</h1>
                 <x-match-teams :match="$match" class="text-white" />
             </div>
 
@@ -63,4 +63,3 @@
     </article>
 </section>
 @endsection
-

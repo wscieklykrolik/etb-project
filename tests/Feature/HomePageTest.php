@@ -80,6 +80,15 @@ it('shows homepage sections from published news, visible matches, and starting f
     $response = $this->get(route('home'));
 
     $response->assertOk();
+    $response->assertViewHas('latestArticles', function ($articles): bool {
+        return $articles->count() === 4
+            && $articles->pluck('title')->values()->all() === [
+                'Aktualnosc 1',
+                'Aktualnosc 2',
+                'Aktualnosc 3',
+                'Aktualnosc 4',
+            ];
+    });
     $response->assertSee('Aktualnosc 1');
     $response->assertSee('Aktualnosc 5');
     $response->assertDontSee('Ukryta aktualnosc');
