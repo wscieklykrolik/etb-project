@@ -107,4 +107,7 @@ it('shows homepage sections from published news, visible matches, and starting f
     $response->assertSee('etb-search-ghost');
     $response->assertSee('focus-within:ring-yellow-400');
     $response->assertDontSee('<datalist', false);
+    $response->assertSee('data-footer-signature', false);
+    $response->assertSee('EAT <span class="text-yellow-400">THE</span> BALL', false);
+    $response->assertSee('images/footer/etb-3rd.avif', false);
 });

@@ -50,6 +50,24 @@
         </div>
     </section>
 
+    <section class="overflow-hidden border-t border-zinc-700 bg-zinc-900 px-4 pb-12 pt-14 text-center sm:pb-16 sm:pt-20" aria-label="EAT THE BALL — ETB Łódź">
+        <div class="mx-auto flex max-w-7xl flex-col items-center" data-footer-signature>
+            <p class="etb-footer-signature-title whitespace-nowrap font-black uppercase text-white" aria-hidden="true">
+                EAT <span class="text-yellow-400">THE</span> BALL
+            </p>
+            <img
+                src="{{ asset('images/footer/etb-3rd.avif') }}"
+                alt="Logo ETB Łódź"
+                width="384"
+                height="384"
+                class="relative -mt-1 h-auto w-64 select-none object-contain sm:-mt-3 sm:w-80 lg:-mt-5 lg:w-96"
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+            >
+        </div>
+    </section>
+
     <section class="bg-black text-center text-zinc-400 text-xs py-3 border-t border-zinc-800">
         © {{ now()->year }} ETB Łódź. Wszelkie prawa zastrzeżone.
     </section>
