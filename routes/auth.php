@@ -21,6 +21,10 @@ Route::middleware('guest')->group(function () {
     Route::get('register/verify', [RegisteredUserController::class, 'showVerificationForm'])
         ->name('register.verify.notice');
 
+    Route::post('register/verify/resend', [RegisteredUserController::class, 'resendCode'])
+        ->middleware('throttle:1,1')
+        ->name('register.verify.resend');
+
     Route::post('register/verify', [RegisteredUserController::class, 'verifyCode'])
         ->middleware('throttle:10,1')
         ->name('register.verify');

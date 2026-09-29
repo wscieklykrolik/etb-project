@@ -11,11 +11,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
@@ -52,7 +54,17 @@ class RegisteredUserController extends Controller
             'code_expires_at' => now()->addMinutes($ttlMinutes),
         ]);
 
-        Mail::to($validated['email'])->send(new ActivationCodeMail($code));
+        try {
+            Mail::to($validated['email'])->send(new ActivationCodeMail($code, $ttlMinutes));
+        } catch (Throwable $exception) {
+            Log::warning('Nie udało się wysłać kodu aktywacyjnego.', [
+                'exception' => $exception::class,
+            ]);
+
+            return redirect()->route('register.verify.notice', [
+                'email' => $validated['email'],
+            ])->with('mail_error', 'Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.');
+        }
 
         return redirect()->route('register.verify.notice', [
             'email' => $validated['email'],
@@ -64,6 +76,47 @@ class RegisteredUserController extends Controller
         return view('auth.verify-registration-code', [
             'email' => (string) $request->query('email'),
         ]);
+    }
+
+    public function resendCode(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+        $email = Str::lower($validated['email']);
+        $pending = PendingRegistration::where('email', $email)
+            ->latest('id')
+            ->first();
+
+        if (! $pending || now()->greaterThan($pending->code_expires_at)) {
+            $pending?->delete();
+
+            return redirect()->route('register.verify.notice', ['email' => $email])
+                ->with('status', 'Jeśli rejestracja oczekuje na potwierdzenie, wysłaliśmy nowy kod.');
+        }
+
+        $code = (string) random_int(100000, 999999);
+        $ttlMinutes = max(1, (int) config('security.registration_code.ttl_minutes', 10));
+
+        try {
+            Mail::to($email)->send(new ActivationCodeMail($code, $ttlMinutes));
+        } catch (Throwable $exception) {
+            Log::warning('Nie udało się ponownie wysłać kodu aktywacyjnego.', [
+                'exception' => $exception::class,
+            ]);
+
+            return redirect()->route('register.verify.notice', ['email' => $email])
+                ->with('mail_error', 'Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.');
+        }
+
+        $pending->forceFill([
+            'verification_code' => Hash::make($code),
+            'verification_attempts' => 0,
+            'code_expires_at' => now()->addMinutes($ttlMinutes),
+        ])->save();
+
+        return redirect()->route('register.verify.notice', ['email' => $email])
+            ->with('status', 'Wysłaliśmy nowy kod aktywacyjny na podany adres e-mail.');
     }
 
     public function verifyCode(Request $request): RedirectResponse

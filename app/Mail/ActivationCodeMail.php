@@ -6,18 +6,17 @@ use Illuminate\Mail\Mailable;
 
 class ActivationCodeMail extends Mailable
 {
-    public string $code;
-
-    public function __construct(string $code)
-    {
-        $this->code = $code;
-    }
+    public function __construct(
+        public string $code,
+        public int $ttlMinutes,
+    ) {}
 
     public function build()
     {
         return $this->subject('Kod aktywacyjny ETB')
             ->text('emails.activation-code', [
                 'code' => $this->code,
+                'ttlMinutes' => $this->ttlMinutes,
             ]);
     }
 }

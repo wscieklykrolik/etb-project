@@ -1,6 +1,12 @@
 <x-guest-layout>
     <x-auth-session-status class="mb-4 text-sm text-black" :status="session('status')" />
 
+    @if (session('mail_error'))
+        <div class="mb-4 text-sm font-medium text-red-700" role="alert">
+            {{ session('mail_error') }}
+        </div>
+    @endif
+
     <h1 class="text-2xl font-bold text-black">Weryfikacja maila</h1>
     <p class="mt-1 text-sm text-black/80">Wpisz 6-cyfrowy kod wysłany na adres e-mail, aby dokończyć tworzenie konta.</p>
 
@@ -25,5 +31,13 @@
                 Potwierdź kod
             </x-primary-button>
         </div>
+    </form>
+
+    <form method="POST" action="{{ route('register.verify.resend') }}" class="mt-4 text-center">
+        @csrf
+        <input type="hidden" name="email" value="{{ old('email', $email) }}">
+        <button type="submit" class="text-sm font-semibold text-black underline">
+            Wyślij kod ponownie
+        </button>
     </form>
 </x-guest-layout>
