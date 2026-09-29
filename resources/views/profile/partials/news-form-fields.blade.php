@@ -99,6 +99,7 @@
             <template x-for="(image, index) in selectedImages" :key="image.url">
                 <div class="rounded border border-gray-200 p-2">
                     <img :src="image.url" :alt="image.file.name" class="h-28 w-full rounded object-cover">
+                    <p class="mt-2 truncate text-xs text-gray-600" x-text="image.file.name" :title="image.file.name"></p>
                     <button type="button" @click="removeFile(index)" class="mt-2 text-sm font-semibold text-red-700">Usuń zdjęcie</button>
                 </div>
             </template>
@@ -106,27 +107,46 @@
     </div>
 
     @if ($item?->main_image_path)
-        <div x-show="type === 'article'" class="rounded border border-gray-200 p-3">
-            <img src="{{ \App\Support\MediaStorage::url($item->main_image_path) }}" alt="Zdjęcie główne" class="h-32 w-48 rounded object-cover">
-            <label class="mt-2 flex items-center gap-2 text-sm">
-                <input type="checkbox" name="remove_main_image" value="1" @checked($field('remove_main_image', false))>
-                Usuń zdjęcie główne
-            </label>
+        <div
+            x-data="{ removed: @js((bool) $field('remove_main_image', false)) }"
+            x-show="type === 'article'"
+            class="rounded border border-gray-200 p-3"
+            :class="removed ? 'border-red-200 bg-red-50' : 'bg-white'"
+        >
+            <p class="mb-3 text-sm font-black text-gray-800">Obecne zdjęcie główne</p>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <img src="{{ \App\Support\MediaStorage::url($item->main_image_path) }}" alt="Zdjęcie główne" class="h-32 w-48 shrink-0 rounded object-cover" :class="removed && 'opacity-40'">
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-medium text-gray-500">Zapisana ścieżka</p>
+                    <code class="mt-1 block break-all rounded bg-gray-100 px-2 py-1.5 text-xs text-gray-700">{{ $item->main_image_path }}</code>
+                    <input type="checkbox" name="remove_main_image" value="1" x-model="removed" class="sr-only">
+                    <button type="button" @click="removed = ! removed" class="mt-3 text-sm font-semibold" :class="removed ? 'text-gray-700' : 'text-red-700'" x-text="removed ? 'Cofnij usunięcie' : 'Usuń zdjęcie główne'"></button>
+                    <p x-show="removed" x-cloak class="mt-1 text-xs font-medium text-red-700">Zdjęcie zostanie usunięte po zapisaniu zmian.</p>
+                </div>
+            </div>
         </div>
     @endif
 
     @if ($item && $item->images->isNotEmpty())
         <div>
-            <p class="text-sm text-gray-600">Zaznaczone zdjęcia zostaną usunięte po zapisaniu zmian.</p>
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <p class="text-sm font-black text-gray-800">Obecnie zapisane zdjęcia ({{ $item->images->count() }})</p>
+                <p class="text-xs text-gray-600">Ścieżka każdego zdjęcia pozostaje bez zmian, dopóki go nie usuniesz.</p>
+            </div>
             <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 @foreach ($item->images as $image)
-                    <label class="block rounded border border-gray-200 p-2">
-                        <img src="{{ \App\Support\MediaStorage::url($image->path) }}" alt="Zdjęcie {{ $loop->iteration }} w galerii" class="h-28 w-full rounded object-cover">
-                        <span class="mt-2 flex items-center gap-2 text-sm text-red-700">
-                            <input type="checkbox" name="remove_images[]" value="{{ $image->id }}" @checked(in_array($image->id, $field('remove_images', [])))>
-                            Usuń zdjęcie
-                        </span>
-                    </label>
+                    <div
+                        x-data="{ removed: @js(in_array($image->id, $field('remove_images', []))) }"
+                        class="rounded border p-2"
+                        :class="removed ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'"
+                    >
+                        <img src="{{ \App\Support\MediaStorage::url($image->path) }}" alt="Zdjęcie {{ $loop->iteration }} w galerii" class="h-28 w-full rounded object-cover" :class="removed && 'opacity-40'">
+                        <p class="mt-2 text-xs font-medium text-gray-500">Zapisana ścieżka</p>
+                        <code class="mt-1 block break-all rounded bg-gray-100 px-2 py-1.5 text-xs text-gray-700">{{ $image->path }}</code>
+                        <input type="checkbox" name="remove_images[]" value="{{ $image->id }}" x-model="removed" class="sr-only">
+                        <button type="button" @click="removed = ! removed" class="mt-2 text-sm font-semibold" :class="removed ? 'text-gray-700' : 'text-red-700'" x-text="removed ? 'Cofnij usunięcie' : 'Usuń zdjęcie'"></button>
+                        <p x-show="removed" x-cloak class="mt-1 text-xs font-medium text-red-700">Zostanie usunięte po zapisaniu.</p>
+                    </div>
                 @endforeach
             </div>
         </div>

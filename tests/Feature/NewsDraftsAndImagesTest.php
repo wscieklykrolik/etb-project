@@ -66,6 +66,47 @@ it('removes only selected gallery images and keeps the remaining ones', function
     Storage::disk('public')->assertExists($kept->path);
 });
 
+it('keeps existing article image paths when the article is edited', function () {
+    $news = editableNews($this->admin, ['main_image_path' => 'news/main/original.png']);
+    $galleryImage = $news->images()->create([
+        'path' => 'news/gallery/original.png',
+        'sort_order' => 0,
+    ]);
+    Storage::disk('public')->put($news->main_image_path, 'main');
+    Storage::disk('public')->put($galleryImage->path, 'gallery');
+
+    $this->put(route('news.update', $news), [
+        'type' => News::TYPE_ARTICLE,
+        'title' => 'Zmieniony tytuł',
+        'content' => $news->content,
+        'is_visible' => true,
+    ])->assertSessionHasNoErrors();
+
+    $news->refresh()->load('images');
+
+    expect($news->main_image_path)->toBe('news/main/original.png')
+        ->and($news->images)->toHaveCount(1)
+        ->and($news->images->sole()->path)->toBe('news/gallery/original.png');
+    Storage::disk('public')->assertExists('news/main/original.png');
+    Storage::disk('public')->assertExists('news/gallery/original.png');
+});
+
+it('shows saved image paths in the article editor', function () {
+    $news = editableNews($this->admin, ['main_image_path' => 'news/main/visible.png']);
+    $news->images()->create([
+        'path' => 'news/gallery/visible.png',
+        'sort_order' => 0,
+    ]);
+
+    $this->get(route('profile.edit', ['section' => 'news']))
+        ->assertOk()
+        ->assertSee('Obecne zdjęcie główne')
+        ->assertSee('news/main/visible.png')
+        ->assertSee('Obecnie zapisane zdjęcia (1)')
+        ->assertSee('news/gallery/visible.png')
+        ->assertSee('Cofnij usunięcie');
+});
+
 it('does not carry values from an edited entry into the new entry form', function () {
     $news = editableNews($this->admin, ['title' => 'Wpis do edycji']);
 
