@@ -23,7 +23,7 @@
     <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-sm uppercase tracking-widest {{ $dateClasses }}">{{ $match->match_date?->format('d.m.Y') }}</p>
-            <p class="mt-1 {{ $isFeatured ? 'text-3xl' : 'text-2xl' }} font-black {{ $timeClasses }}">{{ $match->match_date?->format('H:i') }}</p>
+            <p class="mt-1 {{ $isFeatured ? 'text-3xl' : 'text-2xl' }} font-black {{ $timeClasses }}">{{ $match->timeLabel() }}</p>
         </div>
 
         @if ($match->hasResult())

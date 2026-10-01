@@ -20,7 +20,7 @@
                                             ETB kontra {{ $match->opponent_name }}
                                         </a>
                                     </h2>
-                                    <p class="text-sm text-gray-600">{{ $match->match_date->format('d.m.Y H:i') }}</p>
+                                    <p class="text-sm text-gray-600">{{ $match->dateTimeLabel() }}</p>
                                 </div>
 
                                 <span class="w-fit rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">
@@ -44,4 +44,3 @@
         </div>
     </div>
 @endsection
-

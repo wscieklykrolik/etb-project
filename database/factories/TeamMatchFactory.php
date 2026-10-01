@@ -20,6 +20,7 @@ class TeamMatchFactory extends Factory
             'opponent_name' => $this->faker->company(),
             'opponent_id' => $opponent->id,
             'match_date' => $this->faker->dateTimeBetween('-1 month', '+2 months'),
+            'has_time' => true,
             'location' => $sportsHall->name,
             'sports_hall_id' => $sportsHall->id,
             'is_home' => $this->faker->boolean(),

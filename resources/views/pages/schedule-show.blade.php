@@ -38,7 +38,7 @@
             </div>
             <div class="rounded border border-zinc-800 bg-zinc-900 p-4">
                 <dt class="text-xs uppercase tracking-widest text-zinc-500">Godzina</dt>
-                <dd class="mt-1 font-bold text-white">{{ $match->match_date?->format('H:i') }}</dd>
+                <dd class="mt-1 font-bold text-white">{{ $match->timeLabel() }}</dd>
             </div>
             <div class="rounded border border-zinc-800 bg-zinc-900 p-4">
                 <dt class="text-xs uppercase tracking-widest text-zinc-500">Lokalizacja</dt>

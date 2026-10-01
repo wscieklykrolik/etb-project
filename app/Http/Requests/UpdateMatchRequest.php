@@ -10,11 +10,21 @@ class UpdateMatchRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
+        $matchDate = (string) $this->input('match_date', '');
+        $matchTime = trim((string) $this->input('match_time', ''));
+        $dateAlreadyContainsTime = preg_match('/[T ]\d{2}:\d{2}/', $matchDate) === 1;
+
+        if ($matchTime !== '' && ! $dateAlreadyContainsTime) {
+            $matchDate = substr($matchDate, 0, 10).' '.$matchTime;
+        }
+
         $this->merge([
             'is_home' => $this->boolean('is_home'),
             'include_in_lzkosz' => $this->boolean('include_in_lzkosz'),
             'is_ticketed' => $this->boolean('is_ticketed'),
             'opponent_name' => $this->input('opponent_name', $this->input('opponent')),
+            'match_date' => $matchDate,
+            'has_time' => $matchTime !== '' || $dateAlreadyContainsTime,
         ]);
     }
 
@@ -41,6 +51,8 @@ class UpdateMatchRequest extends FormRequest
                 'date',
                 Rule::when($this->input('status') === TeamMatch::STATUS_UPCOMING, ['after_or_equal:today']),
             ],
+            'match_time' => ['nullable', 'date_format:H:i'],
+            'has_time' => ['boolean'],
             'location' => ['required', 'string', 'max:255'],
             'is_home' => ['boolean'],
             'our_score' => [

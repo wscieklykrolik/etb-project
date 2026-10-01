@@ -49,6 +49,32 @@ it('lets admin create a match', function () {
     $this->assertDatabaseHas('matches', ['opponent_name' => 'Test Team']);
 });
 
+it('lets admin create a match without a start time', function () {
+    $matchDate = now()->addDays(30)->format('Y-m-d');
+
+    $this->actingAs($this->admin)
+        ->post(route('matches.store'), [
+            'status' => TeamMatch::STATUS_UPCOMING,
+            'opponent_name' => 'Rywal bez godziny',
+            'match_date' => $matchDate,
+            'match_time' => '',
+            'location' => 'Hala testowa',
+            'is_home' => true,
+        ])
+        ->assertRedirect(route('profile.edit'));
+
+    $match = TeamMatch::query()->where('opponent_name', 'Rywal bez godziny')->firstOrFail();
+
+    expect($match->has_time)->toBeFalse()
+        ->and($match->timeLabel())->toBe('- : -')
+        ->and($match->isUpcoming())->toBeTrue();
+
+    $this->get(route('schedule'))
+        ->assertOk()
+        ->assertSee('Rywal bez godziny')
+        ->assertSee('- : -');
+});
+
 it('lets employee create a match', function () {
     $response = $this->actingAs($this->employee)
         ->post(route('matches.store'), [

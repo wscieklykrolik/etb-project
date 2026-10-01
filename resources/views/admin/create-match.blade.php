@@ -36,8 +36,14 @@
                 <input id="opponent" type="text" name="opponent" value="{{ old('opponent') }}" required class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2">
             </div>
             <div>
-                <label for="match_date" class="block text-sm text-zinc-300 mb-2">Data i godzina meczu</label>
-                <input id="match_date" type="datetime-local" name="match_date" value="{{ old('match_date') }}" required class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2">
+                <label for="match_date" class="block text-sm text-zinc-300 mb-2">Data meczu</label>
+                <input id="match_date" type="date" name="match_date" value="{{ old('match_date') }}" required class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2">
+            </div>
+
+            <div>
+                <label for="match_time" class="block text-sm text-zinc-300 mb-2">Godzina (opcjonalnie)</label>
+                <input id="match_time" type="time" name="match_time" value="{{ old('match_time') }}" class="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2">
+                <p class="mt-1 text-xs text-zinc-400">Brak godziny zostanie pokazany na stronie jako - : -.</p>
             </div>
         </div>
 

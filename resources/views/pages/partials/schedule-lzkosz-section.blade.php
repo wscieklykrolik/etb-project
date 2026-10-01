@@ -35,7 +35,7 @@
                             </div>
                             <div class="text-sm font-semibold text-zinc-300">
                                 {{ $match->match_date?->format('d.m.Y') }}
-                                <span class="block text-yellow-400">{{ $match->match_date?->format('H:i') }}</span>
+                                <span class="block text-yellow-400">{{ $match->timeLabel() }}</span>
                             </div>
                             <p class="text-sm text-zinc-300">{{ $match->location }}</p>
                             <p class="text-sm font-bold uppercase tracking-wide text-zinc-300">{{ $match->statusLabel() }}</p>

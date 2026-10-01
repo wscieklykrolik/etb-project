@@ -38,6 +38,24 @@ it('automatically finishes an upcoming match two hours after its start', functio
         ->and($afterMatch->resultLabel())->toBe('Wynik nieuzupełniony');
 });
 
+it('does not automatically finish a match whose start time is unknown', function () {
+    $match = TeamMatch::factory()->create([
+        'status' => TeamMatch::STATUS_UPCOMING,
+        'match_date' => now()->subDay()->startOfDay(),
+        'has_time' => false,
+        'our_score' => null,
+        'opponent_score' => null,
+    ]);
+
+    expect($match->isUpcoming())->toBeTrue()
+        ->and($match->timeLabel())->toBe('- : -');
+
+    $this->actingAs($this->admin)
+        ->get(route('profile.edit'))
+        ->assertOk()
+        ->assertDontSee('Mecz został zakończony — dodaj wynik');
+});
+
 it('renders only one status label on a public match card', function () {
     TeamMatch::factory()->create([
         'status' => TeamMatch::STATUS_UPCOMING,

@@ -24,6 +24,7 @@ class TeamMatch extends Model
         'opponent_name',
         'opponent_id',
         'match_date',
+        'has_time',
         'location',
         'sports_hall_id',
         'is_home',
@@ -47,6 +48,7 @@ class TeamMatch extends Model
     {
         return [
             'match_date' => 'datetime',
+            'has_time' => 'boolean',
             'is_home' => 'boolean',
             'include_in_lzkosz' => 'boolean',
             'our_score' => 'integer',
@@ -67,7 +69,7 @@ class TeamMatch extends Model
             return self::STATUS_FINISHED;
         }
 
-        if ($this->match_date?->lte(now()->subHours(2))) {
+        if ($this->has_time && $this->match_date?->lte(now()->subHours(2))) {
             return self::STATUS_FINISHED;
         }
 
@@ -87,6 +89,16 @@ class TeamMatch extends Model
     public function statusLabel(): string
     {
         return $this->isFinished() ? 'Zakończony' : 'Nadchodzący';
+    }
+
+    public function timeLabel(): string
+    {
+        return $this->has_time ? ($this->match_date?->format('H:i') ?? '- : -') : '- : -';
+    }
+
+    public function dateTimeLabel(): string
+    {
+        return trim(($this->match_date?->format('d.m.Y') ?? '').' '.$this->timeLabel());
     }
 
     public function resultLabel(): string

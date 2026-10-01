@@ -156,7 +156,7 @@
                 <div class="flex flex-wrap items-end justify-between gap-4">
                     <div>
                         <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Sklep</p>
-                        <h2 class="mt-2 text-4xl font-black uppercase">Kupuj ETB</h2>
+                        <h2 class="mt-2 text-4xl font-black uppercase">Kupuj oficjalny merch ETB</h2>
                     </div>
                     <a href="{{ route('shop.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-6 py-3 text-sm font-black uppercase text-black hover:bg-white transition-all shadow-lg shadow-yellow-400/20">Zobacz wszystkie <span aria-hidden="true">→</span></a>
                 </div>

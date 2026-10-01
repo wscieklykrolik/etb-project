@@ -50,7 +50,7 @@
 
         <label class="block">
             <span class="text-sm font-medium text-gray-700">Data meczu</span>
-            <input name="match_date" type="datetime-local" required :min="status === '{{ MatchGame::STATUS_UPCOMING }}' ? '{{ now()->format('Y-m-d\T00:00') }}' : null" value="{{ old('match_date', $match?->match_date?->format('Y-m-d\TH:i')) }}" class="mt-1 w-full rounded border-gray-300">
+            <input name="match_date" type="date" required :min="status === '{{ MatchGame::STATUS_UPCOMING }}' ? '{{ now()->format('Y-m-d') }}' : null" value="{{ old('match_date', $match?->match_date?->format('Y-m-d')) }}" class="mt-1 w-full rounded border-gray-300">
         </label>
 
         <label class="relative block">
@@ -66,8 +66,9 @@
         </label>
 
         <label class="block">
-            <span class="text-sm font-medium text-gray-700">Godzina</span>
-            <input type="time" class="mt-1 w-full rounded border-gray-300" @change="syncTime($event.target.value)">
+            <span class="text-sm font-medium text-gray-700">Godzina <span class="font-normal text-gray-500">(opcjonalnie)</span></span>
+            <input name="match_time" type="time" value="{{ old('match_time', $match?->has_time ? $match->match_date?->format('H:i') : '') }}" class="mt-1 w-full rounded border-gray-300">
+            <span class="mt-1 block text-xs text-gray-500">Jeśli pozostawisz to pole puste, na stronie pojawi się - : -.</span>
         </label>
 
         <label class="block">

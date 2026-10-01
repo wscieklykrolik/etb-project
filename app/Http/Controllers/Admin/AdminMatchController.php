@@ -8,6 +8,7 @@ use App\Models\TeamMatch;
 use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class AdminMatchController extends Controller
@@ -24,6 +25,7 @@ class AdminMatchController extends Controller
         $validated = $request->validate([
             'opponent' => ['required', 'string', 'max:255'],
             'match_date' => ['required', 'date'],
+            'match_time' => ['nullable', 'date_format:H:i'],
             'location' => ['required', 'string', 'max:255'],
             'exact_address' => ['nullable', 'string', 'max:500'],
             'is_home' => ['nullable', 'boolean'],
@@ -31,6 +33,16 @@ class AdminMatchController extends Controller
             'away_logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
             'default_home_logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ]);
+
+        $matchDate = Carbon::parse($validated['match_date'])->startOfDay();
+        $validated['has_time'] = filled($validated['match_time'] ?? null);
+
+        if ($validated['has_time']) {
+            $matchDate->setTimeFromTimeString($validated['match_time']);
+        }
+
+        $validated['match_date'] = $matchDate;
+        unset($validated['match_time']);
 
         $defaultHomeLogo = AppSetting::getValue('default_home_logo');
 

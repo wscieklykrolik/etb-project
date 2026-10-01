@@ -17,7 +17,7 @@
             <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                     <dt class="font-semibold text-gray-900">Data meczu</dt>
-                    <dd class="text-gray-700">{{ $match->match_date->format('d.m.Y H:i') }}</dd>
+                    <dd class="text-gray-700">{{ $match->dateTimeLabel() }}</dd>
                 </div>
 
                 <div>
@@ -35,4 +35,3 @@
         </article>
     </div>
 @endsection
-

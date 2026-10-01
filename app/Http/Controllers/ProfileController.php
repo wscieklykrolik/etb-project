@@ -89,6 +89,7 @@ class ProfileController extends Controller
             $snoozedMatchIds = (array) $request->session()->get('match_result_reminder_snoozed', []);
 
             $pendingMatchResult = TeamMatch::query()
+                ->where('has_time', true)
                 ->where('match_date', '<=', now()->subHours(2))
                 ->where(function ($query): void {
                     $query->whereNull('our_score')->orWhereNull('opponent_score');

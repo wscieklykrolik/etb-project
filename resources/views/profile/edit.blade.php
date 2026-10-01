@@ -1217,7 +1217,7 @@
                             <h2 id="missing-match-result-title" class="mt-1 text-xl font-black">Mecz został zakończony — dodaj wynik</h2>
                             <p class="mt-2 text-sm text-slate-600">
                                 ETB Łódź — {{ $pendingMatchResult->opponent_name }},
-                                {{ $pendingMatchResult->match_date?->format('d.m.Y H:i') }}
+                                {{ $pendingMatchResult->dateTimeLabel() }}
                             </p>
                         </div>
                         <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950" aria-label="Zamknij przypomnienie" @click="open = false">

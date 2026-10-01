@@ -75,7 +75,7 @@ class MatchService
             }
         }
 
-        unset($data['opponent'], $data['opponent_logo'], $data['home_logo']);
+        unset($data['opponent'], $data['opponent_logo'], $data['home_logo'], $data['match_time']);
 
         if ($status === TeamMatch::STATUS_UPCOMING) {
             $data['our_score'] = null;

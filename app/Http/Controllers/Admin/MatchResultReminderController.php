@@ -71,6 +71,8 @@ class MatchResultReminderController extends Controller
 
     private function needsResult(TeamMatch $match): bool
     {
-        return $match->match_date?->lte(now()->subHours(2)) === true && ! $match->hasResult();
+        return $match->has_time
+            && $match->match_date?->lte(now()->subHours(2)) === true
+            && ! $match->hasResult();
     }
 }

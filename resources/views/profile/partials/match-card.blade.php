@@ -22,7 +22,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h5 class="font-semibold text-gray-950">ETB kontra {{ $match->opponent_name }}</h5>
-                    <p class="text-sm text-gray-600">{{ $match->match_date->format('d.m.Y H:i') }}</p>
+                    <p class="text-sm text-gray-600">{{ $match->dateTimeLabel() }}</p>
                 </div>
 
                 <span class="inline-flex w-fit rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-900">
