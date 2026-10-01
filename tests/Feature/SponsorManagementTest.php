@@ -3,6 +3,7 @@
 use App\Models\Sponsor;
 use App\Models\SponsorCategory;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -101,8 +102,8 @@ it('lets an admin assign separate images to the footer and homepage using one li
     $this->get(route('home'))
         ->assertOk()
         ->assertSee('https://wspolny-link.example.com')
-        ->assertSee(\App\Support\MediaStorage::url($sponsor->logo_path))
-        ->assertSee(\App\Support\MediaStorage::url($sponsor->homepage_logo_path));
+        ->assertSee(MediaStorage::url($sponsor->logo_path))
+        ->assertSee(MediaStorage::url($sponsor->homepage_logo_path));
 });
 
 it('requires a homepage image when separate images are selected', function () {
