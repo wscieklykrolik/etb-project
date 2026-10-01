@@ -108,7 +108,7 @@ it('lets an admin remove a selected site logo without deleting the others', func
     $this->actingAs($admin)->delete(route('admin.site-logos.destroy', 'title-sponsor'))->assertRedirect();
 
     expect(AppSetting::getValue('title_sponsor_logo'))->toBeNull();
-    expect(AppSetting::getValue('public_team_name'))->toBeNull();
+    expect(AppSetting::getValue('public_team_name'))->toBe('ETB Stary Sponsor');
     expect(AppSetting::getValue('club_logo'))->toBe('logos/klub.png');
     Storage::disk('media')->assertMissing('logos/sponsor.png');
     Storage::disk('media')->assertExists('logos/klub.png');
@@ -128,7 +128,20 @@ it('lets an admin save a public team name without uploading a title sponsor logo
 
     $this->get(route('home'))
         ->assertOk()
+        ->assertSee('ETB Sponsor Bez Logo')
         ->assertSee('Skład ETB Sponsor Bez Logo');
+});
+
+it('shows the public team name field as a separate prominent homepage setting', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $this->actingAs($admin)
+        ->get(route('profile.edit', ['section' => 'dashboard']))
+        ->assertOk()
+        ->assertSee('Ustawienie strony głównej')
+        ->assertSee('Nazwa pierwszej drużyny')
+        ->assertSee('Ta nazwa jest wyświetlana w głównym nagłówku strony, na kartach meczowych terminarza oraz przy prezentacji składu.')
+        ->assertSee('Zapisz nazwę');
 });
 
 it('uses the previous site logo as the club logo fallback and migrates it on upload', function () {

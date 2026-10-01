@@ -26,7 +26,7 @@ class PublicTeamController extends Controller
 
     public function player(Player $player): View
     {
-        abort_unless($player->publish_description, 404);
+        abort_unless($player->hasPublicDescription(), 404);
 
         return view('pages.team-player-show', compact('player'));
     }

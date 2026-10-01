@@ -76,6 +76,11 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
         ->names('admin.faq')
         ->parameters(['faq' => 'question']);
     Route::post('/admin/league-table/sync', [LeagueTableController::class, 'sync'])->name('admin.league-table.sync');
+    Route::post('/admin/league-table/archive', [LeagueTableController::class, 'archive'])->name('admin.league-table.archive');
+    Route::post('/admin/league-table/manual', [LeagueTableController::class, 'storeManual'])->name('admin.league-table.manual.store');
+    Route::put('/admin/league-table/manual/{snapshot}', [LeagueTableController::class, 'updateManual'])->name('admin.league-table.manual.update');
+    Route::delete('/admin/league-table/manual/{snapshot}', [LeagueTableController::class, 'destroyManual'])->name('admin.league-table.manual.destroy');
+    Route::put('/admin/league-table/external-link', [LeagueTableController::class, 'updateExternalLink'])->name('admin.league-table.external-link.update');
     Route::patch('/admin/opponents/{opponent}', [LeagueTableController::class, 'updateOpponent'])->name('admin.opponents.update');
     Route::post('/admin/3x3/tournaments/{tournament}/groups', [ThreeXThreeTournamentGroupController::class, 'store'])->name('admin.3x3.tournaments.groups.store');
     Route::patch('/admin/3x3/tournaments/{tournament}/groups/{group}', [ThreeXThreeTournamentGroupController::class, 'update'])->name('admin.3x3.tournaments.groups.update');
@@ -88,6 +93,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::resource('/admin/staff', TeamStaffController::class)->only(['store', 'update', 'destroy'])->parameters(['staff' => 'staff']);
     Route::resource('/admin/3x3/members', ThreeXThreeMemberController::class)->only(['store', 'update', 'destroy'])->parameters(['members' => 'member']);
     Route::resource('/admin/3x3/tournaments', ThreeXThreeTournamentController::class)->only(['store', 'update', 'destroy'])->parameters(['tournaments' => 'tournament']);
+    Route::put('/admin/sponsors/presentation', [SponsorController::class, 'updatePresentation'])->name('admin.sponsors.presentation.update');
     Route::resource('/admin/sponsors', SponsorController::class)->only(['store', 'update', 'destroy']);
     Route::resource('/admin/sponsor-categories', SponsorCategoryController::class)->only(['store', 'update', 'destroy']);
 

@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSponsorRequest;
 use App\Http\Requests\UpdateSponsorRequest;
+use App\Models\AppSetting;
+use App\Models\ClubSection;
 use App\Models\Sponsor;
 use App\Services\AdminNotificationService;
 use App\Services\SponsorService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SponsorController extends Controller
 {
@@ -39,6 +43,26 @@ class SponsorController extends Controller
         $this->notificationService->record($request->user(), 'updated', $sponsor, "Sponsor: {$sponsor->name}");
 
         return redirect()->route('profile.edit')->with('success', 'Sponsor został zaktualizowany.');
+    }
+
+    public function updatePresentation(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'intro' => ['nullable', 'string', 'max:5000'],
+            'display_mode' => ['required', Rule::in(['grid', 'detailed'])],
+        ]);
+
+        ClubSection::syncDefaults();
+        ClubSection::query()
+            ->where('slug', 'sponsors')
+            ->firstOrFail()
+            ->update(['body' => $validated['intro'] ?? null]);
+
+        AppSetting::setValue('sponsor_display_mode', $validated['display_mode']);
+
+        return redirect()
+            ->route('profile.edit', ['section' => 'sponsors'])
+            ->with('success', 'Sposób prezentacji sponsorów został zaktualizowany.');
     }
 
     public function destroy(Sponsor $sponsor): RedirectResponse

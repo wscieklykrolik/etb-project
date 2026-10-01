@@ -19,21 +19,27 @@ class LzkoszLeagueTableService
 
     public const SOURCE_URL = 'https://lzkosz.pl/liga/215/tabela.html';
 
-    public function sync(): int
+    public const SOURCES = [
+        'lzkosz' => ['label' => 'ŁZKosz', 'league_id' => 215, 'season' => '2025/2026', 'url' => self::SOURCE_URL, 'base_url' => 'https://lzkosz.pl/'],
+        'kpzkosz' => ['label' => 'KPZKosz', 'league_id' => 89, 'season' => '2026/2027', 'url' => 'https://www.kpzkosz.com/liga/89/tabela.html', 'base_url' => 'https://www.kpzkosz.com/'],
+    ];
+
+    public function sync(string $source = 'lzkosz', ?string $season = null): int
     {
-        $response = Http::timeout(15)->get(self::SOURCE_URL);
+        $configuration = self::SOURCES[$source] ?? self::SOURCES['lzkosz'];
+        $response = Http::timeout(15)->get($configuration['url']);
 
         if (! $response->successful()) {
-            throw new RuntimeException('Nie udało się pobrać tabeli ŁZKosz.');
+            throw new RuntimeException('Nie udało się pobrać tabeli ligowej.');
         }
 
-        return $this->storeRows($this->parse($response->body()));
+        return $this->storeRows($this->parse($response->body(), $configuration['base_url']), (int) $configuration['league_id'], $season ?: $configuration['season']);
     }
 
     /**
      * @return Collection<int, array<string, mixed>>
      */
-    public function parse(string $html): Collection
+    public function parse(string $html, string $baseUrl = 'https://lzkosz.pl/'): Collection
     {
         $document = new DOMDocument;
 
@@ -66,7 +72,7 @@ class LzkoszLeagueTableService
                     'position' => (int) $this->cellText($cells->item(0)),
                     'team_name' => $teamName,
                     'team_url' => $teamLink?->attributes?->getNamedItem('href')?->nodeValue
-                        ? $this->absoluteUrl($teamLink->attributes->getNamedItem('href')->nodeValue)
+                        ? $this->absoluteUrl($teamLink->attributes->getNamedItem('href')->nodeValue, $baseUrl)
                         : null,
                     'points' => (int) $this->cellText($cells->item(2)),
                     'games' => (int) $this->cellText($cells->item(3)),
@@ -84,15 +90,17 @@ class LzkoszLeagueTableService
             }
         }
 
-        throw new RuntimeException('Nie znaleziono tabeli ligowej w odpowiedzi ŁZKosz.');
+        throw new RuntimeException('Nie znaleziono tabeli ligowej w odpowiedzi serwisu.');
     }
 
     /**
      * @param  Collection<int, array<string, mixed>>  $rows
      */
-    private function storeRows(Collection $rows): int
+    private function storeRows(Collection $rows, int $leagueId, string $season): int
     {
         $syncedAt = now();
+
+        LeagueStanding::query()->where('league_id', $leagueId)->where('season', $season)->delete();
 
         foreach ($rows as $row) {
             $opponent = Opponent::query()->firstOrCreate(
@@ -107,8 +115,8 @@ class LzkoszLeagueTableService
 
             LeagueStanding::query()->updateOrCreate(
                 [
-                    'league_id' => self::LEAGUE_ID,
-                    'season' => self::SEASON,
+                    'league_id' => $leagueId,
+                    'season' => $season,
                     'opponent_id' => $opponent->id,
                 ],
                 [
@@ -153,12 +161,12 @@ class LzkoszLeagueTableService
         return trim(preg_replace('/\s+/u', ' ', $cell?->textContent ?? ''));
     }
 
-    private function absoluteUrl(string $url): string
+    private function absoluteUrl(string $url, string $baseUrl): string
     {
         if (str_starts_with($url, 'http')) {
             return $url;
         }
 
-        return 'https://lzkosz.pl/'.ltrim($url, '/');
+        return rtrim($baseUrl, '/').'/'.ltrim($url, '/');
     }
 }

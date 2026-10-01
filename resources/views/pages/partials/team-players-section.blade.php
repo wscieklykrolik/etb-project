@@ -23,7 +23,7 @@
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     @foreach ($players as $player)
                         @php($cardClasses = 'group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/70')
-                        @if ($player->publish_description)
+                        @if ($player->hasPublicDescription())
                             <a href="{{ route('team.players.show', $player) }}" class="{{ $cardClasses }}">
                         @else
                             <article class="{{ $cardClasses }} opacity-95">
@@ -40,7 +40,7 @@
                                     <h4 class="mt-2 text-xl font-black text-white">{{ $player->full_name }}</h4>
                                     <p class="mt-1 text-sm font-semibold uppercase tracking-wide text-zinc-400">{{ $player->positionLabel() }}</p>
                                 </div>
-                        @if ($player->publish_description)
+                        @if ($player->hasPublicDescription())
                             </a>
                         @else
                             </article>

@@ -13,6 +13,7 @@ use App\Models\ClubSection;
 use App\Models\FaqQuestion;
 use App\Models\ImportantPage;
 use App\Models\LeagueStanding;
+use App\Models\LeagueTableSnapshot;
 use App\Models\News;
 use App\Models\Order;
 use App\Models\Player;
@@ -25,6 +26,7 @@ use App\Models\TeamStaff;
 use App\Models\ThreeXThreeMember;
 use App\Models\ThreeXThreeTournament;
 use App\Models\User;
+use App\Services\LzkoszLeagueTableService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -130,10 +132,16 @@ class ProfileController extends Controller
             ->whereIn('slug', array_keys(ClubSection::SECTIONS))
             ->orderBy('sort_order')
             ->get();
+        $leagueTableSource = AppSetting::getValue('league_table_source') ?: 'lzkosz';
+        $leagueConfiguration = LzkoszLeagueTableService::SOURCES[$leagueTableSource] ?? LzkoszLeagueTableService::SOURCES['lzkosz'];
+        $leagueTableSeason = AppSetting::getValue('league_table_season') ?: $leagueConfiguration['season'];
         $leagueStandings = LeagueStanding::query()
             ->with('opponent')
+            ->where('league_id', $leagueConfiguration['league_id'])
+            ->where('season', $leagueTableSeason)
             ->orderBy('position')
             ->get();
+        $leagueTableSnapshots = LeagueTableSnapshot::query()->with('rows')->orderBy('sort_order')->orderByDesc('season')->get();
         $academyGroups = AcademyGroup::query()
             ->with(['trainers', 'messages', 'trainings'])
             ->orderBy('sort_order')
@@ -216,8 +224,15 @@ class ProfileController extends Controller
             'threeXThreeTournaments' => $threeXThreeTournaments,
             'sponsors' => $sponsors,
             'sponsorCategories' => $sponsorCategories,
+            'sponsorDisplayMode' => AppSetting::getValue('sponsor_display_mode') ?: 'grid',
             'clubSections' => $clubSections,
             'leagueStandings' => $leagueStandings,
+            'leagueTableSnapshots' => $leagueTableSnapshots,
+            'leagueTableSource' => $leagueTableSource,
+            'leagueTableSeason' => $leagueTableSeason,
+            'leagueExternalUrl' => AppSetting::getValue('league_external_url', 'https://www.kpzkosz.com/liga/89.html'),
+            'leagueExternalLabel' => AppSetting::getValue('league_external_label', 'Otwórz ligę w KPZKosz'),
+            'leagueExternalDescription' => AppSetting::getValue('league_external_description', 'W tym sezonie nasza tabela i oficjalna strona ligi są dostępne w serwisie KPZKosz.'),
             'defaultHomeLogo' => AppSetting::getValue('default_home_logo'),
             'academyGroups' => $academyGroups,
             'academyTrainings' => $academyTrainings,

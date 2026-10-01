@@ -2,6 +2,8 @@
 
 use App\Models\Sponsor;
 use App\Models\SponsorCategory;
+use App\Models\AppSetting;
+use App\Models\ClubSection;
 use App\Models\User;
 use App\Support\MediaStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -210,4 +212,40 @@ it('shows active sponsors on the club sponsors page with large white logo tiles'
     $response->assertSee('bg-white');
     $response->assertSee('max-h-28');
     $response->assertDontSee('Inactive Tile Partner');
+});
+
+it('lets an admin configure the sponsor page introduction and presentation mode', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $this->actingAs($admin)->put(route('admin.sponsors.presentation.update'), [
+        'intro' => 'Poznaj firmy, które wspierają rozwój naszego klubu.',
+        'display_mode' => 'detailed',
+    ])->assertRedirect(route('profile.edit', ['section' => 'sponsors']));
+
+    expect(AppSetting::getValue('sponsor_display_mode'))->toBe('detailed')
+        ->and(ClubSection::query()->where('slug', 'sponsors')->value('body'))->toBe('Poznaj firmy, które wspierają rozwój naszego klubu.');
+});
+
+it('shows sponsors sequentially with descriptions when detailed mode is enabled', function () {
+    AppSetting::setValue('sponsor_display_mode', 'detailed');
+    ClubSection::syncDefaults();
+    ClubSection::query()->where('slug', 'sponsors')->update(['body' => 'Wspierają nas najlepsi partnerzy.']);
+
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_TECHNOLOGY)->firstOrFail();
+    Sponsor::query()->create([
+        'name' => 'Partner z opisem',
+        'description' => 'Firma wspierająca szkolenie młodzieży i rozwój pierwszej drużyny.',
+        'sponsor_category_id' => $category->id,
+        'url' => 'https://opis.example.com',
+        'logo_path' => 'sponsors/opis.png',
+        'sort_order' => 1,
+        'is_active' => true,
+    ]);
+
+    $this->get(route('club.sponsors'))
+        ->assertOk()
+        ->assertSee('Wspierają nas najlepsi partnerzy.')
+        ->assertSee('Partner z opisem')
+        ->assertSee('Firma wspierająca szkolenie młodzieży i rozwój pierwszej drużyny.')
+        ->assertSee('Odwiedź stronę sponsora');
 });

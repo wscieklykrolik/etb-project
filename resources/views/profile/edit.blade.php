@@ -240,7 +240,6 @@
                                 'path' => $titleSponsorLogoPath,
                                 'fallback' => 'Sponsor tytularny',
                                 'link' => $titleSponsorUrl,
-                                'teamName' => $publicTeamName,
                             ],
                             [
                                 'id' => 'academy',
@@ -299,6 +298,24 @@
                                 'fallback' => 'Ciemny motyw',
                             ],
                         ])
+                        <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-yellow-300 bg-yellow-50 p-5 shadow-sm">
+                            <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,32rem)] lg:items-end">
+                                <div>
+                                    <p class="text-xs font-black uppercase tracking-widest text-yellow-700">Ustawienie strony głównej</p>
+                                    <h2 class="mt-1 text-xl font-black">Nazwa pierwszej drużyny</h2>
+                                    <p class="mt-2 max-w-3xl text-sm text-slate-700">Ta nazwa jest wyświetlana w głównym nagłówku strony, na kartach meczowych terminarza oraz przy prezentacji składu. Zmień ją tutaj, gdy zmieni się nazwa sponsora tytularnego lub oficjalna nazwa drużyny.</p>
+                                </div>
+                                <form method="POST" action="{{ route('admin.site-logos.update', 'title-sponsor') }}" class="space-y-2">
+                                    @csrf
+                                    @method('PATCH')
+                                    <label for="public-team-name" class="block text-sm font-bold text-slate-800">Publiczna nazwa drużyny</label>
+                                    <div class="flex flex-col gap-2 sm:flex-row">
+                                        <input id="public-team-name" name="team_name" type="text" value="{{ old('team_name', $publicTeamName) }}" maxlength="80" required placeholder="np. Jaszczak.Finanse ETB Łódź" class="min-w-0 flex-1 rounded-lg border-yellow-400 bg-white text-sm focus:border-yellow-500 focus:ring-yellow-400">
+                                        <button class="shrink-0 rounded-lg bg-yellow-400 px-5 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz nazwę</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </section>
                         <section class="{{ $activeSection === 'dashboard' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                             <div class="mb-5">
                                 <h2 class="text-xl font-black">Logotypy strony</h2>
@@ -322,9 +339,6 @@
                                                 @method('PATCH')
                                                 <input name="logo" type="file" accept="image/*" @required(! $managedLogo['path'] && $managedLogo['id'] !== 'title-sponsor') class="w-full rounded border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold">
                                                 @if ($managedLogo['id'] === 'title-sponsor')
-                                                    <label for="public-team-name" class="block text-sm font-bold text-slate-700">Publiczna nazwa drużyny</label>
-                                                    <input id="public-team-name" name="team_name" type="text" value="{{ old('team_name', $managedLogo['teamName'] ?? 'ETB') }}" maxlength="80" required placeholder="np. ETB Nazwa Sponsora" class="w-full rounded border border-slate-300 bg-white text-sm">
-                                                    <p class="text-xs text-slate-500">Pełna nazwa wyświetlana przy meczach i składzie.</p>
                                                     <input name="url" type="url" value="{{ old('url', $managedLogo['link'] ?? '') }}" placeholder="Link sponsora" class="w-full rounded border border-slate-300 bg-white text-sm">
                                                 @endif
                                                 <button class="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">{{ $managedLogo['id'] === 'title-sponsor' ? 'Zapisz dane sponsora' : 'Zapisz logo' }}</button>
@@ -333,7 +347,7 @@
                                                 <form method="POST" action="{{ route('admin.site-logos.destroy', $managedLogo['id']) }}" onsubmit="return confirm('Usunąć ten logotyp?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">{{ $managedLogo['id'] === 'title-sponsor' ? 'Usuń logo i dane sponsora' : 'Usuń logo' }}</button>
+                                                    <button class="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 hover:bg-red-100">{{ $managedLogo['id'] === 'title-sponsor' ? 'Usuń logo i link sponsora' : 'Usuń logo' }}</button>
                                                 </form>
                                             @endif
                                         </div>
@@ -610,14 +624,40 @@
                     </section>
 
                     <section id="league-table" class="{{ $activeSection === 'league-table' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h2 class="text-xl font-black">Tabela ŁZKosz</h2>
-                                <p class="text-sm text-slate-600">Pobierz tabelę 3 Ligi Mężczyzn i przypisz logotypy do drużyn.</p>
-                            </div>
-                            <form method="POST" action="{{ route('admin.league-table.sync') }}">
+                        <div class="mb-6">
+                            <h2 class="text-xl font-black">Tabele ligowe</h2>
+                            <p class="text-sm text-slate-600">Pobieraj bieżącą tabelę, zapisuj zakończone sezony i publikuj dodatkowe tabele uzupełniane ręcznie.</p>
+                        </div>
+
+                        <div class="mb-6 grid gap-5 xl:grid-cols-2">
+                            <form method="POST" action="{{ route('admin.league-table.sync') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4" onsubmit="if (confirm('Czy chcesz uzupełnić lub zmienić oznaczenie sezonu?')) { const season = prompt('Wpisz sezon w formacie 20XX/XX lub 20XX/20XX:', this.elements.season.value); if (season === null) return false; this.elements.season.value = season.trim(); }">
                                 @csrf
-                                <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Pobierz tabelę z ŁZKosz</button>
+                                <h3 class="font-black">Pobieranie bieżącej tabeli</h3>
+                                <p class="mt-1 text-sm text-slate-600">Wybierz serwis, z którego mają pochodzić dane w tym sezonie.</p>
+                                <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                                    <select name="source" class="rounded-lg border-slate-300 text-sm">
+                                        <option value="lzkosz" @selected($leagueTableSource === 'lzkosz')>ŁZKosz — dotychczasowe źródło</option>
+                                        <option value="kpzkosz" @selected($leagueTableSource === 'kpzkosz')>KPZKosz — liga 89</option>
+                                    </select>
+                                    <input type="hidden" name="season" value="{{ $leagueTableSeason }}">
+                                    <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Pobierz tabelę</button>
+                                </div>
+                                <p class="mt-2 text-xs text-slate-500">Aktualne oznaczenie sezonu: {{ $leagueTableSeason }}</p>
+                            </form>
+
+                            <form method="POST" action="{{ route('admin.league-table.archive') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                @csrf
+                                <h3 class="font-black">Zapisanie zakończonego sezonu</h3>
+                                <p class="mt-1 text-sm text-slate-600">Tworzy niezależną kopię tabeli razem z obecnymi logotypami drużyn.</p>
+                                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <input name="title" value="Tabela ligowa" required class="rounded-lg border-slate-300 text-sm" aria-label="Nazwa archiwalnej tabeli">
+                                    <input name="season" value="{{ $leagueTableSeason }}" class="rounded-lg border-slate-300 text-sm" aria-label="Sezon archiwalnej tabeli">
+                                </div>
+                                <textarea name="description" rows="2" class="mt-3 w-full rounded-lg border-slate-300 text-sm" placeholder="Opcjonalny opis tabeli"></textarea>
+                                <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                    <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="is_published" value="1"> Opublikuj od razu</label>
+                                    <button class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black hover:bg-yellow-50">Zapisz tabelę sezonu</button>
+                                </div>
                             </form>
                         </div>
 
@@ -645,7 +685,7 @@
                                                 <h3 class="font-black">{{ $standing->opponent->name }}</h3>
                                                 <p class="text-sm text-slate-600">{{ $standing->points }} pkt · {{ $standing->wins }}-{{ $standing->losses }} · kosze {{ $standing->points_for }}-{{ $standing->points_against }}</p>
                                                 @if ($standing->source_team_url)
-                                                    <a href="{{ $standing->source_team_url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-yellow-700 hover:text-yellow-900">Profil w ŁZKosz</a>
+                                                    <a href="{{ $standing->source_team_url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-yellow-700 hover:text-yellow-900">Profil w serwisie ligi</a>
                                                 @endif
                                             </div>
                                         </div>
@@ -658,9 +698,70 @@
                                     </div>
                                 </article>
                             @empty
-                                <p class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-600">Tabela nie została jeszcze pobrana. Kliknij „Pobierz tabelę z ŁZKosz”.</p>
+                                <p class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-600">Tabela nie została jeszcze pobrana. Wybierz źródło albo dodaj tabelę ręcznie poniżej.</p>
                             @endforelse
                         </div>
+
+                        <div class="mt-8 border-t border-slate-200 pt-6">
+                            <h3 class="text-lg font-black">Dodatkowe i ręczne tabele</h3>
+                            <p class="mt-1 text-sm text-slate-600">Każdy wiersz wpisz jako: Drużyna; punkty; mecze; wygrane; porażki; wygrane dom; porażki dom; wygrane wyjazd; porażki wyjazd; kosze zdobyte; kosze stracone. Tabela pojawi się na stronie dopiero po dodaniu wierszy i zaznaczeniu publikacji.</p>
+
+                            <form method="POST" action="{{ route('admin.league-table.manual.store') }}" class="mt-4 rounded-xl border-2 border-dashed border-slate-300 p-4">
+                                @csrf
+                                <div class="grid gap-3 md:grid-cols-3">
+                                    <input name="title" required placeholder="Nazwa tabeli, np. Turniej międzynarodowy" class="rounded-lg border-slate-300 text-sm md:col-span-2">
+                                    <input name="season" placeholder="Sezon, np. 2026/27" class="rounded-lg border-slate-300 text-sm">
+                                </div>
+                                <textarea name="description" rows="2" class="mt-3 w-full rounded-lg border-slate-300 text-sm" placeholder="Opis widoczny nad tabelą"></textarea>
+                                <textarea name="rows" rows="6" class="mt-3 w-full rounded-lg border-slate-300 font-mono text-xs" placeholder="ETB Łódź;20;10;10;0;5;0;5;0;800;650"></textarea>
+                                <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                    <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="is_published" value="1"> Opublikuj tabelę</label>
+                                    <button class="rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800">Dodaj ręczną tabelę</button>
+                                </div>
+                            </form>
+
+                            <div class="mt-5 space-y-4">
+                                @forelse ($leagueTableSnapshots as $snapshot)
+                                    @php($manualRows = $snapshot->rows->map(fn ($row) => implode(';', [$row->team_name, $row->points, $row->games, $row->wins, $row->losses, $row->home_wins, $row->home_losses, $row->away_wins, $row->away_losses, $row->points_for, $row->points_against]))->implode("\n"))
+                                    <article class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                        <form method="POST" action="{{ route('admin.league-table.manual.update', $snapshot) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="grid gap-3 md:grid-cols-3">
+                                                <input name="title" value="{{ $snapshot->title }}" required class="rounded-lg border-slate-300 text-sm md:col-span-2" aria-label="Nazwa tabeli">
+                                                <input name="season" value="{{ $snapshot->season }}" class="rounded-lg border-slate-300 text-sm" aria-label="Sezon tabeli">
+                                            </div>
+                                            <textarea name="description" rows="2" class="mt-3 w-full rounded-lg border-slate-300 text-sm" placeholder="Opis widoczny nad tabelą">{{ $snapshot->description }}</textarea>
+                                            <textarea name="rows" rows="6" class="mt-3 w-full rounded-lg border-slate-300 font-mono text-xs">{{ $manualRows }}</textarea>
+                                            <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                                <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="is_published" value="1" @checked($snapshot->is_published)> Opublikuj tabelę</label>
+                                                <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Zapisz zmiany</button>
+                                            </div>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.league-table.manual.destroy', $snapshot) }}" class="mt-3" onsubmit="return confirm('Czy na pewno usunąć tę tabelę?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-sm font-bold text-red-700 hover:text-red-900">Usuń tabelę</button>
+                                        </form>
+                                    </article>
+                                @empty
+                                    <p class="text-sm text-slate-500">Nie dodano jeszcze żadnej dodatkowej tabeli.</p>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.league-table.external-link.update') }}" class="mt-8 border-t border-slate-200 pt-6">
+                            @csrf
+                            @method('PUT')
+                            <h3 class="text-lg font-black">Dodatkowy odnośnik do ligi</h3>
+                            <p class="mt-1 text-sm text-slate-600">Po zapisaniu pojawi się bliźniaczy przycisk obok stałego odnośnika do ŁZKosz. Usuń adres, aby go ukryć.</p>
+                            <div class="mt-4 grid gap-3 md:grid-cols-2">
+                                <input type="url" name="url" value="{{ $leagueExternalUrl }}" placeholder="https://www.kpzkosz.com/liga/89.html" class="rounded-lg border-slate-300 text-sm">
+                                <input name="label" value="{{ $leagueExternalLabel }}" placeholder="Otwórz ligę w KPZKosz" class="rounded-lg border-slate-300 text-sm">
+                            </div>
+                            <textarea name="description" rows="3" class="mt-3 w-full rounded-lg border-slate-300 text-sm" placeholder="W tym sezonie nasza tabela i oficjalna strona ligi są dostępne tutaj.">{{ $leagueExternalDescription }}</textarea>
+                            <button class="mt-3 rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800">Zapisz odnośnik</button>
+                        </form>
                     </section>
 
                     <section id="news" class="{{ $activeSection === 'news' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm" x-data="newsLightbox()">
@@ -831,6 +932,7 @@
                     @include('profile.partials.important-links-admin')
 
                     <section id="sponsors" class="{{ $activeSection === 'sponsors' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        @php($sponsorsClubSection = $clubSections->firstWhere('slug', 'sponsors'))
                         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-black">Sponsorzy</h2>
@@ -841,6 +943,33 @@
                                 <button type="button" class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300" @click="openModal = 'sponsor-create'">Dodaj sponsora</button>
                             </div>
                         </div>
+
+                        <form method="POST" action="{{ route('admin.sponsors.presentation.update') }}" class="mb-6 space-y-5 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+                            @csrf
+                            @method('PUT')
+                            <div>
+                                <h3 class="font-black">Prezentacja na podstronie „Sponsorzy”</h3>
+                                <p class="mt-1 text-sm text-slate-600">Ustaw tekst widoczny nad sponsorami i wybierz, czy pokazać same logotypy, czy każdego sponsora po kolei wraz z opisem.</p>
+                            </div>
+                            <div>
+                                <label for="sponsor-page-intro" class="mb-1 block text-sm font-bold text-slate-700">Tekst wprowadzający</label>
+                                <textarea id="sponsor-page-intro" name="intro" rows="4" maxlength="5000" class="w-full rounded-lg border-yellow-300 bg-white text-sm" placeholder="Napisz kilka zdań o partnerach i sponsorach klubu...">{{ old('intro', $sponsorsClubSection?->body ?: 'Partnerzy ETB wyeksponowani tak, jak powinny pracować logotypy: spokojnie, czytelnie i na jasnym tle.') }}</textarea>
+                            </div>
+                            <fieldset>
+                                <legend class="mb-2 text-sm font-bold text-slate-700">Sposób prezentacji</legend>
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-4">
+                                        <input type="radio" name="display_mode" value="detailed" @checked(old('display_mode', $sponsorDisplayMode) === 'detailed') class="mt-0.5 border-slate-300 text-yellow-500 focus:ring-yellow-400">
+                                        <span><span class="block text-sm font-black">Sponsorzy po kolei z opisami</span><span class="mt-1 block text-xs leading-5 text-slate-500">Każdy sponsor otrzyma osobny, szeroki blok z logo, nazwą i opisem.</span></span>
+                                    </label>
+                                    <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-4">
+                                        <input type="radio" name="display_mode" value="grid" @checked(old('display_mode', $sponsorDisplayMode) === 'grid') class="mt-0.5 border-slate-300 text-yellow-500 focus:ring-yellow-400">
+                                        <span><span class="block text-sm font-black">Obecny układ logotypów</span><span class="mt-1 block text-xs leading-5 text-slate-500">Zachowuje dotychczasową siatkę jasnych kafelków bez opisów.</span></span>
+                                    </label>
+                                </div>
+                            </fieldset>
+                            <button class="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300"><i data-lucide="save" class="h-4 w-4"></i>Zapisz prezentację sponsorów</button>
+                        </form>
 
                         <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
                             <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -899,6 +1028,9 @@
                                         <div class="min-w-0">
                                             <h3 class="truncate font-black">{{ $sponsor->name }}</h3>
                                             <p class="text-sm font-semibold text-yellow-700">{{ $sponsor->typeLabel() }}</p>
+                                            @if (filled($sponsor->description))
+                                                <p class="mt-1 line-clamp-2 text-xs text-slate-600">{{ $sponsor->description }}</p>
+                                            @endif
                                             <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="block truncate text-sm text-slate-600 hover:text-yellow-700">{{ $sponsor->url }}</a>
                                             <p class="mt-1 text-xs font-semibold text-slate-500">{{ $sponsor->homepage_logo_path ? 'Osobne zdjęcia dla dwóch miejsc' : 'Jedno zdjęcie w obu miejscach' }}</p>
                                             <p class="mt-1 text-xs font-bold uppercase {{ $sponsor->is_active ? 'text-emerald-700' : 'text-slate-500' }}">{{ $sponsor->is_active ? 'Widoczny' : 'Ukryty' }}</p>

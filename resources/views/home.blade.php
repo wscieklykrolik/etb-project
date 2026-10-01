@@ -130,7 +130,8 @@
 
             <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 @forelse($startingFive as $player)
-                    <a href="{{ route('team.players.show', $player) }}" class="group overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
+                    @php($hasPublicDescription = $player->hasPublicDescription())
+                    <a href="{{ $hasPublicDescription ? route('team.players.show', $player) : route('team.players') }}" data-player-card data-player-destination="{{ $hasPublicDescription ? 'opis' : 'pelny-sklad' }}" class="group overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 transition-all hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/5">
                         <div class="aspect-[4/5] bg-zinc-800 overflow-hidden">
                             @if($player->photo_path)
                                 <img src="{{ \App\Support\MediaStorage::url($player->photo_path) }}" alt="{{ $player->full_name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">

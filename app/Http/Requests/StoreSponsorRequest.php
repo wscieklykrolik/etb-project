@@ -25,6 +25,7 @@ class StoreSponsorRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:5000'],
             'sponsor_category_id' => ['required', 'exists:sponsor_categories,id'],
             'url' => ['required', 'url', 'max:2048'],
             'use_same_logo' => ['required', 'boolean'],

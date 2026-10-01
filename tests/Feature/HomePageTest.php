@@ -59,12 +59,23 @@ it('shows homepage sections from published news, visible matches, and starting f
         'publish_at' => now()->subDay(),
     ]);
 
-    Player::query()->create([
+    $playerWithoutDescription = Player::query()->create([
         'first_name' => 'Jan',
         'last_name' => 'Kowalski',
         'number' => 7,
         'position' => 'point_guard',
         'date_of_birth' => '2000-01-01',
+        'is_starting_five' => true,
+    ]);
+
+    $playerWithDescription = Player::query()->create([
+        'first_name' => 'Piotr',
+        'last_name' => 'Opisany',
+        'number' => 9,
+        'position' => 'shooting_guard',
+        'date_of_birth' => '1999-01-01',
+        'description' => 'Opis zawodnika widoczny publicznie.',
+        'publish_description' => true,
         'is_starting_five' => true,
     ]);
 
@@ -96,7 +107,11 @@ it('shows homepage sections from published news, visible matches, and starting f
     $response->assertSee('Trefl Sopot');
     $response->assertSee('Slask Wroclaw');
     $response->assertSee('Jan Kowalski');
+    $response->assertSee('Piotr Opisany');
     $response->assertDontSee('Adam Rezerwowy');
+    $response->assertSee('href="'.route('team.players').'" data-player-card data-player-destination="pelny-sklad"', false);
+    $response->assertSee('href="'.route('team.players.show', $playerWithDescription).'" data-player-card data-player-destination="opis"', false);
+    $response->assertDontSee('href="'.route('team.players.show', $playerWithoutDescription).'" data-player-card', false);
     $response->assertSee('Kochasz koszykówkę');
     $response->assertSee('academy-cta-link');
     $response->assertSee('academy-cta-arrow');

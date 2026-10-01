@@ -8,6 +8,8 @@
     $actionUrl = $actionUrl ?? null;
     $actionLabel = $actionLabel ?? null;
     $externalAction = $externalAction ?? false;
+    $externalServiceName = $externalServiceName ?? 'ŁZKosz';
+    $externalNoteId = ($sectionId ?: 'external').'-new-tab-note';
 @endphp
 
 <section @if($sectionId) id="{{ $sectionId }}" @endif class="scroll-mt-28">
@@ -39,7 +41,7 @@
                     <div class="mt-5 flex max-w-2xl items-start gap-3 rounded-xl border border-yellow-400/25 bg-yellow-400/10 px-4 py-3 text-sm leading-5 text-yellow-50">
                         <i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" aria-hidden="true"></i>
                         <p>
-                            Oficjalna strona ŁZKosz otworzy się w nowej karcie.
+                            Oficjalna strona {{ $externalServiceName }} otworzy się w nowej karcie.
                             <strong class="font-bold text-white">Strona ETB pozostanie otwarta tutaj.</strong>
                         </p>
                     </div>
@@ -51,7 +53,7 @@
                     href="{{ $actionUrl }}"
                     @if($externalAction) target="_blank" rel="noopener noreferrer" @endif
                     class="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-3 text-sm font-black text-black shadow-lg shadow-yellow-400/10 transition hover:-translate-y-0.5 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-zinc-900 lg:mt-0"
-                    @if($externalAction) aria-describedby="third-league-new-tab-note" @endif
+                    @if($externalAction) aria-describedby="{{ $externalNoteId }}" @endif
                 >
                     {{ $actionLabel }}
                     @if ($externalAction)
@@ -63,7 +65,7 @@
         </div>
 
         @if ($externalAction)
-            <span id="third-league-new-tab-note" class="sr-only">Oficjalna strona ŁZKosz otworzy się w nowej karcie, a strona ETB pozostanie otwarta.</span>
+            <span id="{{ $externalNoteId }}" class="sr-only">Oficjalna strona {{ $externalServiceName }} otworzy się w nowej karcie, a strona ETB pozostanie otwarta.</span>
         @endif
     </div>
 </section>

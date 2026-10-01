@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClubSection;
+use App\Models\AppSetting;
 use App\Models\SponsorCategory;
 use Illuminate\View\View;
 
@@ -13,6 +14,7 @@ class PublicClubController extends Controller
         return view('pages.club', [
             'clubSections' => $this->sections(),
             'clubSponsorCategories' => $this->sponsorCategories(),
+            'sponsorDisplayMode' => $this->sponsorDisplayMode(),
         ]);
     }
 
@@ -25,6 +27,7 @@ class PublicClubController extends Controller
         return view('pages.club-section', [
             'clubSection' => $clubSection,
             'clubSponsorCategories' => $this->sponsorCategories(),
+            'sponsorDisplayMode' => $this->sponsorDisplayMode(),
         ]);
     }
 
@@ -62,5 +65,12 @@ class PublicClubController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+    }
+
+    private function sponsorDisplayMode(): string
+    {
+        $mode = AppSetting::getValue('sponsor_display_mode');
+
+        return in_array($mode, ['grid', 'detailed'], true) ? $mode : 'grid';
     }
 }

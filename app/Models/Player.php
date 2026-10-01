@@ -55,6 +55,11 @@ class Player extends Model
         return BasketballPosition::tryFrom((string) $this->position)?->label() ?? (string) $this->position;
     }
 
+    public function hasPublicDescription(): bool
+    {
+        return $this->publish_description && filled($this->description);
+    }
+
     public function positionOrder(): int
     {
         return BasketballPosition::tryFrom((string) $this->position)?->sortOrder() ?? 99;

@@ -69,7 +69,7 @@ class SiteLogoController extends Controller
                 'max:2048',
             ],
             'url' => ['nullable', 'url', 'max:255'],
-            'team_name' => [Rule::requiredIf(isset($config['name_key'])), 'nullable', 'string', 'max:80'],
+            'team_name' => ['sometimes', 'required', 'string', 'max:80'],
         ]);
 
         if ($request->hasFile('logo')) {
@@ -81,7 +81,7 @@ class SiteLogoController extends Controller
             $this->deleteStoredPaths($oldPaths, $path);
         }
 
-        if (isset($config['link_key'])) {
+        if (isset($config['link_key']) && $request->has('url')) {
             if ($request->filled('url')) {
                 AppSetting::setValue($config['link_key'], $request->string('url')->toString());
             } else {
@@ -89,11 +89,15 @@ class SiteLogoController extends Controller
             }
         }
 
-        if (isset($config['name_key'])) {
+        if (isset($config['name_key']) && $request->has('team_name')) {
             AppSetting::setValue($config['name_key'], $request->string('team_name')->trim()->toString());
         }
 
-        return back()->with('success', $config['label'].' zostało zaktualizowane.');
+        $message = $request->has('team_name') && ! $request->hasFile('logo') && ! $request->has('url')
+            ? 'Nazwa drużyny została zaktualizowana.'
+            : $config['label'].' zostało zaktualizowane.';
+
+        return back()->with('success', $message);
     }
 
     public function destroy(string $logo): RedirectResponse
@@ -104,7 +108,6 @@ class SiteLogoController extends Controller
         AppSetting::query()->where('key', $config['key'])->delete();
         $this->forgetLegacySetting($config);
         $this->forgetLinkSetting($config);
-        $this->forgetNameSetting($config);
         $this->deleteStoredPaths($oldPaths);
 
         return back()->with('success', $config['label'].' zostało usunięte.');
@@ -139,13 +142,6 @@ class SiteLogoController extends Controller
     {
         if (isset($config['link_key'])) {
             AppSetting::query()->where('key', $config['link_key'])->delete();
-        }
-    }
-
-    private function forgetNameSetting(array $config): void
-    {
-        if (isset($config['name_key'])) {
-            AppSetting::query()->where('key', $config['name_key'])->delete();
         }
     }
 

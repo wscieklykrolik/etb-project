@@ -113,7 +113,7 @@ Route::get('/club/contact', [PublicClubController::class, 'contact'])->name('clu
 
 /* Rozgrywki */
 Route::get('/schedule/lzkosz', [PublicScheduleController::class, 'lzkosz'])->name('schedule.lzkosz');
-Route::view('/schedule/third-league', 'pages.schedule-third-league')->name('schedule.third-league');
+Route::get('/schedule/third-league', [PublicScheduleController::class, 'thirdLeague'])->name('schedule.third-league');
 Route::get('/schedule/table', [PublicScheduleController::class, 'table'])->name('schedule.table');
 Route::get('/schedule/3x3', [ThreeXThreeTournamentController::class, 'participating'])->name('schedule.3x3');
 Route::redirect('/schedule/3x3-tournaments', '/schedule/3x3')->name('schedule.3x3.tournaments.old');

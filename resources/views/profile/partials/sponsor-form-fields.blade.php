@@ -8,6 +8,12 @@
     <input id="sponsor-name-{{ $sponsor?->id ?? 'new' }}" name="name" value="{{ old('name', $sponsor?->name) }}" required class="w-full rounded-lg border-slate-300 text-sm">
 </div>
 
+<div>
+    <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-description-{{ $sponsor?->id ?? 'new' }}">Opis sponsora</label>
+    <textarea id="sponsor-description-{{ $sponsor?->id ?? 'new' }}" name="description" rows="4" maxlength="5000" placeholder="Napisz krótko o sponsorze, jego działalności lub współpracy z klubem..." class="w-full rounded-lg border-slate-300 text-sm">{{ old('description', $sponsor?->description) }}</textarea>
+    <p class="mt-1 text-xs text-slate-500">Opis pojawi się na podstronie „Sponsorzy” po wybraniu prezentacji z opisami.</p>
+</div>
+
 <div class="grid gap-4 md:grid-cols-2">
     <div>
         <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-category-{{ $sponsor?->id ?? 'new' }}">Kategoria partnera</label>
@@ -18,7 +24,7 @@
         </select>
     </div>
     <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-sort-{{ $sponsor?->id ?? 'new' }}">Kolejność</label>
+        <label class="mb-1 block text-sm font-semibold text-slate-700" for="sponsor-sort-{{ $sponsor?->id ?? 'new' }}">Kolejność na stronie sponsorów</label>
         <input id="sponsor-sort-{{ $sponsor?->id ?? 'new' }}" type="number" min="0" max="9999" name="sort_order" value="{{ old('sort_order', $sponsor?->sort_order ?? 0) }}" class="w-full rounded-lg border-slate-300 text-sm">
     </div>
 </div>
