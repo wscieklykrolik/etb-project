@@ -188,8 +188,8 @@
                 <div class="flex flex-wrap items-center justify-center gap-7">
                     @foreach($sponsors as $sponsor)
                         <a href="{{ $sponsor->url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="group flex h-32 w-32 items-center justify-center rounded-lg border border-white/15 bg-white/[0.06] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-yellow-400/70 hover:bg-yellow-400/10 hover:shadow-lg hover:shadow-yellow-400/20 focus:outline-none focus:ring-2 focus:ring-yellow-400 sm:h-36 sm:w-36" title="{{ $sponsor->name }}">
-                            @if($sponsor->logo_path)
-                                <img src="{{ \App\Support\MediaStorage::url($sponsor->logo_path) }}" alt="{{ $sponsor->name }}" class="max-h-24 w-full object-contain opacity-85 grayscale brightness-0 invert transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_18px_rgba(250,204,21,0.55)]">
+                            @if($sponsor->homepageLogoPath())
+                                <img src="{{ \App\Support\MediaStorage::url($sponsor->homepageLogoPath()) }}" alt="{{ $sponsor->name }}" class="max-h-24 w-full object-contain opacity-85 grayscale brightness-0 invert transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_18px_rgba(250,204,21,0.55)]">
                             @else
                                 <span class="text-center text-sm font-bold text-zinc-300 transition-colors group-hover:text-yellow-400">{{ $sponsor->name }}</span>
                             @endif

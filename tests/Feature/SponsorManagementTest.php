@@ -70,6 +70,90 @@ it('lets an admin create and delete sponsors with logo and link', function () {
     Storage::disk('public')->assertMissing($sponsor->logo_path);
 });
 
+it('lets an admin assign separate images to the footer and homepage using one link', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_SPONSOR)->firstOrFail();
+
+    $response = $this->actingAs($admin)->post(route('sponsors.store'), [
+        'name' => 'Sponsor z dwoma zdjęciami',
+        'sponsor_category_id' => $category->id,
+        'url' => 'https://wspolny-link.example.com',
+        'use_same_logo' => '0',
+        'logo' => UploadedFile::fake()->create('stopka.png', 12, 'image/png'),
+        'homepage_logo' => UploadedFile::fake()->create('strona-glowna.png', 12, 'image/png'),
+        'sort_order' => 3,
+        'is_active' => '1',
+    ]);
+
+    $response->assertRedirect(route('profile.edit'));
+
+    $sponsor = Sponsor::query()->firstOrFail();
+
+    expect($sponsor->homepage_logo_path)->not->toBeNull()
+        ->and($sponsor->homepage_logo_path)->not->toBe($sponsor->logo_path)
+        ->and($sponsor->homepageLogoPath())->toBe($sponsor->homepage_logo_path);
+
+    Storage::disk('public')->assertExists($sponsor->logo_path);
+    Storage::disk('public')->assertExists($sponsor->homepage_logo_path);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('https://wspolny-link.example.com')
+        ->assertSee(\App\Support\MediaStorage::url($sponsor->logo_path))
+        ->assertSee(\App\Support\MediaStorage::url($sponsor->homepage_logo_path));
+});
+
+it('requires a homepage image when separate images are selected', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_SPONSOR)->firstOrFail();
+
+    $this->actingAs($admin)->post(route('sponsors.store'), [
+        'name' => 'Sponsor bez drugiego zdjęcia',
+        'sponsor_category_id' => $category->id,
+        'url' => 'https://partner.example.com',
+        'use_same_logo' => '0',
+        'logo' => UploadedFile::fake()->create('stopka.png', 12, 'image/png'),
+        'sort_order' => 3,
+        'is_active' => '1',
+    ])->assertSessionHasErrors('homepage_logo');
+});
+
+it('can return to one shared image and removes the unused homepage file', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $category = SponsorCategory::query()->where('legacy_type', Sponsor::TYPE_SPONSOR)->firstOrFail();
+    Storage::disk('public')->put('sponsors/wspolne.png', 'shared');
+    Storage::disk('public')->put('sponsors/glowna.png', 'homepage');
+
+    $sponsor = Sponsor::query()->create([
+        'name' => 'Sponsor wracający do wspólnego zdjęcia',
+        'sponsor_category_id' => $category->id,
+        'url' => 'https://partner.example.com',
+        'logo_path' => 'sponsors/wspolne.png',
+        'homepage_logo_path' => 'sponsors/glowna.png',
+        'sort_order' => 3,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($admin)->put(route('sponsors.update', $sponsor), [
+        'name' => $sponsor->name,
+        'sponsor_category_id' => $category->id,
+        'url' => $sponsor->url,
+        'use_same_logo' => '1',
+        'sort_order' => 3,
+        'is_active' => '1',
+    ])->assertRedirect(route('profile.edit'));
+
+    expect($sponsor->fresh()->homepage_logo_path)->toBeNull();
+    Storage::disk('public')->assertMissing('sponsors/glowna.png');
+    Storage::disk('public')->assertExists('sponsors/wspolne.png');
+});
+
 it('lets an admin manage sponsor categories', function () {
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 

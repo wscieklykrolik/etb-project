@@ -25,6 +25,7 @@ class Sponsor extends Model
         'sponsor_category_id',
         'url',
         'logo_path',
+        'homepage_logo_path',
         'sort_order',
         'is_active',
     ];
@@ -86,5 +87,10 @@ class Sponsor extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(SponsorCategory::class, 'sponsor_category_id');
+    }
+
+    public function homepageLogoPath(): string
+    {
+        return $this->homepage_logo_path ?: $this->logo_path;
     }
 }

@@ -900,6 +900,7 @@
                                             <h3 class="truncate font-black">{{ $sponsor->name }}</h3>
                                             <p class="text-sm font-semibold text-yellow-700">{{ $sponsor->typeLabel() }}</p>
                                             <a href="{{ $sponsor->url }}" target="_blank" rel="noopener noreferrer" class="block truncate text-sm text-slate-600 hover:text-yellow-700">{{ $sponsor->url }}</a>
+                                            <p class="mt-1 text-xs font-semibold text-slate-500">{{ $sponsor->homepage_logo_path ? 'Osobne zdjęcia dla dwóch miejsc' : 'Jedno zdjęcie w obu miejscach' }}</p>
                                             <p class="mt-1 text-xs font-bold uppercase {{ $sponsor->is_active ? 'text-emerald-700' : 'text-slate-500' }}">{{ $sponsor->is_active ? 'Widoczny' : 'Ukryty' }}</p>
                                         </div>
                                     </div>

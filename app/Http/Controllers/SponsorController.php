@@ -18,7 +18,11 @@ class SponsorController extends Controller
 
     public function store(StoreSponsorRequest $request): RedirectResponse
     {
-        $sponsor = $this->sponsorService->create($request->safe()->except('logo'), $request->file('logo'));
+        $sponsor = $this->sponsorService->create(
+            $request->safe()->except(['logo', 'homepage_logo']),
+            $request->file('logo'),
+            $request->file('homepage_logo'),
+        );
         $this->notificationService->record($request->user(), 'created', $sponsor, "Sponsor: {$sponsor->name}");
 
         return redirect()->route('profile.edit')->with('success', 'Sponsor został zapisany.');
@@ -26,7 +30,12 @@ class SponsorController extends Controller
 
     public function update(UpdateSponsorRequest $request, Sponsor $sponsor): RedirectResponse
     {
-        $this->sponsorService->update($sponsor, $request->safe()->except('logo'), $request->file('logo'));
+        $this->sponsorService->update(
+            $sponsor,
+            $request->safe()->except(['logo', 'homepage_logo']),
+            $request->file('logo'),
+            $request->file('homepage_logo'),
+        );
         $this->notificationService->record($request->user(), 'updated', $sponsor, "Sponsor: {$sponsor->name}");
 
         return redirect()->route('profile.edit')->with('success', 'Sponsor został zaktualizowany.');
