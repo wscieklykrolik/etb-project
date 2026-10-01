@@ -140,6 +140,7 @@ it('archives the current table together with team names and logo paths', functio
         'points_against' => 650,
         'points_difference' => 150,
         'ratio' => 1.2308,
+        'source_team_name' => 'ETB Łódź',
     ]);
 
     $this->actingAs($admin)->post(route('admin.league-table.archive'), [
