@@ -25,7 +25,10 @@ class HomeController extends Controller
 
         $lastFinishedMatch = TeamMatch::query()
             ->with(['opponent', 'sportsHall'])
-            ->where('status', TeamMatch::STATUS_FINISHED)
+            ->where(function ($query): void {
+                $query->where('status', TeamMatch::STATUS_FINISHED)
+                    ->orWhere('match_date', '<=', now()->subHours(2));
+            })
             ->where(function ($query): void {
                 $query->whereNull('publish_at')->orWhere('publish_at', '<=', now());
             })
@@ -35,7 +38,7 @@ class HomeController extends Controller
         $upcomingMatches = TeamMatch::query()
             ->with(['opponent', 'sportsHall'])
             ->where('status', TeamMatch::STATUS_UPCOMING)
-            ->where('match_date', '>=', now())
+            ->where('match_date', '>', now()->subHours(2))
             ->where(function ($query): void {
                 $query->whereNull('publish_at')->orWhere('publish_at', '<=', now());
             })

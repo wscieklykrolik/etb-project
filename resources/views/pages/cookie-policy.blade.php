@@ -26,7 +26,7 @@
 
         <section>
             <h2 class="text-2xl font-black text-white">2. Kto odpowiada za cookies?</h2>
-            <p class="mt-3 leading-7">Administratorem serwisu jest ETB Łódź. W sprawach dotyczących prywatności i cookies możesz napisać na adres <a href="mailto:etb.3x3@gmail.com" class="font-bold text-yellow-400 underline underline-offset-4">etb.3x3@gmail.com</a>.</p>
+            <p class="mt-3 leading-7">Administratorem serwisu jest ETB Łódź. W sprawach dotyczących prywatności i cookies możesz napisać na adres <a href="mailto:{{ $officeEmail }}" class="font-bold text-yellow-400 underline underline-offset-4">{{ $officeEmail }}</a>.</p>
         </section>
 
         <section>

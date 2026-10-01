@@ -36,6 +36,7 @@
                                 @endif
                                 <a href="{{ $sectionUrl('tickets') }}" class="{{ $sectionClasses('tickets') }}"><i data-lucide="ticket" class="h-4 w-4"></i>Bilety</a>
                                 <a href="{{ $sectionUrl('club-content') }}" class="{{ $sectionClasses('club-content') }}"><i data-lucide="building-2" class="h-4 w-4"></i>Klub</a>
+                                <a href="{{ $sectionUrl('contact') }}" class="{{ $sectionClasses('contact') }}"><i data-lucide="mail" class="h-4 w-4"></i>Kontakt</a>
                                 <a href="{{ $sectionUrl('important-links') }}" class="{{ $sectionClasses('important-links') }}"><i data-lucide="link" class="h-4 w-4"></i>Ważne linki</a>
                                 <a href="{{ $sectionUrl('news') }}" class="{{ $sectionClasses('news') }}"><i data-lucide="newspaper" class="h-4 w-4"></i>Aktualności</a>
                                 <a href="{{ $sectionUrl('academy') }}" class="{{ $sectionClasses('academy') }}"><i data-lucide="graduation-cap" class="h-4 w-4"></i>Akademia</a>

@@ -170,10 +170,6 @@
                 </header>
 
                 <main id="dashboard" class="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-                    @if (session('success'))
-                        <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{{ session('success') }}</div>
-                    @endif
-
                     @if ($errors->any())
                         <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                             <p class="font-semibold">Nie udało się zapisać formularza.</p>
@@ -545,6 +541,34 @@
                                 </div>
                             </div>
                         </div>
+                    </section>
+
+                    <section id="contact" class="{{ $activeSection === 'contact' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="mb-6">
+                            <h2 class="text-xl font-black">Kontakt</h2>
+                            <p class="text-sm text-slate-600">Zmień adresy widoczne w stopce i odpowiednich sekcjach strony.</p>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.contact-emails.update') }}" class="max-w-3xl space-y-5">
+                            @csrf
+                            @method('PUT')
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <label for="office-email" class="block text-sm font-black text-slate-900">Adres e-mail biura</label>
+                                <p class="mt-1 text-xs leading-5 text-slate-500">Wyświetla się w stopce oraz jako kontakt w sprawach prywatności i cookies.</p>
+                                <input id="office-email" name="office_email" type="email" required maxlength="254" value="{{ old('office_email', $officeEmail) }}" class="mt-3 w-full rounded-lg border-slate-300 bg-white text-sm" autocomplete="email">
+                            </div>
+
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <label for="marketing-email" class="block text-sm font-black text-slate-900">Adres e-mail marketingu i mediów</label>
+                                <p class="mt-1 text-xs leading-5 text-slate-500">Wyświetla się w stopce oraz w sekcji „Marketing” na stronie kontaktowej.</p>
+                                <input id="marketing-email" name="marketing_email" type="email" required maxlength="254" value="{{ old('marketing_email', $marketingEmail) }}" class="mt-3 w-full rounded-lg border-slate-300 bg-white text-sm" autocomplete="email">
+                            </div>
+
+                            <button class="inline-flex items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">
+                                <i data-lucide="save" class="h-4 w-4" aria-hidden="true"></i>
+                                Zapisz adresy e-mail
+                            </button>
+                        </form>
                     </section>
 
                     <section id="club-content" class="{{ $activeSection === 'club-content' ? '' : 'hidden' }} rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -1184,6 +1208,53 @@
     @endif
 
     @if ($isPanelUser)
+        @if ($pendingMatchResult)
+            <div x-data="{ open: true }" x-show="open" x-cloak x-transition class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="missing-match-result-title">
+                <div class="w-full max-w-lg rounded-xl bg-white p-6 text-slate-950 shadow-2xl">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-yellow-600">Uzupełnienie wyniku</p>
+                            <h2 id="missing-match-result-title" class="mt-1 text-xl font-black">Mecz został zakończony — dodaj wynik</h2>
+                            <p class="mt-2 text-sm text-slate-600">
+                                ETB Łódź — {{ $pendingMatchResult->opponent_name }},
+                                {{ $pendingMatchResult->match_date?->format('d.m.Y H:i') }}
+                            </p>
+                        </div>
+                        <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950" aria-label="Zamknij przypomnienie" @click="open = false">
+                            <i data-lucide="x" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.matches.result-reminder.store', $pendingMatchResult) }}" class="mt-6 space-y-4">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="text-sm font-bold">
+                                Punkty ETB Łódź
+                                <input name="our_score" type="number" min="0" max="999" required value="{{ old('our_score') }}" class="mt-1 w-full rounded-lg border-slate-300 focus:border-yellow-400 focus:ring-yellow-400">
+                            </label>
+                            <label class="text-sm font-bold">
+                                Punkty: {{ $pendingMatchResult->opponent_name }}
+                                <input name="opponent_score" type="number" min="0" max="999" required value="{{ old('opponent_score') }}" class="mt-1 w-full rounded-lg border-slate-300 focus:border-yellow-400 focus:ring-yellow-400">
+                            </label>
+                        </div>
+                        <button class="w-full rounded-lg bg-yellow-400 px-4 py-3 text-sm font-black text-black hover:bg-yellow-300">Zapisz wynik</button>
+                    </form>
+
+                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                        <form method="POST" action="{{ route('admin.matches.result-reminder.remind', $pendingMatchResult) }}">
+                            @csrf
+                            <button class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold hover:bg-slate-50">Przypomnij później</button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.matches.result-reminder.dismiss', $pendingMatchResult) }}" onsubmit="return confirm('Czy na pewno nie chcesz już otrzymywać przypomnienia o wyniku tego meczu?')">
+                            @csrf
+                            <button class="w-full rounded-lg border border-red-200 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-50">Odrzuć na zawsze</button>
+                        </form>
+                    </div>
+                    <p class="mt-4 text-xs text-slate-500">Zamknięcie okna przyciskiem X ukrywa je tylko do następnego wejścia do panelu.</p>
+                </div>
+            </div>
+        @endif
+
         <div x-show="openModal === 'match-create'" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-slate-950 shadow-xl" @click.outside="openModal = null">
                 <h4 class="mb-4 text-lg font-black">Dodaj mecz</h4>

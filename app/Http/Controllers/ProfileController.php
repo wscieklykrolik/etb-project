@@ -14,6 +14,7 @@ use App\Models\FaqQuestion;
 use App\Models\ImportantPage;
 use App\Models\LeagueStanding;
 use App\Models\LeagueTableSnapshot;
+use App\Models\MatchResultReminderDismissal;
 use App\Models\News;
 use App\Models\Order;
 use App\Models\Player;
@@ -50,6 +51,7 @@ class ProfileController extends Controller
             'matches',
             'tickets',
             'club-content',
+            'contact',
             'important-links',
             'academy',
             'faq',
@@ -68,17 +70,36 @@ class ProfileController extends Controller
             ? (string) $request->query('section')
             : 'dashboard';
 
-        $upcomingMatches = TeamMatch::query()
+        $matches = TeamMatch::query()
             ->with(['opponent', 'sportsHall'])
-            ->where('status', TeamMatch::STATUS_UPCOMING)
             ->orderBy('match_date')
             ->get();
 
-        $finishedMatches = TeamMatch::query()
-            ->with(['opponent', 'sportsHall'])
-            ->where('status', TeamMatch::STATUS_FINISHED)
-            ->orderByDesc('match_date')
-            ->get();
+        $upcomingMatches = $matches
+            ->filter(fn (TeamMatch $match): bool => $match->isUpcoming())
+            ->values();
+        $finishedMatches = $matches
+            ->filter(fn (TeamMatch $match): bool => $match->isFinished())
+            ->sortByDesc('match_date')
+            ->values();
+
+        $pendingMatchResult = null;
+
+        if ($user->isAdmin()) {
+            $snoozedMatchIds = (array) $request->session()->get('match_result_reminder_snoozed', []);
+
+            $pendingMatchResult = TeamMatch::query()
+                ->where('match_date', '<=', now()->subHours(2))
+                ->where(function ($query): void {
+                    $query->whereNull('our_score')->orWhereNull('opponent_score');
+                })
+                ->whereNotIn('id', $snoozedMatchIds)
+                ->whereNotIn('id', MatchResultReminderDismissal::query()
+                    ->select('match_id')
+                    ->where('user_id', $user->id))
+                ->orderBy('match_date')
+                ->first();
+        }
 
         $publishedNews = News::query()
             ->with(['author', 'images'])
@@ -215,6 +236,7 @@ class ProfileController extends Controller
             'availableRoles' => User::roles(),
             'upcomingMatches' => $upcomingMatches,
             'finishedMatches' => $finishedMatches,
+            'pendingMatchResult' => $pendingMatchResult,
             'publishedNews' => $publishedNews,
             'scheduledNews' => $scheduledNews,
             'draftNews' => $draftNews,

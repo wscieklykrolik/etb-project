@@ -20,7 +20,7 @@ class StoreTeamStaffRequest extends FormRequest
             'birth_year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
             'description' => ['nullable', 'string', 'max:5000'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ];
     }
 }

@@ -26,7 +26,7 @@ class StoreThreeXThreeMemberRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:5000'],
             'is_coach' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ];
     }
 }

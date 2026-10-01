@@ -118,3 +118,31 @@ it('uses the editable club contact content on both contact routes', function () 
         ->assertSee('Kontakt z biurem ETB: kontakt@etb.test')
         ->assertDontSee('Sekcja gotowa do dodawania treści');
 });
+
+it('lets an admin change office and marketing email addresses from the contact tab', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $this->actingAs($admin)
+        ->get(route('profile.edit', ['section' => 'contact']))
+        ->assertOk()
+        ->assertSee('Adres e-mail biura')
+        ->assertSee('Adres e-mail marketingu i mediów');
+
+    $this->actingAs($admin)->put(route('admin.contact-emails.update'), [
+        'office_email' => 'biuro@etb.test',
+        'marketing_email' => 'marketing@etb.test',
+    ])->assertRedirect(route('profile.edit', ['section' => 'contact']));
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('mailto:biuro@etb.test', false)
+        ->assertSee('mailto:marketing@etb.test', false);
+
+    $this->get(route('contact'))
+        ->assertOk()
+        ->assertSee('mailto:marketing@etb.test', false);
+
+    $this->get(route('cookies.policy'))
+        ->assertOk()
+        ->assertSee('mailto:biuro@etb.test', false);
+});

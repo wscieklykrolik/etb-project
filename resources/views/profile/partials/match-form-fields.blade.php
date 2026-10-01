@@ -2,7 +2,7 @@
     use App\Models\MatchGame;
 
     $match = $match ?? null;
-    $currentStatus = old('status', $match?->status ?? MatchGame::STATUS_UPCOMING);
+    $currentStatus = old('status', $match?->effectiveStatus() ?? MatchGame::STATUS_UPCOMING);
     $isHome = filter_var(old('is_home', $match?->is_home ?? true), FILTER_VALIDATE_BOOLEAN);
     $includeInLzkosz = filter_var(old('include_in_lzkosz', $match?->include_in_lzkosz ?? false), FILTER_VALIDATE_BOOLEAN);
     $isTicketed = filter_var(old('is_ticketed', $match?->is_ticketed ?? false), FILTER_VALIDATE_BOOLEAN);

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\FaqQuestionController;
 use App\Http\Controllers\Admin\LeagueTableController;
 use App\Http\Controllers\Admin\MatchSuggestionController;
+use App\Http\Controllers\Admin\MatchResultReminderController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductFilterController;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::delete('/admin/notifications/{notification}', [AdminNotificationController::class, 'destroy'])->name('admin.notifications.destroy');
     Route::put('/admin/tickets-page', [TicketPageController::class, 'update'])->name('admin.tickets-page.update');
     Route::put('/admin/club-sections/{section}', [ClubSectionController::class, 'update'])->name('admin.club-sections.update');
+    Route::put('/admin/contact-emails', [ClubSectionController::class, 'updateEmails'])->name('admin.contact-emails.update');
     Route::patch('/admin/club-sections/{section}/images/{image}', [ClubSectionController::class, 'updateImage'])->name('admin.club-sections.images.update');
     Route::delete('/admin/club-sections/{section}/images/{image}', [ClubSectionController::class, 'destroyImage'])->name('admin.club-sections.images.destroy');
     Route::post('/admin/academy/groups', [AcademyGroupController::class, 'store'])->name('admin.academy.groups.store');
@@ -116,6 +118,9 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::post('/admin/matches/{match}/result-reminder/result', [MatchResultReminderController::class, 'store'])->name('admin.matches.result-reminder.store');
+    Route::post('/admin/matches/{match}/result-reminder/remind', [MatchResultReminderController::class, 'remind'])->name('admin.matches.result-reminder.remind');
+    Route::post('/admin/matches/{match}/result-reminder/dismiss', [MatchResultReminderController::class, 'dismiss'])->name('admin.matches.result-reminder.dismiss');
     Route::patch('/admin/site-logos/{logo}', [SiteLogoController::class, 'update'])->name('admin.site-logos.update');
     Route::delete('/admin/site-logos/{logo}', [SiteLogoController::class, 'destroy'])->name('admin.site-logos.destroy');
     Route::patch('/admin/users/{user}/role', [UserRoleController::class, 'update'])->name('admin.users.role.update');

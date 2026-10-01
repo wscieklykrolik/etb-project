@@ -24,7 +24,7 @@ class UpdateProductRequest extends FormRequest
             'is_physical' => ['boolean'],
             'is_published' => ['boolean'],
             'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'max:2048'],
+            'images.*' => ['image', 'max:'.config('media.max_upload_kilobytes')],
             'filter_options' => ['nullable', 'array'],
             'filter_options.*' => ['integer', 'exists:product_filter_options,id'],
         ];

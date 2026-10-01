@@ -161,3 +161,21 @@ it('uses the previous site logo as the club logo fallback and migrates it on upl
     expect(AppSetting::getValue('club_logo'))->toStartWith('logos/');
     Storage::disk('media')->assertMissing('logos/stare-logo.png');
 });
+
+it('accepts an image above the warning threshold and exposes upload limits to the interface', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=');
+    $largeLogo = UploadedFile::fake()->createWithContent('duze-logo.png', $png.str_repeat("\0", 6000 * 1024));
+
+    $this->actingAs($admin)->patch(route('admin.site-logos.update', 'club'), [
+        'logo' => $largeLogo,
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    expect(AppSetting::getValue('club_logo'))->toStartWith('logos/');
+
+    $this->actingAs($admin)
+        ->get(route('profile.edit'))
+        ->assertOk()
+        ->assertSee('name="etb-large-upload-warning-kb" content="5012"', false)
+        ->assertSee('name="etb-max-upload-kb" content="25600"', false);
+});

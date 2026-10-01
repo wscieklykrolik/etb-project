@@ -40,7 +40,7 @@ class StoreThreeXThreeTournamentRequest extends FormRequest
             'team_size' => ['nullable', 'required_if:registration_mode,'.ThreeXThreeTournament::REGISTRATION_INTERNAL, 'integer', 'min:2', 'max:12'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['string', Rule::in(ThreeXThreeCategory::values())],
-            'image' => ['nullable', 'image', 'max:5120'],
+            'image' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ];
     }
 }

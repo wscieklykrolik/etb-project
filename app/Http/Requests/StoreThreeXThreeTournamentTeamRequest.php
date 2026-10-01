@@ -40,7 +40,7 @@ class StoreThreeXThreeTournamentTeamRequest extends FormRequest
                     ->where('three_x_three_tournament_id', $tournament?->id),
             ],
             'category' => ['required', 'string', Rule::in($categories)],
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
             'players' => ['required', 'array', 'size:'.$teamSize],
             'players.*.name' => ['required', 'string', 'max:255'],
         ];

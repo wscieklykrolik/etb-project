@@ -18,7 +18,7 @@
                     <p class="text-sm font-bold uppercase tracking-widest {{ $match->isWin() ? 'text-emerald-400' : 'text-red-400' }}">{{ $match->isWin() ? 'Zwycięstwo' : 'Porażka' }}</p>
                 @else
                     <p class="text-5xl font-black text-white">--:--</p>
-                    <p class="text-sm font-bold uppercase tracking-widest text-zinc-400">Do rozegrania</p>
+                    <p class="text-sm font-bold uppercase tracking-widest text-zinc-400">{{ $match->resultLabel() }}</p>
                 @endif
             </div>
         </div>
@@ -46,7 +46,7 @@
             </div>
             <div class="rounded border border-zinc-800 bg-zinc-900 p-4">
                 <dt class="text-xs uppercase tracking-widest text-zinc-500">Status</dt>
-                <dd class="mt-1 font-bold text-white">{{ $match->status === \App\Models\TeamMatch::STATUS_FINISHED ? 'Zakończony' : 'Nadchodzący' }}</dd>
+                <dd class="mt-1 font-bold text-white">{{ $match->statusLabel() }}</dd>
             </div>
         </dl>
 

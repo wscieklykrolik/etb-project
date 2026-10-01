@@ -24,7 +24,7 @@ class TicketPageController extends Controller
             'body' => ['nullable', 'string', 'max:100000'],
             'button_url' => ['nullable', 'url', 'max:2048'],
             'button_label' => ['nullable', 'string', 'max:80'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('media.max_upload_kilobytes')],
             'remove_image' => ['sometimes', 'boolean'],
         ], [], [
             'body' => 'treść',

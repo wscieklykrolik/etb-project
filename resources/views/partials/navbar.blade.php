@@ -126,7 +126,7 @@
                         Sklep
                         <span x-data="{ count: 0 }" x-init="fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count); setInterval(()=>fetch('{{ route('cart.badge') }}').then(r=>r.json()).then(d=>count=d.count),30000)" x-show="count > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" x-text="count"></span>
                     </a>
-                    <a href="{{ route('academy') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black transition-all hover:border-zinc-700 hover:bg-zinc-200">
+                    <a href="{{ route('academy') }}" class="ajax-link inline-flex items-center justify-center gap-2 rounded border border-zinc-500 px-3 py-2 text-sm font-semibold text-black hover:bg-yellow-400">
                         <i data-lucide="graduation-cap" class="w-4 h-4"></i> Akademia
                     </a>
                 </div>
@@ -136,10 +136,10 @@
             <div class="etb-header-sponsor flex items-center justify-center p-2">
                 @if ($titleSponsorLogoUrl && $titleSponsorUrl)
                     <a href="{{ $titleSponsorUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex h-full w-full items-center justify-center">
-                        <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-24 w-full object-contain" fallback="" />
+                        <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-24 w-full object-contain object-right" fallback="" />
                     </a>
                 @else
-                    <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-24 w-full object-contain" fallback="" />
+                    <x-site-logo :url="$titleSponsorLogoUrl" alt="Logo sponsora tytularnego" image-class="max-h-24 w-full object-contain object-right" fallback="" />
                 @endif
             </div>
             @endif

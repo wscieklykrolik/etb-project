@@ -26,7 +26,7 @@ class ImportantPageController extends Controller
 
         $data = $request->validateWithBag($slug, [
             'body' => ['nullable', 'string', 'max:100000'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:'.config('media.max_upload_kilobytes')],
             'remove_image' => ['sometimes', 'boolean'],
         ], [], [
             'body' => 'treść',

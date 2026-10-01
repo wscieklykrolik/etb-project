@@ -30,8 +30,8 @@
     <section class="bg-zinc-900 text-zinc-200 py-10 border-t border-zinc-700">
         <div class="max-w-7xl mx-auto px-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 text-sm">
             <div><h4 class="font-bold text-white mb-3">ETB Łódź</h4><p>Oficjalna strona klubu ETB Łódź.</p></div>
-            <div><h4 class="font-bold text-white mb-3">Biuro</h4><a href="mailto:etb.3x3@gmail.com" class="break-words hover:text-yellow-400">etb.3x3@gmail.com</a></div>
-            <div><h4 class="font-bold text-white mb-3">Marketing i media</h4><p>media@etb-lodz.pl</p></div>
+            <div><h4 class="font-bold text-white mb-3">Biuro</h4><a href="mailto:{{ $officeEmail }}" class="break-words hover:text-yellow-400">{{ $officeEmail }}</a></div>
+            <div><h4 class="font-bold text-white mb-3">Marketing i media</h4><a href="mailto:{{ $marketingEmail }}" class="break-words hover:text-yellow-400">{{ $marketingEmail }}</a></div>
             <div><h4 class="font-bold text-white mb-3">Bilety i Akademia</h4><p><a href="{{ route('tickets') }}" class="hover:text-yellow-400">Bilety</a><br><a href="{{ route('academy') }}" class="hover:text-yellow-400">Akademia</a></p></div>
             <div>
                 <h4 class="font-bold text-white mb-3">Ważne linki</h4>

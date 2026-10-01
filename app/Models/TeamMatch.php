@@ -61,10 +61,38 @@ class TeamMatch extends Model
         return $this->our_score !== null && $this->opponent_score !== null;
     }
 
+    public function effectiveStatus(): string
+    {
+        if ($this->status === self::STATUS_FINISHED) {
+            return self::STATUS_FINISHED;
+        }
+
+        if ($this->match_date?->lte(now()->subHours(2))) {
+            return self::STATUS_FINISHED;
+        }
+
+        return self::STATUS_UPCOMING;
+    }
+
+    public function isFinished(): bool
+    {
+        return $this->effectiveStatus() === self::STATUS_FINISHED;
+    }
+
+    public function isUpcoming(): bool
+    {
+        return ! $this->isFinished();
+    }
+
+    public function statusLabel(): string
+    {
+        return $this->isFinished() ? 'Zakończony' : 'Nadchodzący';
+    }
+
     public function resultLabel(): string
     {
         if (! $this->hasResult()) {
-            return 'Do rozegrania';
+            return $this->isFinished() ? 'Wynik nieuzupełniony' : 'Do rozegrania';
         }
 
         return "{$this->our_score}:{$this->opponent_score}";

@@ -18,7 +18,7 @@
 
             <div class="max-w-4xl rounded-lg border border-zinc-800 bg-zinc-950 p-6">
                 <p class="text-base leading-8 text-zinc-100 sm:text-lg">W sprawach marketingu, współpracy medialnej i materiałów promocyjnych napisz do nas.</p>
-                <a href="mailto:media@etb-lodz.pl" class="mt-4 inline-flex items-center gap-2 text-lg font-black text-yellow-400 transition hover:text-yellow-300">media@etb-lodz.pl</a>
+                <a href="mailto:{{ $marketingEmail }}" class="mt-4 inline-flex items-center gap-2 text-lg font-black text-yellow-400 transition hover:text-yellow-300">{{ $marketingEmail }}</a>
             </div>
         </section>
     </div>

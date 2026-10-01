@@ -27,7 +27,7 @@ class StorePlayerRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:5000'],
             'publish_description' => ['nullable', 'boolean'],
             'is_starting_five' => ['nullable', 'boolean'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ];
     }
 }

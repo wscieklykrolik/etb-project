@@ -27,9 +27,9 @@ class AdminMatchController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'exact_address' => ['nullable', 'string', 'max:500'],
             'is_home' => ['nullable', 'boolean'],
-            'image' => ['nullable', 'image', 'max:5120'],
-            'away_logo' => ['nullable', 'image', 'max:5120'],
-            'default_home_logo' => ['nullable', 'image', 'max:5120'],
+            'image' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
+            'away_logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
+            'default_home_logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ]);
 
         $defaultHomeLogo = AppSetting::getValue('default_home_logo');

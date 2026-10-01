@@ -29,11 +29,13 @@ class PublicScheduleController extends Controller
             $query->where('season', $season);
         }
 
-        if (in_array($view, [TeamMatch::STATUS_UPCOMING, TeamMatch::STATUS_FINISHED], true)) {
-            $query->where('status', $view);
-        }
-
         $matches = $query->orderBy('match_date', $sort)->get();
+
+        if ($view === TeamMatch::STATUS_UPCOMING) {
+            $matches = $matches->filter(fn (TeamMatch $match): bool => $match->isUpcoming())->values();
+        } elseif ($view === TeamMatch::STATUS_FINISHED) {
+            $matches = $matches->filter(fn (TeamMatch $match): bool => $match->isFinished())->values();
+        }
 
         $seasons = TeamMatch::query()
             ->whereNotNull('season')
@@ -79,8 +81,8 @@ class PublicScheduleController extends Controller
 
         return view('pages.schedule', [
             'matches' => $matches,
-            'upcomingMatches' => $matches->where('status', TeamMatch::STATUS_UPCOMING),
-            'finishedMatches' => $matches->where('status', TeamMatch::STATUS_FINISHED),
+            'upcomingMatches' => $matches->filter(fn (TeamMatch $match): bool => $match->isUpcoming()),
+            'finishedMatches' => $matches->filter(fn (TeamMatch $match): bool => $match->isFinished()),
             'seasons' => $seasons,
             'selectedSeason' => $season,
             'selectedView' => $view,

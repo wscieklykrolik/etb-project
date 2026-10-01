@@ -66,7 +66,7 @@ class SiteLogoController extends Controller
                 Rule::requiredIf(! isset($config['name_key']) && ! AppSetting::getValue($config['key'])),
                 'nullable',
                 'image',
-                'max:2048',
+                'max:'.config('media.max_upload_kilobytes'),
             ],
             'url' => ['nullable', 'url', 'max:255'],
             'team_name' => ['sometimes', 'required', 'string', 'max:80'],

@@ -43,6 +43,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+const formatUploadSize = (bytes) => new Intl.NumberFormat('pl-PL', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+}).format(bytes / (1024 * 1024));
+
+document.addEventListener('change', (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'file' || !input.files?.length) return;
+
+    const files = [...input.files].filter((file) => file.type.startsWith('image/') || input.accept.includes('image'));
+    if (!files.length) return;
+
+    const warningKilobytes = Number(document.querySelector('meta[name="etb-large-upload-warning-kb"]')?.content || 5012);
+    const maxKilobytes = Number(document.querySelector('meta[name="etb-max-upload-kb"]')?.content || 25600);
+    const oversized = files.filter((file) => file.size > warningKilobytes * 1024);
+    const tooLarge = files.filter((file) => file.size > maxKilobytes * 1024);
+
+    if (tooLarge.length) {
+        const details = tooLarge.map((file) => `• ${file.name}: ${formatUploadSize(file.size)} MB`).join('\n');
+        alert(`Nie można wgrać poniższych plików, ponieważ przekraczają maksymalny limit ${formatUploadSize(maxKilobytes * 1024)} MB:\n\n${details}`);
+        input.value = '';
+        return;
+    }
+
+    if (!oversized.length) return;
+
+    const details = oversized.map((file) => `• ${file.name}: ${formatUploadSize(file.size)} MB`).join('\n');
+    const accepted = confirm(
+        `Wybrane zdjęcie lub zdjęcia przekraczają zalecany limit ${warningKilobytes} KB:\n\n${details}\n\nCzy na pewno chcesz je wgrać? Duża liczba takich plików może zdecydowanie obciążyć bazę danych, zajmować dużo miejsca na serwerze i spowolnić stronę.`
+    );
+
+    if (!accepted) input.value = '';
+}, true);
+
 window.adminUserSearch = function adminUserSearch(searchUrl, filters = {}) {
     return {
         query: '',

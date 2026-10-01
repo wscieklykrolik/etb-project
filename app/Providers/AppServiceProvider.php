@@ -104,6 +104,8 @@ class AppServiceProvider extends ServiceProvider
                     'ticketsPageBody' => AppSetting::getValue('tickets_page_body'),
                     'ticketsPageButtonUrl' => AppSetting::getValue('tickets_page_button_url'),
                     'ticketsPageButtonLabel' => AppSetting::getValue('tickets_page_button_label'),
+                    'officeEmail' => AppSetting::getValue('office_email', 'etb.3x3@gmail.com'),
+                    'marketingEmail' => AppSetting::getValue('marketing_email', 'media@etb-lodz.pl'),
                     'adminLogoPath' => $adminLogoPath,
                     'adminLogoUrl' => MediaStorage::url($adminLogoPath),
                     'authLogoPath' => $authLogoPath,

@@ -164,7 +164,7 @@ class LeagueTableController extends Controller
     public function updateOpponent(Request $request, Opponent $opponent): RedirectResponse
     {
         $validated = $request->validate([
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
         ]);
 
         if ($request->hasFile('logo')) {

@@ -32,9 +32,9 @@ class StoreNewsRequest extends FormRequest
             'photo_author' => ['nullable', 'string', 'max:255'],
             'publish_at' => ['nullable', 'date'],
             'is_visible' => ['nullable', 'boolean'],
-            'main_image' => ['nullable', 'image', 'max:5120'],
+            'main_image' => ['nullable', 'image', 'max:'.config('media.max_upload_kilobytes')],
             'gallery' => ['nullable', $draft ? 'sometimes' : 'required_if:type,'.News::TYPE_GALLERY, 'array', 'max:100'],
-            'gallery.*' => ['image', 'max:5120'],
+            'gallery.*' => ['image', 'max:'.config('media.max_upload_kilobytes')],
         ];
     }
 
