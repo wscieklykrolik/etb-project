@@ -52,7 +52,10 @@ mkdir -p "$base/shared/storage/app/public" "$base/shared/storage/app/private" \
 chmod 711 "$HOME/apps" "$base" "$base/shared" "$base/shared/storage" "$base/shared/storage/app"
 chmod 755 "$base/shared/storage/app/public"
 cd "$release"
-"$composer_bin" install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+"$composer_bin" install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+# Hosting blokuje proc_open używane przez Composer do uruchamiania @php.
+# Nowe wydanie nie zawiera cache; odkrywanie pakietów wykonujemy bezpośrednio.
+"$php_bin" artisan package:discover --ansi
 "$composer_bin" check-platform-reqs --no-dev
 "$php_bin" scripts/check-production.php
 if [[ ! -e "$base/current" ]] && grep -Eq "^[[:space:]]*APP_KEY[[:space:]]*=[[:space:]]*(\"\"|''|null)?[[:space:]]*$" "$base/shared/.env"; then

@@ -52,7 +52,9 @@ mkdir -p "$base/shared/storage/app/public" "$base/shared/storage/app/private" \
 chmod 711 "$HOME/apps" "$base" "$base/shared" "$base/shared/storage" "$base/shared/storage/app"
 chmod 755 "$base/shared/storage/app/public"
 cd "$release"
-"$composer_bin" install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+"$composer_bin" install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+# Uruchom hook bezpośrednio: Composer wymaga proc_open dla poleceń @php.
+"$php_bin" artisan package:discover --ansi
 "$composer_bin" check-platform-reqs --no-dev
 # Kontrola nie wypisuje sekretów i odbywa się przed jakąkolwiek migracją.
 "$php_bin" scripts/check-staging.php
