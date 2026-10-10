@@ -51,6 +51,10 @@ mkdir -p "$base/shared/storage/app/public" "$base/shared/storage/app/private" \
     "$base/shared/storage/framework/views" "$base/shared/storage/logs" "$release/bootstrap/cache"
 chmod 711 "$HOME/apps" "$base" "$base/shared" "$base/shared/storage" "$base/shared/storage/app"
 chmod 755 "$base/shared/storage/app/public"
+# Przy odtwarzaniu archiwum umask 077 może pozostawić media z trybem 700/600.
+# Udostępniamy wyłącznie publiczne media, bez .env i prywatnego storage.
+find "$base/shared/storage/app/public" -type d -exec chmod 755 {} +
+find "$base/shared/storage/app/public" -type f -exec chmod 644 {} +
 cd "$release"
 "$composer_bin" install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 # Hosting blokuje proc_open używane przez Composer do uruchamiania @php.
