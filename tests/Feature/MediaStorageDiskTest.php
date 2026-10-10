@@ -92,6 +92,27 @@ it('deletes uploaded media from the configured media disk when the record is del
     Storage::disk('media')->assertMissing($path);
 });
 
+it('keeps public images on the current domain when the configured application url is stale', function () {
+    config([
+        'app.url' => 'https://test.eattheball.pl',
+        'filesystems.media_disk' => 'public',
+    ]);
+
+    Sponsor::query()->create([
+        'name' => 'Partner po zmianie domeny',
+        'type' => Sponsor::TYPE_TECHNOLOGY,
+        'url' => 'https://partner.example.com',
+        'logo_path' => 'sponsors/logo.png',
+        'sort_order' => 1,
+        'is_active' => true,
+    ]);
+
+    $this->get(route('club.sponsors'))
+        ->assertOk()
+        ->assertSee('src="/storage/sponsors/logo.png"', false)
+        ->assertDontSee('https://test.eattheball.pl/storage/');
+});
+
 it('generates public media urls from the configured disk instead of assuming the storage path', function () {
     config([
         'filesystems.media_disk' => 'media_url_test',

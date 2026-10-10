@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Wyłącznie staging. Uruchamiany z prywatnego katalogu incoming po przesłaniu paczki.
 set -Eeuo pipefail
+trap 'echo "Wdrożenie stagingu przerwane w wierszu $LINENO. Sprawdź prywatną konfigurację i ścieżki serwera; po zmianie domeny użyj procedury naprawy." >&2' ERR
 umask 027
 release_id=${1:?Podaj identyfikator wydania}
 [[ "$release_id" =~ ^[a-f0-9]{40}-[0-9]+-[0-9]+$ ]] || exit 1
@@ -8,16 +9,16 @@ base="$HOME/apps/etb-staging"
 [[ -d "$base" && ! -L "$base" ]] || { echo 'Brak prywatnego katalogu stagingu.'; exit 1; }
 base=$(realpath "$base")
 [[ "$base" == "$HOME/apps/etb-staging" ]] || exit 1
-[[ -f "$base/shared/.env" && -f "$base/shared/public-root" ]] || exit 1
+[[ -f "$base/shared/.env" && -f "$base/shared/public-root" ]] || { echo 'Brak konfiguracji lub pliku public-root stagingu.' >&2; exit 1; }
 public_root=$(cat "$base/shared/public-root")
 # Nie wolno użyć katalogu głównego WordPressa.
 case "$public_root" in
     "$HOME/domains/test.eattheball.pl/public_html"|"$HOME/domains/eattheball.pl/public_html/test") ;;
     *) echo 'Niedozwolony katalog publiczny stagingu.'; exit 1 ;;
 esac
-[[ -d "$public_root" && ! -L "$public_root" ]] || exit 1
-[[ "$(realpath "$public_root")" == "$public_root" ]] || exit 1
-[[ -f "$public_root/.etb-staging" && ! -e "$public_root/wp-config.php" ]] || exit 1
+[[ -d "$public_root" && ! -L "$public_root" ]] || { echo 'Katalog wskazany w public-root nie istnieje albo jest symlinkiem. Sprawdź ścieżki po zmianie domeny w Hostingerze.' >&2; exit 1; }
+[[ "$(realpath "$public_root")" == "$public_root" ]] || { echo 'Ścieżka public-root nie wskazuje bezpośrednio dozwolonego katalogu stagingu.' >&2; exit 1; }
+[[ -f "$public_root/.etb-staging" && ! -e "$public_root/wp-config.php" ]] || { echo 'Brak markera stagingu albo wykryto WordPressa. Nie wdrażaj stagingu do katalogu produkcji.' >&2; exit 1; }
 [[ -f "$public_root/index.php" ]] || { echo 'Najpierw przygotuj plik wejściowy według DEPLOYMENT.md.'; exit 1; }
 # Nie usuwaj ręcznie założonej ochrony HTTP, jeśli operator nie przeniósł jej do shared.
 if [[ -f "$public_root/.htaccess" ]] && grep -Eiq '^[[:space:]]*AuthType[[:space:]]' "$public_root/.htaccess"; then
@@ -27,7 +28,7 @@ if [[ -f "$public_root/.htaccess" ]] && grep -Eiq '^[[:space:]]*AuthType[[:space
 fi
 php_bin=$(cat "$base/shared/php-bin")
 composer_bin=$(cat "$base/shared/composer-bin")
-[[ -x "$php_bin" && -x "$composer_bin" ]] || exit 1
+[[ -x "$php_bin" && -x "$composer_bin" ]] || { echo 'Zapisane ścieżki PHP lub Composer są nieprawidłowe.' >&2; exit 1; }
 command -v flock >/dev/null
 command -v rsync >/dev/null
 exec 9>"$base/shared/operation.lock"

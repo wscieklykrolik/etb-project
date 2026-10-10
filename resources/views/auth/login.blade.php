@@ -2,13 +2,15 @@
     <x-auth-session-status class="mb-4 text-sm text-black" :status="session('status')" />
 
     <h1 class="text-2xl font-bold text-black">Zaloguj się</h1>
-    <p class="mt-1 text-sm text-black/80">Nie masz konta? <a href="{{ route('register') }}" class="font-semibold underline">Zarejestruj się</a>.</p>
+    @unless(config('accounts.admin_only'))
+        <p class="mt-1 text-sm text-black/80">Nie masz konta? <a href="{{ route('register') }}" class="font-semibold underline">Zarejestruj się</a>.</p>
+    @endunless
 
     <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
         @csrf
 
         <div>
-            <x-input-label for="email" class="text-black font-semibold" value="Adres e-mail" />
+            <x-input-label for="email" class="text-black font-semibold" :value="config('accounts.admin_only') ? 'Login' : 'Adres e-mail'" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-700" />
         </div>
@@ -32,7 +34,7 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-            @if (Route::has('password.request'))
+            @if (!config('accounts.admin_only') && Route::has('password.request'))
                 <a class="underline text-sm text-black hover:text-zinc-900 rounded-md focus:outline-none focus:ring-2 focus:ring-black" href="{{ route('password.request') }}">
                     Nie pamiętasz hasła?
                 </a>

@@ -9,24 +9,29 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Middleware\BlockPublicAccounts;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
+        ->middleware(BlockPublicAccounts::class)
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware(['throttle:5,1', BlockPublicAccounts::class]);
 
     Route::get('register/verify', [RegisteredUserController::class, 'showVerificationForm'])
+        ->middleware(BlockPublicAccounts::class)
         ->name('register.verify.notice');
 
     Route::post('register/verify/resend', [RegisteredUserController::class, 'resendCode'])
         ->middleware('throttle:1,1')
+        ->middleware(BlockPublicAccounts::class)
         ->name('register.verify.resend');
 
     Route::post('register/verify', [RegisteredUserController::class, 'verifyCode'])
         ->middleware('throttle:10,1')
+        ->middleware(BlockPublicAccounts::class)
         ->name('register.verify');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
@@ -35,30 +40,37 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->middleware(BlockPublicAccounts::class)
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->middleware('throttle:5,1')
+        ->middleware(BlockPublicAccounts::class)
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->middleware(BlockPublicAccounts::class)
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->middleware('throttle:5,1')
+        ->middleware(BlockPublicAccounts::class)
         ->name('password.store');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
+        ->middleware(BlockPublicAccounts::class)
         ->name('verification.notice');
 
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(BlockPublicAccounts::class)
         ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
+        ->middleware(BlockPublicAccounts::class)
         ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])

@@ -61,6 +61,16 @@ final class ProductionConfigurationTest extends TestCase
         self::assertTrue(DeploymentConfiguration::production($this->configuration()));
     }
 
+    public function test_accepts_admin_only_without_smtp(): void
+    {
+        $configuration = $this->configuration();
+        $configuration->set(['accounts.admin_only' => true, 'accounts.admin_login' => 'admin@etb.pl',
+            'mail.default' => 'array', 'mail.mailers.smtp.host' => '', 'mail.mailers.smtp.password' => '']);
+        self::assertTrue(DeploymentConfiguration::production($configuration));
+        $configuration->set('mail.default', 'log');
+        self::assertFalse(DeploymentConfiguration::production($configuration));
+    }
+
     public function test_accepts_production_with_smtps(): void
     {
         $configuration = $this->configuration();

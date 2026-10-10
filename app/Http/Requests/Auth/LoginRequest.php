@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -42,7 +43,15 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('email', 'password');
+        $allowed = true;
+        if (config('accounts.admin_only')) {
+            $allowed = $credentials['email'] === config('accounts.admin_login');
+            $credentials['role'] = User::ROLE_ADMIN;
+            $credentials[] = fn ($query) => $query->whereNotNull('email_verified_at');
+        }
+
+        if (! $allowed || ! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

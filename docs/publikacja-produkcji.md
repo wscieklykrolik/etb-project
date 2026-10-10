@@ -1,5 +1,7 @@
 # Publikacja ETB na eattheball.pl zamiast WordPressa
 
+Jeśli domena została już zamieniona w Hostingerze, a działająca aplikacja pochodzi ze stagingu, rozpocznij od [naprawy po zmianie domeny](naprawa-po-zmianie-domeny.md). Ten wariant wymaga zachowania istniejącej bazy, uploadów i klucza aplikacji zamiast instalacji pustej produkcji.
+
 Ta instrukcja dotyczy publicznej domeny `https://eattheball.pl`. Najpierw odbierz aplikację na stagingu, następnie przygotuj hosting i kopie zapasowe, a dopiero na końcu przełącz domenę w zaplanowanym oknie serwisowym.
 
 Dokument opisuje pliki przygotowane w repozytorium oraz czynności do wykonania na koncie Hostinger i GitHub. Nie potwierdza bieżącego stanu serwera ani wykonania publikacji. Historyczne wyniki opisane w [DEPLOYMENT.md](../DEPLOYMENT.md) mają własne daty; nie zastępują nowego odbioru.

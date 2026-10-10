@@ -19,7 +19,7 @@ class DeploymentConfiguration
             && $configuration->get('database.connections.mysql.url') === null
             && $configuration->get('filesystems.media_disk') === 'public'
             && $configuration->get('filesystems.default') === 'local'
-            && $configuration->get('mail.default') === 'smtp'
+            && $configuration->get('mail.default') === ($configuration->get('accounts.admin_only', false) ? 'array' : 'smtp')
             && $configuration->get('queue.default') === 'database'
             && $configuration->get('queue.connections.database.retry_after') >= 90
             && $configuration->get('cache.default') === 'database'
@@ -35,9 +35,14 @@ class DeploymentConfiguration
             && $configuration->get('shop.legacy_enabled') === false;
 
         $required = ['database.connections.mysql.host', 'database.connections.mysql.database',
-            'database.connections.mysql.username', 'database.connections.mysql.password',
-            'mail.mailers.smtp.host', 'mail.mailers.smtp.username',
-            'mail.mailers.smtp.password', 'mail.from.address'];
+            'database.connections.mysql.username', 'database.connections.mysql.password'];
+
+        if (! $configuration->get('accounts.admin_only', false)) {
+            $required = [...$required, 'mail.mailers.smtp.host', 'mail.mailers.smtp.username',
+                'mail.mailers.smtp.password', 'mail.from.address'];
+        } else {
+            $valid = $valid && $configuration->get('accounts.admin_login') === 'admin@etb.pl';
+        }
 
         foreach ($required as $name) {
             $value = $configuration->get($name);
@@ -45,13 +50,15 @@ class DeploymentConfiguration
                 && ! str_contains($value, 'PLACEHOLDER') && ! str_contains($value, 'example.com');
         }
 
-        $valid = $valid && filter_var($configuration->get('mail.from.address'), FILTER_VALIDATE_EMAIL) !== false
-            && $configuration->get('mail.mailers.smtp.url') === null
-            && (($configuration->get('mail.mailers.smtp.port') == 587 && $configuration->get('mail.mailers.smtp.require_tls') === true
-                    && in_array($configuration->get('mail.mailers.smtp.scheme'), [null, 'smtp'], true))
-                || ($configuration->get('mail.mailers.smtp.port') == 465 && $configuration->get('mail.mailers.smtp.scheme') === 'smtps'))
-            && $configuration->get('mail.mailers.smtp.timeout') > 0
-            && $configuration->get('mail.mailers.smtp.timeout') <= 30;
+        if (! $configuration->get('accounts.admin_only', false)) {
+            $valid = $valid && filter_var($configuration->get('mail.from.address'), FILTER_VALIDATE_EMAIL) !== false
+                && $configuration->get('mail.mailers.smtp.url') === null
+                && (($configuration->get('mail.mailers.smtp.port') == 587 && $configuration->get('mail.mailers.smtp.require_tls') === true
+                        && in_array($configuration->get('mail.mailers.smtp.scheme'), [null, 'smtp'], true))
+                    || ($configuration->get('mail.mailers.smtp.port') == 465 && $configuration->get('mail.mailers.smtp.scheme') === 'smtps'))
+                && $configuration->get('mail.mailers.smtp.timeout') > 0
+                && $configuration->get('mail.mailers.smtp.timeout') <= 30;
+        }
 
         $key = $configuration->get('app.key');
         $allowEmptyKey = $firstDeployment && ! $requireKey;
