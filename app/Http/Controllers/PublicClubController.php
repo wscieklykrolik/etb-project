@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClubSection;
 use App\Models\AppSetting;
+use App\Models\ClubSection;
 use App\Models\SponsorCategory;
 use Illuminate\View\View;
 

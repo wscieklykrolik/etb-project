@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "./preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "./legacy-utilities.css";
+@config "../../tailwind.config.js";
+@source "../views";
+@source "../js";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views";
+
+/* Dotychczasowy wygląd kontrolek i obramowań po aktualizacji Tailwinda. */
+@layer base {
+    *, ::before, ::after, ::backdrop {
+        border-color: #e5e7eb;
+    }
+}
 
 [x-cloak] {
     display: none !important;

@@ -32,8 +32,10 @@ use App\Services\LzkoszLeagueTableService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Throwable;
 
 class ProfileController extends Controller
 {
@@ -278,11 +280,28 @@ class ProfileController extends Controller
     {
         $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
+        $emailChanged = $request->user()->isDirty('email');
+
+        if ($emailChanged) {
             $request->user()->email_verified_at = null;
         }
 
         $request->user()->save();
+
+        if ($emailChanged) {
+            try {
+                $request->user()->sendEmailVerificationNotification();
+            } catch (Throwable $exception) {
+                Log::warning('Nie udało się wysłać linku potwierdzającego nowy adres e-mail.', [
+                    'exception' => $exception::class,
+                ]);
+
+                return Redirect::route('verification.notice')
+                    ->with('mail_error', 'Adres e-mail został zmieniony, ale nie udało się wysłać linku potwierdzającego. Spróbuj ponownie za chwilę.');
+            }
+
+            return Redirect::route('verification.notice')->with('status', 'verification-link-sent');
+        }
 
         return Redirect::route('profile.edit');
     }

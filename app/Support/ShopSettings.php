@@ -6,9 +6,15 @@ use App\Models\AppSetting;
 
 class ShopSettings
 {
+    public static function legacyAvailable(): bool
+    {
+        return (bool) config('shop.legacy_enabled', false);
+    }
+
     public static function legacy(): bool
     {
-        return AppSetting::getValue('shop_order_mode', 'message') === 'legacy';
+        return self::legacyAvailable()
+            && AppSetting::getValue('shop_order_mode', 'message') === 'legacy';
     }
 
     public static function contact(): array

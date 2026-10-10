@@ -9,6 +9,7 @@ use App\Support\ShopSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ShopSettingsController extends Controller
 {
@@ -41,6 +42,13 @@ class ShopSettingsController extends Controller
             'confirmation' => ['required', Rule::in(['ZMIENIAM TRYB SKLEPU'])],
             'acknowledged' => ['accepted'],
         ]);
+
+        if ($data['mode'] === 'legacy' && ! ShopSettings::legacyAvailable()) {
+            throw ValidationException::withMessages([
+                'mode' => 'Płatności online i automatyczna wysyłka są wyłączone w tym środowisku. Zamówienia przez wiadomości pozostają dostępne.',
+            ]);
+        }
+
         AppSetting::setValue('shop_order_mode', $data['mode']);
 
         return back()->with('success', 'Zmieniono sposób zamawiania dla całej strony.');

@@ -34,29 +34,29 @@ require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])->middleware('verified')->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('players', PlayerController::class)->except(['index', 'show']);
+    Route::resource('players', PlayerController::class)->except(['index', 'show'])->middleware('verified');
 
-    Route::resource('news', NewsController::class)->except(['index', 'show']);
-    Route::get('/admin/news/{news}/preview', [NewsController::class, 'preview'])->name('admin.news.preview');
-    Route::patch('/admin/news/{news}/publish', [NewsController::class, 'publish'])->name('admin.news.publish');
+    Route::resource('news', NewsController::class)->except(['index', 'show'])->middleware('verified');
+    Route::get('/admin/news/{news}/preview', [NewsController::class, 'preview'])->middleware('verified')->name('admin.news.preview');
+    Route::patch('/admin/news/{news}/publish', [NewsController::class, 'publish'])->middleware('verified')->name('admin.news.publish');
 
-    Route::middleware('role:athlete')->group(function () {
+    Route::middleware(['verified', 'role:athlete'])->group(function () {
         Route::get('/athlete/data', [UserDataController::class, 'athlete'])->name('athlete.data');
     });
 
-    Route::middleware('role:fan')->group(function () {
+    Route::middleware(['verified', 'role:fan'])->group(function () {
         Route::get('/fan/data', [UserDataController::class, 'fan'])->name('fan.data');
     });
 
-    Route::middleware('role:employee')->group(function () {
+    Route::middleware(['verified', 'role:employee'])->group(function () {
         Route::get('/employee/data', [UserDataController::class, 'employee'])->name('employee.data');
     });
 
-    Route::middleware('role:trainer')->group(function () {
+    Route::middleware(['verified', 'role:trainer'])->group(function () {
         Route::get('/trainer/data', [UserDataController::class, 'trainer'])->name('trainer.data');
     });
 });
@@ -66,7 +66,8 @@ Route::resource('players', PlayerController::class)->only(['index', 'show']);
 Route::get('/news', [PublicNewsController::class, 'index'])->name('news.index');
 Route::get('/news/{news}', [PublicNewsController::class, 'show'])->name('news.show');
 
-Route::resource('matches', MatchController::class);
+Route::resource('matches', MatchController::class)
+    ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], ['auth', 'verified']);
 
 Route::get('/shop', [PublicProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [PublicProductController::class, 'show'])->name('shop.show');
@@ -80,7 +81,7 @@ Route::post('/cart/update', [CartController::class, 'update'])->name('cart.updat
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/cart/badge', [CartController::class, 'badge'])->name('cart.badge');
 
-Route::middleware(['auth', EnsureLegacyShop::class])->group(function () {
+Route::middleware(['auth', 'verified', EnsureLegacyShop::class])->group(function () {
     Route::get('/checkout/shipping', [CheckoutController::class, 'shipping'])->name('checkout.shipping');
     Route::post('/checkout/shipping', [CheckoutController::class, 'storeShipping']);
     Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
@@ -88,7 +89,7 @@ Route::middleware(['auth', EnsureLegacyShop::class])->group(function () {
 
 });
 
-Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->middleware('auth')->name('checkout.confirmation');
+Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->middleware(['auth', 'verified'])->name('checkout.confirmation');
 Route::post('/payment/przelewy24/webhook', [CheckoutController::class, 'webhook'])->middleware(EnsureLegacyShop::class)->name('payment.przelewy24.webhook');
 
 /*
@@ -129,7 +130,7 @@ Route::redirect('/team-3x3/players', '/team/3x3')->name('team3x3.players');
 Route::get('/3x3/tournaments', [ThreeXThreeTournamentController::class, 'index'])->name('three-x-three.tournaments.index');
 Route::get('/3x3/tournaments/{tournament}', [ThreeXThreeTournamentController::class, 'show'])->name('three-x-three.tournaments.show');
 Route::post('/3x3/tournaments/{tournament}/teams', [ThreeXThreeTournamentTeamController::class, 'store'])
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('three-x-three.tournaments.teams.store');
 Route::get('/3x3/teams/{team}', [ThreeXThreeTournamentTeamController::class, 'show'])->name('three-x-three.teams.show');
 

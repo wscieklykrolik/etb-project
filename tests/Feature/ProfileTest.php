@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 test('profile page is displayed', function () {
@@ -14,6 +16,7 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
+    Notification::fake();
     $user = User::factory()->create();
 
     $response = $this
@@ -25,16 +28,24 @@ test('profile information can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect(route('verification.notice'))
+        ->assertSessionHas('status', 'verification-link-sent');
 
     $user->refresh();
 
     $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
+
+    Notification::assertSentTo($user, VerifyEmailNotification::class, function ($notification, $channels, $notifiable): bool {
+        return $notifiable->getEmailForVerification() === 'test@example.com';
+    });
+
+    $this->get(route('profile.edit'))->assertRedirect(route('verification.notice'));
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
+    Notification::fake();
     $user = User::factory()->create();
 
     $response = $this
@@ -49,6 +60,25 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->refresh()->email_verified_at);
+    Notification::assertNothingSent();
+});
+
+test('a mail failure keeps the changed email unverified and offers another delivery attempt', function () {
+    Notification::shouldReceive('send')->once()->andThrow(new RuntimeException('SMTP niedostępne'));
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->patch(route('profile.update'), [
+        'name' => $user->name,
+        'email' => 'nowy@example.com',
+    ])->assertRedirect(route('verification.notice'))
+        ->assertSessionHas('mail_error');
+
+    expect($user->fresh()->email)->toBe('nowy@example.com')
+        ->and($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    $this->get(route('verification.notice'))
+        ->assertOk()
+        ->assertSee('nie udało się wysłać linku potwierdzającego')
+        ->assertSee('Wyślij ponownie e-mail weryfikacyjny');
 });
 
 test('user can delete their account', function () {

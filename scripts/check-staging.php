@@ -8,6 +8,7 @@ $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 $valid = app()->environment('production')
+    && config('deployment.environment') === 'staging'
     && config('app.debug') === false
     && config('app.url') === 'https://test.eattheball.pl'
     && config('database.default') === 'mysql'

@@ -1,5 +1,13 @@
 # ETB — wdrożenie na Hostingerze
 
+## Przygotowanie produkcji (10.10.2026)
+
+Kod i oddzielny, ręcznie uruchamiany workflow produkcji zostały przygotowane. Instrukcja zastąpienia WordPressa na `eattheball.pl` znajduje się w [docs/publikacja-produkcji.md](docs/publikacja-produkcji.md). Nie wykonano przełączenia domeny ani nowej kontroli konta Hostinger.
+
+Aktualny audyt npm: 0 podatności; produkcyjny audyt Composer: bez zgłoszeń. Usunięto podatny łańcuch Tailwind 3 przez migrację do Tailwind 4 z zachowaniem motywu i zgodności stylów. Naprawiono publikowanie `.htaccess` stagingu. Produkcja wymaga oddzielnej bazy, storage, klucza aplikacji, działającego SMTP i wyłączonego starego sklepu. Pełne testy lokalne: 302 testy, 1483 asercje; Pint i build poprawne. MySQL CI oraz rzeczywisty odbiór hostingu pozostają do wykonania po zapisaniu zmian w GitHub.
+
+Poniższe wyniki z września są zapisem historycznym. Opis skryptu crona oznacza przygotowany sposób uruchamiania; nie potwierdza jego obecnej konfiguracji ani działania na hostingu.
+
 ## Status audytu i stagingu (23.09.2026)
 
 **STAGING READY** pod `https://test.eattheball.pl`. Laravel działa na Hostingerze z PHP 8.3.33, MySQL, produkcyjnym buildem Vite i trwałym storage. Wykonano także drugie wdrożenie kontrolne. **NOT READY FOR DEPLOYMENT** dotyczy nadal późniejszego przełączenia publicznej domeny `eattheball.pl`. WordPress pod domeną główną pozostał nietknięty. Nie wykonano commita ani pushu.

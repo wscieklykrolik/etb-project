@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\LeagueStanding;
 use App\Models\LeagueTableSnapshot;
-use App\Models\AppSetting;
 use App\Models\TeamMatch;
 use App\Models\ThreeXThreeTournament;
 use App\Services\LzkoszLeagueTableService;

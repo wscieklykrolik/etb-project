@@ -1,0 +1,110 @@
+name: Wspólna weryfikacja i paczka Hostinger
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Testy (${{ matrix.database }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, mysql]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: etb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      DB_CONNECTION: ${{ matrix.database }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: ${{ matrix.database == 'mysql' && 'etb_test' || ':memory:' }}
+      DB_USERNAME: root
+      DB_PASSWORD: ''
+      DB_URL: ''
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      POLISH_HOLIDAYS_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, pdo_sqlite, sqlite3, dom, xml, fileinfo, curl, gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Zależności według lockfile i audyty
+        run: |
+          composer validate --no-check-publish
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          composer audit --locked --no-dev
+          npm ci
+          npm audit --audit-level=high
+      - name: Build produkcyjny
+        run: npm run build
+      - name: Konfiguracja wyłącznie testowa
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+      - name: Migracje i testy na jednorazowej bazie CI
+        run: |
+          php artisan migrate --force
+          php artisan test --compact
+      - name: Zgodność cache i składni skryptów
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan config:clear
+          php artisan route:clear
+          bash -n scripts/deploy-staging.sh scripts/queue-staging.sh scripts/deploy-production.sh scripts/queue-production.sh
+          php -l scripts/check-staging.php
+          php -l scripts/check-production.php
+
+  package:
+    name: Paczka z produkcyjnym frontendem
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Zależności frontendu i build według lockfile
+        run: npm ci && npm run build
+      - name: Paczka śledzonego kodu bez sekretów, storage i cache
+        run: |
+          set -Eeuo pipefail
+          test -s public/build/manifest.json
+          test ! -e public/hot
+          mkdir -p artifacts
+          git ls-files -z -- app bootstrap config database lang resources routes public scripts artisan composer.json composer.lock > artifacts/release-files.list
+          tar -czf artifacts/release.tar.gz --exclude='bootstrap/cache/*' --exclude='database/*.sqlite*' --exclude='public/storage' --exclude='public/storage/*' --exclude='public/hot' --null -T artifacts/release-files.list public/build
+          cd artifacts
+          sha256sum release.tar.gz > release.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: etb-${{ github.sha }}
+          path: artifacts/release.tar.gz*
+          retention-days: 14
+          if-no-files-found: error

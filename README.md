@@ -47,3 +47,5 @@ composer test
 ## Dokumentacja
 
 - Studium wykonalności: `docs/studium-wykonalnosci.md`
+- Staging Hostinger: [DEPLOYMENT.md](DEPLOYMENT.md)
+- Publikacja eattheball.pl krok po kroku: [instrukcja produkcji](docs/publikacja-produkcji.md)

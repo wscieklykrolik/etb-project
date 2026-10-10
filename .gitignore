@@ -3,6 +3,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 .env.backup
 .env.production
@@ -17,6 +18,8 @@
 /.zed
 /auth.json
 /node_modules
+/.npm-cache
+/.composer-cache
 /public/build
 /public/hot
 /public/storage

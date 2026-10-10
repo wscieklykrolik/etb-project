@@ -13,8 +13,8 @@ use App\Http\Controllers\Admin\ClubSectionController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\FaqQuestionController;
 use App\Http\Controllers\Admin\LeagueTableController;
-use App\Http\Controllers\Admin\MatchSuggestionController;
 use App\Http\Controllers\Admin\MatchResultReminderController;
+use App\Http\Controllers\Admin\MatchSuggestionController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductFilterController;
@@ -36,7 +36,7 @@ use App\Http\Controllers\ThreeXThreeTournamentController;
 use App\Http\Middleware\EnsureLegacyShop;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:admin,employee'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,employee'])->group(function () {
     Route::put('/admin/important-pages/{slug}', [ImportantPageController::class, 'update'])->name('admin.important-pages.update');
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::middleware('can:manage-matches')->group(function () {
@@ -118,7 +118,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::get('/admin/export/jpk', [ExportController::class, 'jpk'])->name('admin.export.jpk');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/matches/{match}/result-reminder/result', [MatchResultReminderController::class, 'store'])->name('admin.matches.result-reminder.store');
     Route::post('/admin/matches/{match}/result-reminder/remind', [MatchResultReminderController::class, 'remind'])->name('admin.matches.result-reminder.remind');
     Route::post('/admin/matches/{match}/result-reminder/dismiss', [MatchResultReminderController::class, 'dismiss'])->name('admin.matches.result-reminder.dismiss');
@@ -129,7 +129,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users/emails/export', UserEmailExportController::class)->name('admin.users.emails.export');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/shop-settings', [ShopSettingsController::class, 'edit'])->name('admin.shop-settings.edit');
     Route::put('/admin/shop-settings', [ShopSettingsController::class, 'update'])->name('admin.shop-settings.update');
     Route::patch('/admin/shop-settings/mode', [ShopSettingsController::class, 'mode'])->name('admin.shop-settings.mode');

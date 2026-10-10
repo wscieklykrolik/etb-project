@@ -32,11 +32,11 @@
         <div class="rounded-md border-2 border-black bg-white p-4 text-black space-y-3">
             <label class="flex items-start gap-2">
                 <input type="checkbox" name="accepted_terms" value="1" class="mt-1 rounded border-black text-black focus:ring-black" {{ old('accepted_terms') ? 'checked' : '' }} required>
-                <span class="text-sm">Akceptuję regulamin oraz warunki korzystania z platformy ETB.</span>
+                <span class="text-sm">Akceptuję <a href="{{ route('important-pages.show', 'regulamin-sklepu') }}" target="_blank" rel="noopener noreferrer" class="font-semibold underline">regulamin</a> oraz warunki korzystania z platformy ETB.</span>
             </label>
             <label class="flex items-start gap-2">
                 <input type="checkbox" name="accepted_privacy" value="1" class="mt-1 rounded border-black text-black focus:ring-black" {{ old('accepted_privacy') ? 'checked' : '' }} required>
-                <span class="text-sm">Akceptuję politykę prywatności i przetwarzanie danych zgodnie z wymaganiami ETB.</span>
+                <span class="text-sm">Akceptuję <a href="{{ route('important-pages.show', 'polityka-prywatnosci') }}" target="_blank" rel="noopener noreferrer" class="font-semibold underline">politykę prywatności</a> i przetwarzanie danych zgodnie z wymaganiami ETB.</span>
             </label>
             <label class="flex items-start gap-2">
                 <input type="checkbox" name="marketing_email_consent" value="1" class="mt-1 rounded border-black text-black focus:ring-black" {{ old('marketing_email_consent') ? 'checked' : '' }}>

@@ -10,6 +10,8 @@ test('registration screen can be rendered', function () {
     $response = $this->get('/register');
 
     $response->assertStatus(200);
+    $response->assertSee(route('important-pages.show', 'regulamin-sklepu'), false)
+        ->assertSee(route('important-pages.show', 'polityka-prywatnosci'), false);
 });
 
 test('registration sends activation code before account creation', function () {

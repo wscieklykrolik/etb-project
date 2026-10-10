@@ -262,7 +262,7 @@
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-black/60">Akademia ETB</p>
                 <h2 class="mt-2 text-4xl font-black uppercase md:text-5xl">Kochasz koszykówkę? Dołącz do nas</h2>
             </div>
-            <span class="academy-cta-arrow flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-black text-3xl font-black text-yellow-400 transition-[transform,background-color,color] duration-300 group-hover:scale-110 group-hover:bg-white group-hover:text-black group-focus-visible:scale-110 group-focus-visible:bg-white group-focus-visible:text-black" aria-hidden="true">
+            <span class="academy-cta-arrow flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-black text-3xl font-black text-yellow-400 transition-[transform,scale,background-color,color] duration-300 group-hover:scale-110 group-hover:bg-white group-hover:text-black group-focus-visible:scale-110 group-focus-visible:bg-white group-focus-visible:text-black" aria-hidden="true">
                 <svg class="academy-cta-arrow-icon h-10 w-10" viewBox="0 0 24 24" fill="none">
                     <path d="M4 12h14" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="m13 7 5 5-5 5" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />

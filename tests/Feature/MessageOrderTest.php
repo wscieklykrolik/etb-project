@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AppSetting;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -120,6 +121,33 @@ it('requires the explicit phrase and acknowledgement before switching the whole 
     $this->get(route('message-order.show'))->assertRedirect(route('checkout.shipping'));
     $this->patch(route('admin.shop-settings.mode'), ['mode' => 'message', 'confirmation' => 'ZMIENIAM TRYB SKLEPU', 'acknowledged' => 1])->assertRedirect();
     expect(ShopSettings::legacy())->toBeFalse();
+});
+
+it('blocks saved legacy settings and refuses enabling them when the environment flag is disabled', function () {
+    config(['shop.legacy_enabled' => false]);
+    AppSetting::setValue('shop_order_mode', 'legacy');
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $this->actingAs($admin);
+
+    expect(ShopSettings::legacy())->toBeFalse();
+    $this->get(route('checkout.shipping'))->assertRedirect(route('message-order.show'));
+    $this->post(route('checkout.place'))->assertForbidden();
+    $this->post(route('payment.przelewy24.webhook'))->assertForbidden();
+
+    $this->patch(route('admin.shop-settings.mode'), [
+        'mode' => 'legacy',
+        'confirmation' => 'ZMIENIAM TRYB SKLEPU',
+        'acknowledged' => 1,
+    ])->assertSessionHasErrors('mode');
+
+    $this->patch(route('admin.shop-settings.mode'), [
+        'mode' => 'message',
+        'confirmation' => 'ZMIENIAM TRYB SKLEPU',
+        'acknowledged' => 1,
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    expect(AppSetting::getValue('shop_order_mode'))->toBe('message');
+    Http::assertNothingSent();
 });
 
 it('uses admin contact and payment instructions as escaped text', function () {

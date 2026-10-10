@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Sponsor;
-use App\Models\SponsorCategory;
 use App\Models\AppSetting;
 use App\Models\ClubSection;
+use App\Models\Sponsor;
+use App\Models\SponsorCategory;
 use App\Models\User;
 use App\Support\MediaStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;

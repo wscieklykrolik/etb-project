@@ -19,6 +19,12 @@ esac
 [[ "$(realpath "$public_root")" == "$public_root" ]] || exit 1
 [[ -f "$public_root/.etb-staging" && ! -e "$public_root/wp-config.php" ]] || exit 1
 [[ -f "$public_root/index.php" ]] || { echo 'Najpierw przygotuj plik wejściowy według DEPLOYMENT.md.'; exit 1; }
+# Nie usuwaj ręcznie założonej ochrony HTTP, jeśli operator nie przeniósł jej do shared.
+if [[ -f "$public_root/.htaccess" ]] && grep -Eiq '^[[:space:]]*AuthType[[:space:]]' "$public_root/.htaccess"; then
+    [[ -s "$base/shared/staging-access.htaccess" ]] || {
+        echo 'Przenieś reguły ochrony HTTP do shared/staging-access.htaccess przed aktualizacją.'; exit 1;
+    }
+fi
 php_bin=$(cat "$base/shared/php-bin")
 composer_bin=$(cat "$base/shared/composer-bin")
 [[ -x "$php_bin" && -x "$composer_bin" ]] || exit 1
@@ -35,6 +41,7 @@ mkdir "$release"
 tar -xzf release.tar.gz -C "$release"
 [[ ! -e "$release/.env" && ! -e "$release/storage" && ! -e "$release/public/hot" && ! -e "$release/vendor" ]] || exit 1
 [[ -s "$release/public/build/manifest.json" ]] || exit 1
+[[ -f "$release/public/.htaccess" && ! -e "$release/bootstrap/cache/config.php" && ! -e "$release/bootstrap/cache/routes-v7.php" ]] || exit 1
 ln -s "$base/shared/.env" "$release/.env"
 ln -s "$base/shared/storage" "$release/storage"
 mkdir -p "$base/shared/storage/app/public" "$base/shared/storage/app/private" \
@@ -77,6 +84,19 @@ for directory in build images; do
         find "$public_root/$directory" -type f -exec chmod 644 {} +
     fi
 done
+htaccess_next="$public_root/.htaccess.next-$release_id"
+[[ ! -e "$htaccess_next" && ! -L "$htaccess_next" ]] || exit 1
+{
+    printf '<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteRule ^app(?:/|$) - [F,L,NC]\n</IfModule>\n'
+    cat "$release/public/.htaccess"
+    printf '\n<IfModule mod_headers.c>\n    Header always set X-Robots-Tag "noindex, nofollow, noarchive"\n</IfModule>\n'
+    if [[ -f "$base/shared/staging-access.htaccess" ]]; then
+        printf '\n'
+        cat "$base/shared/staging-access.htaccess"
+    fi
+} > "$htaccess_next"
+chmod 644 "$htaccess_next"
+mv -Tf "$htaccess_next" "$public_root/.htaccess"
 printf 'User-agent: *\nDisallow: /\n' > "$public_root/robots.txt"
 chmod 644 "$public_root/robots.txt"
 if [[ -L "$public_root/storage" ]]; then
