@@ -82,6 +82,60 @@
         </div>
     </section>
 
+    @if($leagueTablePreview)
+        <section class="border-b border-zinc-800/50 bg-black py-14">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-yellow-400">Aktualna pozycja</p>
+                        <h2 class="mt-2 text-4xl font-black uppercase italic text-white">Tabela ligowa</h2>
+                    </div>
+                    <p class="text-sm font-bold text-zinc-500">{{ $leagueTablePreview['title'] }}</p>
+                </div>
+
+                <a href="{{ route('schedule.table') }}" class="group relative block overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400" aria-label="Zobacz pełną tabelę">
+                    <div class="divide-y divide-zinc-800">
+                        @foreach($leagueTablePreview['rows'] as $row)
+                            <div @class([
+                                'grid min-h-24 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 transition-colors sm:grid-cols-[4rem_minmax(0,1fr)_repeat(3,6rem)] sm:px-7',
+                                'bg-yellow-400 text-black' => $row['is_ours'],
+                                'bg-zinc-950 text-white group-hover:bg-zinc-900' => ! $row['is_ours'],
+                            ])>
+                                <span class="text-center text-2xl font-black">{{ $row['position'] }}</span>
+                                <div class="flex min-w-0 items-center gap-4">
+                                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-2">
+                                        @if($row['logo_path'])
+                                            <img src="{{ \App\Support\MediaStorage::url($row['logo_path']) }}" alt="" class="max-h-full max-w-full object-contain">
+                                        @else
+                                            <span class="text-[10px] font-black text-zinc-500">LOGO</span>
+                                        @endif
+                                    </div>
+                                    <span class="truncate text-base font-black sm:text-lg">{{ $row['team_name'] }}</span>
+                                </div>
+                                <div class="text-right sm:text-center">
+                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Pkt</span>
+                                    <span class="text-xl font-black">{{ $row['points'] }}</span>
+                                </div>
+                                <div class="hidden text-center sm:block">
+                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Mecze</span>
+                                    <span class="text-lg font-bold">{{ $row['games'] }}</span>
+                                </div>
+                                <div class="hidden text-center sm:block">
+                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Bilans</span>
+                                    <span class="text-lg font-bold">{{ $row['wins'] }}–{{ $row['losses'] }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="pointer-events-none absolute inset-0 hidden items-center justify-center bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 md:flex">
+                        <span class="rounded-lg bg-yellow-400 px-6 py-3 text-sm font-black uppercase text-black shadow-xl">Zobacz pełną tabelę <span aria-hidden="true">→</span></span>
+                    </div>
+                </a>
+            </div>
+        </section>
+    @endif
+
     <section class="bg-black py-16">
         <div class="mx-auto max-w-7xl px-6">
             <div class="flex flex-wrap items-end justify-between gap-4">

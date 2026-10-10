@@ -1,20 +1,37 @@
 <?php
 
+use App\Models\AppSetting;
 use App\Services\LzkoszLeagueTableService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('lzkosz:sync-table', function (LzkoszLeagueTableService $leagueTableService): int {
-    $count = $leagueTableService->sync();
-    $this->info("Tabela ŁZKosz została pobrana. Zaktualizowano {$count} drużyn.");
+Artisan::command('lzkosz:sync-table {source?} {season?}', function (LzkoszLeagueTableService $leagueTableService): int {
+    $source = $this->argument('source') ?: AppSetting::getValue('league_table_source', 'lzkosz');
+    $source = array_key_exists($source, LzkoszLeagueTableService::SOURCES) ? $source : 'lzkosz';
+    $configuration = LzkoszLeagueTableService::SOURCES[$source] ?? LzkoszLeagueTableService::SOURCES['lzkosz'];
+    $season = $this->argument('season')
+        ?: AppSetting::getValue("league_table_season_{$source}")
+        ?: AppSetting::getValue('league_table_season')
+        ?: $configuration['season'];
+    $count = $leagueTableService->sync($source, $season);
+    AppSetting::setValue('league_table_source', $source);
+    AppSetting::setValue('league_table_season', $season);
+    AppSetting::setValue("league_table_season_{$source}", $season);
+    $this->info("Tabela {$configuration['label']} została pobrana. Zaktualizowano {$count} drużyn.");
 
     return self::SUCCESS;
 })->purpose('Sync the 3 Liga Mężczyzn table from ŁZKosz');
+
+Schedule::command('lzkosz:sync-table')
+    ->dailyAt('16:00')
+    ->timezone('Europe/Warsaw')
+    ->withoutOverlapping();
 
 Artisan::command('media:sync {source=public} {destination=s3} {--force}', function (string $source, string $destination): int {
     $sourceDisk = Storage::disk($source);

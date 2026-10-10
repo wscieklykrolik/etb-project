@@ -23,8 +23,8 @@
                 <p class="text-sm text-red-700" role="alert">{{ $error }}</p>
             @endforeach
             <div>
-                <label for="body-{{ $slug }}" class="mb-2 block text-sm font-bold">Treść</label>
-                <textarea id="body-{{ $slug }}" name="body" rows="10" maxlength="100000" class="w-full rounded-lg border-slate-300">{{ $isSubmitted ? old('body') : $page?->body }}</textarea>
+                <label id="body-{{ $slug }}-label" for="body-{{ $slug }}" class="mb-2 block text-sm font-bold">Treść</label>
+                <x-admin.rich-text-editor name="body" id="body-{{ $slug }}" :value="$isSubmitted ? old('body') : $page?->body" maxlength="100000" min-height="18rem" />
             </div>
             @if ($page?->image_path)
                 <img src="{{ \App\Support\MediaStorage::url($page->image_path) }}" alt="{{ $title }}" class="max-h-72 max-w-full object-contain">

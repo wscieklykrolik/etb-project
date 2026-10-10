@@ -60,6 +60,25 @@ it('shows public article and photo author signatures on a news detail page', fun
     $response->assertSee('Autor zdjęć: Piotr Wiśniewski');
 });
 
+it('renders safe rich text links in an article', function () {
+    $author = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $news = News::query()->create([
+        'type' => News::TYPE_ARTICLE,
+        'title' => 'Artykuł z formatowaniem',
+        'content' => '<p><strong>Ważna treść</strong> i <a href="https://example.com" onclick="alert(1)">odnośnik</a><script>alert(2)</script></p>',
+        'author_id' => $author->id,
+        'publish_at' => now()->subMinute(),
+        'is_visible' => true,
+    ]);
+
+    $this->get(route('news.show', $news))
+        ->assertOk()
+        ->assertSee('<strong>Ważna treść</strong>', false)
+        ->assertSee('href="https://example.com"', false)
+        ->assertDontSee('onclick="alert(1)"', false)
+        ->assertDontSee('alert(2)', false);
+});
+
 it('blocks youtube videos until marketing cookies are accepted', function () {
     $author = User::factory()->create(['role' => User::ROLE_ADMIN]);
 

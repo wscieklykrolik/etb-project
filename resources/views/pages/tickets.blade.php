@@ -16,7 +16,7 @@
 
             <div class="mt-8 rounded-lg border border-zinc-700 bg-zinc-900 p-6">
                 @if (filled($ticketsPageBody))
-                    <div class="whitespace-pre-line break-words text-base leading-8 text-zinc-100">{{ $ticketsPageBody }}</div>
+                    <div class="etb-rich-text break-words text-base leading-8 text-zinc-100">{!! \App\Support\RichText::toHtml($ticketsPageBody) !!}</div>
                 @else
                     <p class="text-sm text-zinc-400">Treść strony biletów zostanie wkrótce uzupełniona.</p>
                 @endif

@@ -41,7 +41,8 @@
                 <button class="hover:text-yellow-400 text-sm transition-colors">Wyloguj</button>
             </form>
         @else
-            <a href="{{ route('login') }}" class="hover:text-yellow-400 transition-colors">Zaloguj</a>
+            {{-- Tymczasowo ukryte. Logowanie pozostaje dostępne bezpośrednio pod adresem /login. --}}
+            {{-- <a href="{{ route('login') }}" class="hover:text-yellow-400 transition-colors">Zaloguj</a> --}}
         @endauth
     </div>
 </div>

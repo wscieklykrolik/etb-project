@@ -45,10 +45,12 @@
         <input name="title" required value="{{ $field('title', $item?->title) }}" class="mt-1 w-full rounded border-gray-300">
     </label>
 
-    <label class="block" x-show="type === 'article'">
-        <span class="text-sm font-medium text-gray-700">Treść</span>
-        <textarea name="content" rows="8" :required="type === 'article'" class="mt-1 w-full rounded border-gray-300">{{ $field('content', $item?->content) }}</textarea>
-    </label>
+    <div class="block" x-show="type === 'article'">
+        <label id="news-content-label" for="news-content" class="text-sm font-medium text-gray-700">Treść</label>
+        <div class="mt-1">
+            <x-admin.rich-text-editor name="content" id="news-content" :value="$field('content', $item?->content)" min-height="16rem" />
+        </div>
+    </div>
 
     <label class="block">
         <span class="text-sm font-medium text-gray-700">Krótki opis</span>

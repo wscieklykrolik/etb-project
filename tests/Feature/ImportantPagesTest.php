@@ -18,6 +18,33 @@ it('links the footer to all important pages and the new office email', function 
     $this->get('/informacje/nieznana')->assertNotFound();
 });
 
+it('includes a competition rules page in the footer and admin panel', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $this->get(route('important-pages.show', 'regulamin-konkursow'))
+        ->assertOk()
+        ->assertSee('Regulamin konkursów');
+
+    $this->actingAs($admin)->get(route('profile.edit', ['section' => 'important-links']))
+        ->assertOk()
+        ->assertSee('Regulamin konkursów')
+        ->assertSee('Formatowanie tekstu');
+});
+
+it('renders allowed formatting and removes unsafe markup from important pages', function () {
+    ImportantPage::create([
+        'slug' => 'regulamin-konkursow',
+        'body' => '<p><strong>Ważne</strong> <a href="https://example.com" onclick="alert(1)">zasady</a><script>alert(2)</script></p>',
+    ]);
+
+    $this->get(route('important-pages.show', 'regulamin-konkursow'))
+        ->assertOk()
+        ->assertSee('<strong>Ważne</strong>', false)
+        ->assertSee('href="https://example.com"', false)
+        ->assertDontSee('onclick="alert(1)"', false)
+        ->assertDontSee('alert(2)', false);
+});
+
 it('lets panel users save text and shows it escaped on the public page', function (string $role) {
     $user = User::factory()->create(['role' => $role]);
     $this->actingAs($user)->get(route('profile.edit', ['section' => 'important-links']))

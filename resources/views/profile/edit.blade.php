@@ -369,8 +369,8 @@
                             @method('PUT')
 
                             <div>
-                                <label for="tickets-page-body" class="mb-2 block text-sm font-bold">Treść</label>
-                                <textarea id="tickets-page-body" name="body" rows="8" maxlength="100000" class="w-full rounded-lg border-slate-300 text-sm" placeholder="Wpisz tekst widoczny na stronie biletów...">{{ old('body', $ticketsPageBody) }}</textarea>
+                                <label id="tickets-page-body-label" for="tickets-page-body" class="mb-2 block text-sm font-bold">Treść</label>
+                                <x-admin.rich-text-editor name="body" id="tickets-page-body" :value="old('body', $ticketsPageBody)" maxlength="100000" min-height="14rem" />
                             </div>
 
                             <div class="grid gap-4 lg:grid-cols-2">
@@ -602,8 +602,10 @@
                                         </div>
 
                                         <div>
-                                            <label for="club-section-body-{{ $clubSection->slug }}" class="text-sm font-black text-slate-700">Pole tekstowe</label>
-                                            <textarea id="club-section-body-{{ $clubSection->slug }}" name="body" rows="7" class="mt-2 w-full rounded-lg border-slate-300 text-sm" placeholder="Wpisz treść sekcji...">{{ old('body', $clubSection->body) }}</textarea>
+                                            <label id="club-section-body-{{ $clubSection->slug }}-label" for="club-section-body-{{ $clubSection->slug }}" class="text-sm font-black text-slate-700">Pole tekstowe</label>
+                                            <div class="mt-2">
+                                                <x-admin.rich-text-editor name="body" id="club-section-body-{{ $clubSection->slug }}" :value="old('body', $clubSection->body)" min-height="12rem" />
+                                            </div>
                                         </div>
 
                                         <div>
@@ -667,6 +669,25 @@
                                     <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Pobierz tabelę</button>
                                 </div>
                                 <p class="mt-2 text-xs text-slate-500">Aktualne oznaczenie sezonu: {{ $leagueTableSeason }}</p>
+                            </form>
+
+                            <form method="POST" action="{{ route('admin.league-table.homepage-preview.update') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                @csrf
+                                @method('PUT')
+                                <h3 class="font-black">Podgląd tabeli na stronie głównej</h3>
+                                <p class="mt-1 text-sm text-slate-600">Wybierz tabelę pokazywaną między terminarzem a aktualnościami. Tryb automatyczny wybiera ostatnio pobraną lub uzupełnioną opublikowaną tabelę.</p>
+                                <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                                    <select name="source" class="rounded-lg border-slate-300 text-sm">
+                                        <option value="automatic" @selected($homepageLeagueTableSelection === 'automatic')>Automatycznie — ostatnio zaktualizowana</option>
+                                        @foreach($homepageLeagueTableOptions as $option)
+                                            <option value="{{ $option['key'] }}" @selected($homepageLeagueTableSelection === $option['key'])>{{ $option['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button class="rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800">Zapisz wybór</button>
+                                </div>
+                                @if($homepageLeagueTableOptions->isEmpty())
+                                    <p class="mt-2 text-xs text-slate-500">Wybór będzie dostępny po pobraniu albo opublikowaniu tabeli z wierszami.</p>
+                                @endif
                             </form>
 
                             <form method="POST" action="{{ route('admin.league-table.archive') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -976,8 +997,8 @@
                                 <p class="mt-1 text-sm text-slate-600">Ustaw tekst widoczny nad sponsorami i wybierz, czy pokazać same logotypy, czy każdego sponsora po kolei wraz z opisem.</p>
                             </div>
                             <div>
-                                <label for="sponsor-page-intro" class="mb-1 block text-sm font-bold text-slate-700">Tekst wprowadzający</label>
-                                <textarea id="sponsor-page-intro" name="intro" rows="4" maxlength="5000" class="w-full rounded-lg border-yellow-300 bg-white text-sm" placeholder="Napisz kilka zdań o partnerach i sponsorach klubu...">{{ old('intro', $sponsorsClubSection?->body ?: 'Partnerzy ETB wyeksponowani tak, jak powinny pracować logotypy: spokojnie, czytelnie i na jasnym tle.') }}</textarea>
+                                <label id="sponsor-page-intro-label" for="sponsor-page-intro" class="mb-1 block text-sm font-bold text-slate-700">Tekst wprowadzający</label>
+                                <x-admin.rich-text-editor name="intro" id="sponsor-page-intro" :value="old('intro', $sponsorsClubSection?->body ?: 'Partnerzy ETB wyeksponowani tak, jak powinny pracować logotypy: spokojnie, czytelnie i na jasnym tle.')" maxlength="5000" min-height="10rem" />
                             </div>
                             <fieldset>
                                 <legend class="mb-2 text-sm font-bold text-slate-700">Sposób prezentacji</legend>

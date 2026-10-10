@@ -27,6 +27,7 @@ use App\Models\TeamStaff;
 use App\Models\ThreeXThreeMember;
 use App\Models\ThreeXThreeTournament;
 use App\Models\User;
+use App\Services\HomepageLeagueTableService;
 use App\Services\LzkoszLeagueTableService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request, HomepageLeagueTableService $homepageLeagueTableService): View
     {
         $user = $request->user();
         $userRoleFilter = in_array($request->query('user_role'), User::roles(), true)
@@ -253,6 +254,8 @@ class ProfileController extends Controller
             'leagueTableSnapshots' => $leagueTableSnapshots,
             'leagueTableSource' => $leagueTableSource,
             'leagueTableSeason' => $leagueTableSeason,
+            'homepageLeagueTableOptions' => $homepageLeagueTableService->availableTables(),
+            'homepageLeagueTableSelection' => $homepageLeagueTableService->selection(),
             'leagueExternalUrl' => AppSetting::getValue('league_external_url', 'https://www.kpzkosz.com/liga/89.html'),
             'leagueExternalLabel' => AppSetting::getValue('league_external_label', 'Otwórz ligę w KPZKosz'),
             'leagueExternalDescription' => AppSetting::getValue('league_external_description', 'W tym sezonie nasza tabela i oficjalna strona ligi są dostępne w serwisie KPZKosz.'),

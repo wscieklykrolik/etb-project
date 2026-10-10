@@ -10,6 +10,7 @@ class ImportantPage extends Model
         'polityka-prywatnosci' => 'Polityka prywatności',
         'regulamin-sklepu' => 'Regulamin sklepu',
         'regulamin-zwrotow' => 'Regulamin zwrotów',
+        'regulamin-konkursow' => 'Regulamin konkursów',
     ];
 
     protected $fillable = ['slug', 'body', 'image_path'];

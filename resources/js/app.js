@@ -4,6 +4,44 @@ import { createIcons, icons } from 'lucide';
 
 window.Alpine = Alpine;
 
+window.richTextEditor = function richTextEditor() {
+    return {
+        init() {
+            this.$refs.editor.innerHTML = this.$refs.input.value;
+        },
+        sync() {
+            const hasFormatting = this.$refs.editor.querySelector('p, div, br, strong, b, em, i, u, a, ul, ol, li');
+            this.$refs.input.value = hasFormatting
+                ? this.$refs.editor.innerHTML
+                : this.$refs.editor.textContent;
+            this.$refs.input.dispatchEvent(new Event('input', { bubbles: true }));
+        },
+        format(command, value = null) {
+            this.$refs.editor.focus();
+            document.execCommand(command, false, value);
+            this.sync();
+        },
+        addLink() {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed) {
+                window.alert('Najpierw zaznacz tekst, który ma być linkiem.');
+                return;
+            }
+
+            const url = window.prompt('Podaj adres linku:', 'https://');
+            if (url === null) return;
+
+            const trimmedUrl = url.trim();
+            if (!/^(https?:\/\/|mailto:|tel:|\/[^/]|#)/i.test(trimmedUrl)) {
+                window.alert('Podaj poprawny adres rozpoczynający się od https://, http://, mailto:, tel:, / lub #.');
+                return;
+            }
+
+            this.format('createLink', trimmedUrl);
+        },
+    };
+};
+
 // Keep wide tables inside their own scroll area, including editorial content.
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#app-main table').forEach((table) => {

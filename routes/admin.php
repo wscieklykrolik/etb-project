@@ -83,6 +83,7 @@ Route::middleware(['auth', 'role:admin,employee'])->group(function () {
     Route::put('/admin/league-table/manual/{snapshot}', [LeagueTableController::class, 'updateManual'])->name('admin.league-table.manual.update');
     Route::delete('/admin/league-table/manual/{snapshot}', [LeagueTableController::class, 'destroyManual'])->name('admin.league-table.manual.destroy');
     Route::put('/admin/league-table/external-link', [LeagueTableController::class, 'updateExternalLink'])->name('admin.league-table.external-link.update');
+    Route::put('/admin/league-table/homepage-preview', [LeagueTableController::class, 'updateHomepagePreview'])->name('admin.league-table.homepage-preview.update');
     Route::patch('/admin/opponents/{opponent}', [LeagueTableController::class, 'updateOpponent'])->name('admin.opponents.update');
     Route::post('/admin/3x3/tournaments/{tournament}/groups', [ThreeXThreeTournamentGroupController::class, 'store'])->name('admin.3x3.tournaments.groups.store');
     Route::patch('/admin/3x3/tournaments/{tournament}/groups/{group}', [ThreeXThreeTournamentGroupController::class, 'update'])->name('admin.3x3.tournaments.groups.update');

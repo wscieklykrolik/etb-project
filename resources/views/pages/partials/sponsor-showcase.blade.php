@@ -11,7 +11,7 @@
     <div class="mb-6">
         <p class="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">Klub</p>
         <h2 class="mt-2 text-3xl font-black text-white">Sponsorzy</h2>
-        <p class="mt-3 max-w-4xl whitespace-pre-line text-base leading-7 text-zinc-300">{{ $sponsorIntro }}</p>
+        <div class="etb-rich-text mt-3 max-w-4xl text-base leading-7 text-zinc-300">{!! \App\Support\RichText::toHtml($sponsorIntro) !!}</div>
     </div>
 
     <div class="rounded-lg bg-white p-5 text-slate-950 shadow-xl sm:p-7 lg:p-8">

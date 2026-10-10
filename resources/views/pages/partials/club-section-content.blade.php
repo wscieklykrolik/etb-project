@@ -10,7 +10,7 @@
 
     <div class="{{ $clubSection->images->isNotEmpty() ? 'grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start' : 'max-w-4xl' }}">
         @if (filled($clubSection->body))
-            <div class="whitespace-pre-line text-base leading-8 text-zinc-100 sm:text-lg">{{ $clubSection->body }}</div>
+            <div class="etb-rich-text text-base leading-8 text-zinc-100 sm:text-lg">{!! \App\Support\RichText::toHtml($clubSection->body) !!}</div>
         @endif
 
         @if ($clubSection->images->isNotEmpty())

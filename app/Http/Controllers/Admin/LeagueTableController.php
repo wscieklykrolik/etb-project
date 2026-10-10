@@ -7,6 +7,7 @@ use App\Models\AppSetting;
 use App\Models\LeagueStanding;
 use App\Models\LeagueTableSnapshot;
 use App\Models\Opponent;
+use App\Services\HomepageLeagueTableService;
 use App\Services\LzkoszLeagueTableService;
 use App\Support\MediaStorage;
 use Illuminate\Http\RedirectResponse;
@@ -43,6 +44,7 @@ class LeagueTableController extends Controller
 
         AppSetting::setValue('league_table_source', $source);
         AppSetting::setValue('league_table_season', $season);
+        AppSetting::setValue("league_table_season_{$source}", $season);
 
         return redirect()
             ->route('profile.edit')
@@ -159,6 +161,18 @@ class LeagueTableController extends Controller
         AppSetting::setValue('league_external_description', $validated['description'] ?? '');
 
         return back()->with('success', 'Dodatkowy odnośnik do ligi został zapisany.');
+    }
+
+    public function updateHomepagePreview(Request $request, HomepageLeagueTableService $homepageLeagueTableService): RedirectResponse
+    {
+        $availableKeys = $homepageLeagueTableService->availableTables()->pluck('key')->all();
+        $validated = $request->validate([
+            'source' => ['required', 'string', 'in:'.implode(',', [HomepageLeagueTableService::AUTOMATIC_SOURCE, ...$availableKeys])],
+        ]);
+
+        AppSetting::setValue(HomepageLeagueTableService::SETTING_KEY, $validated['source']);
+
+        return back()->with('success', 'Źródło podglądu tabeli na stronie głównej zostało zapisane.');
     }
 
     public function updateOpponent(Request $request, Opponent $opponent): RedirectResponse

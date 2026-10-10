@@ -61,7 +61,7 @@
             @endif
 
             @if ($news->type === \App\Models\News::TYPE_ARTICLE)
-                <div class="prose prose-invert mt-8 max-w-none text-zinc-300">{!! nl2br(e($news->content)) !!}</div>
+                <div class="etb-rich-text mt-8 max-w-none text-zinc-300">{!! \App\Support\RichText::toHtml($news->content) !!}</div>
             @endif
 
             @if ($news->images->isNotEmpty())

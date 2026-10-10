@@ -8,11 +8,12 @@ use App\Models\Player;
 use App\Models\Product;
 use App\Models\Sponsor;
 use App\Models\TeamMatch;
+use App\Services\HomepageLeagueTableService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(HomepageLeagueTableService $homepageLeagueTableService): View
     {
         $latestNews = News::query()
             ->with(['author', 'images'])
@@ -109,6 +110,7 @@ class HomeController extends Controller
             'shopProducts' => $shopProducts,
             'faqQuestions' => $faqQuestions,
             'faqSchemaJson' => $faqSchemaJson,
+            'leagueTablePreview' => $homepageLeagueTableService->preview(),
         ]);
     }
 }
