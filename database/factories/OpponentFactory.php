@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Opponent;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class OpponentFactory extends Factory
 {
@@ -12,7 +13,7 @@ class OpponentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
+            'name' => Str::limit($this->faker->company(), 180, '').' '.Str::uuid(),
         ];
     }
 }
