@@ -112,6 +112,7 @@ it('allows only administrators to change settings or the global mode', function 
 })->with(['fan', 'employee']);
 
 it('requires the explicit phrase and acknowledgement before switching the whole shop', function () {
+    config(['shop.legacy_enabled' => true]);
     $this->actingAs(User::factory()->create(['role' => 'admin']));
     $this->get(route('admin.shop-settings.edit'))->assertOk()->assertSee('ZMIENIAM TRYB SKLEPU');
     $this->patch(route('admin.shop-settings.mode'), ['mode' => 'legacy'])->assertSessionHasErrors(['confirmation', 'acknowledged']);

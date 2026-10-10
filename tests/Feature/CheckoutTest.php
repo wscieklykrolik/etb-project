@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    config(['shop.legacy_enabled' => true]);
     AppSetting::setValue('shop_order_mode', 'legacy');
     $this->user = User::factory()->create();
     $this->product = Product::factory()->create([
