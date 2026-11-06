@@ -482,6 +482,8 @@ it('rejects black and white academy group colors but allows manual yellow', func
 });
 
 it('lets an admin change a recurring series while preserving a single-training exception', function () {
+    $this->travelTo(now()->setDate(2026, 10, 1)->startOfDay());
+
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
     $group = AcademyGroup::query()->create([
         'name' => 'Juniorzy U17M',
