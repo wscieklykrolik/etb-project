@@ -184,6 +184,43 @@ it('shows only published product details', function () {
         ->assertNotFound();
 });
 
+it('publishes or hides a product using the draft checkbox', function (bool $published) {
+    $product = Product::factory()->create([
+        'name' => 'Produkt ze zmienianą widocznością',
+        'is_published' => ! $published,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->put(route('admin.products.update', $product), [
+            'name' => $product->name,
+            'price_grosze' => $product->price_grosze,
+            'stock_qty' => $product->stock_qty,
+            'is_published' => $published ? '1' : '0',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect($product->fresh()->is_published)->toBe($published);
+
+    $form = $this->get(route('admin.products.edit', $product))
+        ->assertOk()
+        ->assertSee('Wersja robocza')
+        ->assertSee('<input type="hidden" name="is_published" value="1">', false);
+
+    preg_match('/<input type="checkbox" name="is_published" value="0"[^>]*>/', $form->getContent(), $checkbox);
+    expect($checkbox)->toHaveCount(1);
+    expect(str_contains($checkbox[0], 'checked'))->toBe(! $published);
+
+    $shop = $this->get(route('shop.index'))->assertOk();
+    if ($published) {
+        $shop->assertSee($product->name);
+        $this->get(route('shop.show', $product))->assertOk();
+    } else {
+        $shop->assertDontSee($product->name);
+        $this->get(route('shop.show', $product))->assertNotFound();
+    }
+})->with([true, false]);
+
 it('filters public shop by product filter option and size', function () {
     $filterGroup = ProductFilterGroup::query()->create(['name' => 'Typ produktu', 'slug' => 'typ-produktu']);
     $shirtOption = $filterGroup->options()->create(['name' => 'Koszulka', 'slug' => 'koszulka']);

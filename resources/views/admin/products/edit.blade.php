@@ -82,10 +82,10 @@
 
             <div class="flex items-center gap-6">
                 <label class="inline-flex items-center gap-2">
-                    <input type="hidden" name="is_published" value="0">
-                    <input type="checkbox" name="is_published" value="1" {{ old('is_published', $product->is_published) ? 'checked' : '' }}
+                    <input type="hidden" name="is_published" value="1">
+                    <input type="checkbox" name="is_published" value="0" @checked(! old('is_published', $product->is_published))
                            class="rounded border-slate-300 bg-white text-yellow-800 focus:ring-yellow-400">
-                    <span class="text-sm text-slate-700">Opublikowany</span>
+                    <span class="text-sm text-slate-700">Wersja robocza</span>
                 </label>
 
                 <label class="inline-flex items-center gap-2">
@@ -95,6 +95,8 @@
                     <span class="text-sm text-slate-700">Produkt fizyczny</span>
                 </label>
             </div>
+
+            <p class="text-xs text-slate-500">Zaznacz, aby ukryć produkt. Odznacz, aby opublikować go w sklepie po zapisaniu.</p>
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Zdjęcia</label>
