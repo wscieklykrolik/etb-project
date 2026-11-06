@@ -5,7 +5,10 @@ use App\Models\Product;
 use App\Models\ProductFilterGroup;
 use App\Models\ProductVariantSize;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -78,6 +81,52 @@ it('admin can create product via API', function () {
 it('guest cannot access product admin', function () {
     $response = $this->get(route('admin.products.create'));
     $response->assertRedirect(route('login'));
+});
+
+it('stores product images larger than 25 MB on create and update', function () {
+    config(['filesystems.media_disk' => 'public']);
+    Storage::fake('public');
+    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=');
+
+    $data = [
+        'name' => 'Produkt z dużymi zdjęciami',
+        'price_grosze' => 4999,
+        'stock_qty' => 10,
+        'is_published' => true,
+    ];
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.products.store'), [
+            ...$data,
+            'images' => [UploadedFile::fake()->createWithContent('duze-zdjecie.png', $png.str_repeat("\0", 26 * 1024 * 1024))],
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    $product = Product::where('name', $data['name'])->firstOrFail();
+    $firstImage = $product->images[0];
+    Storage::disk('public')->assertExists($firstImage);
+
+    $this->put(route('admin.products.update', $product), [
+        ...$data,
+        'images' => [UploadedFile::fake()->createWithContent('kolejne-duze-zdjecie.png', $png.str_repeat("\0", 27 * 1024 * 1024))],
+    ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    $images = $product->fresh()->images;
+    expect($images)->toHaveCount(2);
+    expect($images[0])->toBe($firstImage);
+    Storage::disk('public')->assertExists($images);
+
+    $this->get(route('shop.show', $product))
+        ->assertOk()
+        ->assertSee(MediaStorage::url($firstImage), false);
+
+    $this->get(route('admin.products.edit', $product))
+        ->assertOk()
+        ->assertSee('data-max-upload-kb="0"', false)
+        ->assertSee(MediaStorage::url($images[1]), false);
 });
 
 it('admin can open shop management pages', function () {

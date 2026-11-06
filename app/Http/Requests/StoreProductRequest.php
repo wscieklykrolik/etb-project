@@ -24,7 +24,7 @@ class StoreProductRequest extends FormRequest
             'is_physical' => ['boolean'],
             'is_published' => ['boolean'],
             'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'max:'.config('media.max_upload_kilobytes')],
+            'images.*' => ['image'],
             'filter_options' => ['nullable', 'array'],
             'filter_options.*' => ['integer', 'exists:product_filter_options,id'],
         ];

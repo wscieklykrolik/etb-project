@@ -107,7 +107,7 @@
                         @endforeach
                     </div>
                 @endif
-                <input type="file" name="images[]" multiple accept="image/*"
+                <input type="file" name="images[]" multiple accept="image/*" data-max-upload-kb="0"
                        class="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:text-slate-900 hover:file:bg-slate-200">
                 @error('images.*') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
             </div>

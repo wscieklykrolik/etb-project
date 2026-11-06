@@ -94,9 +94,9 @@ document.addEventListener('change', (event) => {
     if (!files.length) return;
 
     const warningKilobytes = Number(document.querySelector('meta[name="etb-large-upload-warning-kb"]')?.content || 5012);
-    const maxKilobytes = Number(document.querySelector('meta[name="etb-max-upload-kb"]')?.content || 25600);
+    const maxKilobytes = Number(input.dataset.maxUploadKb ?? document.querySelector('meta[name="etb-max-upload-kb"]')?.content ?? 25600);
     const oversized = files.filter((file) => file.size > warningKilobytes * 1024);
-    const tooLarge = files.filter((file) => file.size > maxKilobytes * 1024);
+    const tooLarge = maxKilobytes > 0 ? files.filter((file) => file.size > maxKilobytes * 1024) : [];
 
     if (tooLarge.length) {
         const details = tooLarge.map((file) => `• ${file.name}: ${formatUploadSize(file.size)} MB`).join('\n');
