@@ -1,9 +1,12 @@
 <?php
 
+use App\Models\AppSetting;
 use App\Models\LeagueStanding;
 use App\Models\LeagueTableSnapshot;
 use App\Models\Opponent;
 use App\Models\User;
+use App\Services\LzkoszLeagueTableService;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Http;
 
 it('imports the lzkosz league table into local opponents and standings', function () {
@@ -30,7 +33,7 @@ it('imports the lzkosz league table into local opponents and standings', functio
 
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-    $response = $this->actingAs($admin)->post(route('admin.league-table.sync'));
+    $response = $this->actingAs($admin)->post(route('admin.league-table.sync'), ['source' => 'lzkosz']);
 
     $response->assertRedirect(route('profile.edit'));
     $this->assertDatabaseHas('opponents', [
@@ -117,6 +120,8 @@ it('shows the configured kpzkosz league link next to the permanent link', functi
 });
 
 it('archives the current table together with team names and logo paths', function () {
+    AppSetting::setValue('league_table_source', 'lzkosz');
+    AppSetting::setValue('league_table_season', '2025/2026');
     $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
     $opponent = Opponent::query()->create([
         'name' => 'ETB Łódź',
@@ -153,4 +158,59 @@ it('archives the current table together with team names and logo paths', functio
     expect($snapshot->is_published)->toBeTrue()
         ->and($snapshot->rows->first()->team_name)->toBe('ETB Łódź')
         ->and($snapshot->rows->first()->logo_path)->toBe('team-logos/etb.png');
+});
+
+it('uses kpzkosz by default and refreshes the configured active league and season', function () {
+    Http::preventStrayRequests();
+    Http::fake(['www.kpzkosz.com/liga/89/tabela.html' => Http::response('<table><thead><tr><th>drużyna stosunek</th></tr></thead><tbody><tr><td>1</td><td><a href="/liga/89/d/etb.html">ETB Łódź</a></td><td>20</td><td>10</td><td>10 - 0</td><td>5 - 0</td><td>5 - 0</td><td>800 - 650</td><td>150</td><td>1.23</td></tr></tbody></table>')]);
+
+    $this->artisan('lzkosz:sync-table')->assertSuccessful();
+    $this->assertDatabaseHas('league_standings', ['league_id' => 89, 'season' => '2026/2027', 'points' => 20]);
+    AppSetting::setValue('league_table_season_kpzkosz', '2027/28');
+    $this->artisan('lzkosz:sync-table')->assertSuccessful();
+    $this->assertDatabaseHas('league_standings', ['league_id' => 89, 'season' => '2027/28']);
+    $this->get(route('schedule.table'))->assertOk()->assertSee('ETB Łódź')->assertSee('2027/28');
+});
+
+it('allows administrators to turn hourly refresh off and on', function () {
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $event = collect(app(Schedule::class)->events())->first(fn ($event) => str_contains($event->command ?? '', 'lzkosz:sync-table'));
+
+    foreach ([false, true] as $enabled) {
+        $this->actingAs($admin)->put(route('admin.league-table.auto-refresh.update'), ['enabled' => $enabled])->assertSessionHasNoErrors()->assertRedirect();
+        expect($event->filtersPass(app()))->toBe($enabled);
+    }
+    $this->get(route('profile.edit', ['section' => 'league-table']))->assertOk()->assertSee('Wyłącz automatyczne odświeżanie');
+});
+
+it('protects refresh settings from guests and regular users', function () {
+    $this->put(route('admin.league-table.auto-refresh.update'), ['enabled' => false])->assertRedirect(route('login'));
+    $this->actingAs(User::factory()->create(['role' => User::ROLE_FAN]))->put(route('admin.league-table.auto-refresh.update'), ['enabled' => false])->assertForbidden();
+});
+
+it('keeps the last successful standings when the source is unavailable or malformed', function (string $body, int $status) {
+    $service = app(LzkoszLeagueTableService::class);
+    Http::fake(['*' => Http::sequence()->push('<table><thead><tr><th>drużyna stosunek</th></tr></thead><tbody><tr><td>1</td><td>ETB Łódź</td><td>20</td><td>10</td><td>10 - 0</td><td>5 - 0</td><td>5 - 0</td><td>800 - 650</td><td>150</td><td>1.23</td></tr></tbody></table>')->push($body, $status)]);
+    $service->sync();
+    expect(fn () => $service->sync())->toThrow(RuntimeException::class);
+    $this->assertDatabaseHas('league_standings', ['league_id' => 89, 'points' => 20]);
+})->with([['Awaria', 503], ['<html>Brak tabeli</html>', 200]]);
+
+it('switches existing league settings and restores them on migration rollback', function () {
+    AppSetting::setValue('league_table_source', 'lzkosz');
+    AppSetting::setValue('league_table_season', '2025/26');
+    AppSetting::setValue('homepage_league_table_source', 'current:lzkosz');
+    AppSetting::query()->where('key', 'league_table_auto_refresh')->delete();
+    $migration = require database_path('migrations/2026_11_12_120000_set_kpzkosz_as_current_league.php');
+
+    $migration->up();
+    expect(AppSetting::getValue('league_table_source'))->toBe('kpzkosz')
+        ->and(AppSetting::getValue('league_table_season'))->toBe('2026/2027')
+        ->and(AppSetting::getValue('league_table_auto_refresh'))->toBe('1')
+        ->and(AppSetting::getValue('homepage_league_table_source'))->toBe('current:kpzkosz');
+    $migration->down();
+    expect(AppSetting::getValue('league_table_source'))->toBe('lzkosz')
+        ->and(AppSetting::getValue('league_table_season'))->toBe('2025/26')
+        ->and(AppSetting::getValue('league_table_auto_refresh'))->toBeNull()
+        ->and(AppSetting::getValue('homepage_league_table_source'))->toBe('current:lzkosz');
 });

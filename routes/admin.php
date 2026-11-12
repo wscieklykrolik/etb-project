@@ -78,6 +78,7 @@ Route::middleware(['auth', 'verified', 'role:admin,employee'])->group(function (
         ->names('admin.faq')
         ->parameters(['faq' => 'question']);
     Route::post('/admin/league-table/sync', [LeagueTableController::class, 'sync'])->name('admin.league-table.sync');
+    Route::put('/admin/league-table/auto-refresh', [LeagueTableController::class, 'updateAutoRefresh'])->name('admin.league-table.auto-refresh.update');
     Route::post('/admin/league-table/archive', [LeagueTableController::class, 'archive'])->name('admin.league-table.archive');
     Route::post('/admin/league-table/manual', [LeagueTableController::class, 'storeManual'])->name('admin.league-table.manual.store');
     Route::put('/admin/league-table/manual/{snapshot}', [LeagueTableController::class, 'updateManual'])->name('admin.league-table.manual.update');

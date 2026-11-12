@@ -7,12 +7,15 @@ use App\Models\Opponent;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class LzkoszLeagueTableService
 {
+    public const DEFAULT_SOURCE = 'kpzkosz';
+
     public const LEAGUE_ID = 215;
 
     public const SEASON = '2025/2026';
@@ -24,16 +27,18 @@ class LzkoszLeagueTableService
         'kpzkosz' => ['label' => 'KPZKosz', 'league_id' => 89, 'season' => '2026/2027', 'url' => 'https://www.kpzkosz.com/liga/89/tabela.html', 'base_url' => 'https://www.kpzkosz.com/'],
     ];
 
-    public function sync(string $source = 'lzkosz', ?string $season = null): int
+    public function sync(string $source = self::DEFAULT_SOURCE, ?string $season = null): int
     {
-        $configuration = self::SOURCES[$source] ?? self::SOURCES['lzkosz'];
+        $configuration = self::SOURCES[$source] ?? self::SOURCES[self::DEFAULT_SOURCE];
         $response = Http::timeout(15)->get($configuration['url']);
 
         if (! $response->successful()) {
             throw new RuntimeException('Nie udało się pobrać tabeli ligowej.');
         }
 
-        return $this->storeRows($this->parse($response->body(), $configuration['base_url']), (int) $configuration['league_id'], $season ?: $configuration['season']);
+        $rows = $this->parse($response->body(), $configuration['base_url']);
+
+        return DB::transaction(fn () => $this->storeRows($rows, (int) $configuration['league_id'], $season ?: $configuration['season']));
     }
 
     /**

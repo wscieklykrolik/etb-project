@@ -108,11 +108,11 @@ it('lets an administrator save the homepage table source', function () {
     expect(AppSetting::getValue('homepage_league_table_source'))->toBe('current:lzkosz');
 });
 
-it('schedules an automatic table refresh every day at 16:00 Warsaw time', function () {
+it('schedules an automatic table refresh every hour in Warsaw time', function () {
     $event = collect(app(Schedule::class)->events())
         ->first(fn ($event): bool => str_contains($event->command ?? '', 'lzkosz:sync-table'));
 
     expect($event)->not->toBeNull()
-        ->and($event->expression)->toBe('0 16 * * *')
+        ->and($event->expression)->toBe('0 * * * *')
         ->and($event->timezone)->toBe('Europe/Warsaw');
 });

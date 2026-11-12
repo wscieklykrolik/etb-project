@@ -18,11 +18,27 @@
             </a>
 
             <div class="grid gap-12 lg:grid-cols-2">
-                <div class="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+                <div x-data="{ active: 0, images: @js(collect($product->images ?? [])->map(fn ($path) => \App\Support\MediaStorage::url($path))->values()->all()) }" aria-label="Galeria zdjęć produktu">
+                    <div class="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
                     @if($product->images && $img = $product->images[0] ?? null)
-                        <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                        <img src="{{ \App\Support\MediaStorage::url($img) }}" :src="images[active]" alt="{{ $product->name }}" :alt="@js($product->name) + ' — zdjęcie ' + (active + 1)" class="h-full w-full object-contain">
                     @else
                         <span class="text-6xl font-black text-zinc-700">{{ strtoupper(substr($product->name, 0, 2)) }}</span>
+                    @endif
+                    </div>
+                    @if(count($product->images ?? []) > 1)
+                        <div class="mt-4 flex items-center justify-between gap-3 text-sm">
+                            <button type="button" @click="active = (active - 1 + images.length) % images.length" class="rounded-lg border border-zinc-700 px-3 py-2 hover:border-yellow-400" aria-label="Poprzednie zdjęcie">←</button>
+                            <p aria-live="polite">Zdjęcie <span x-text="active + 1">1</span> z {{ count($product->images) }}</p>
+                            <button type="button" @click="active = (active + 1) % images.length" class="rounded-lg border border-zinc-700 px-3 py-2 hover:border-yellow-400" aria-label="Następne zdjęcie">→</button>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @foreach($product->images as $image)
+                                <a href="{{ \App\Support\MediaStorage::url($image) }}" @click.prevent="active = {{ $loop->index }}" :aria-current="active === {{ $loop->index }} ? 'true' : 'false'" :class="active === {{ $loop->index }} ? 'border-yellow-400' : 'border-zinc-700'" class="overflow-hidden rounded-lg border-2 p-1 focus-visible:outline focus-visible:outline-yellow-400" aria-label="Pokaż zdjęcie {{ $loop->iteration }} produktu {{ $product->name }}">
+                                    <img src="{{ \App\Support\MediaStorage::url($image) }}" alt="{{ $product->name }} — zdjęcie {{ $loop->iteration }}" loading="lazy" class="h-16 w-16 object-contain sm:h-20 sm:w-20">
+                                </a>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
 

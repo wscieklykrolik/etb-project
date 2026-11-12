@@ -28,7 +28,7 @@ class LeagueTableController extends Controller
             'season.regex' => 'Sezon wpisz w formacie 20XX/XX albo 20XX/20XX.',
         ]);
 
-        $source = $validated['source'] ?? 'lzkosz';
+        $source = $validated['source'] ?? LzkoszLeagueTableService::DEFAULT_SOURCE;
         $configuration = LzkoszLeagueTableService::SOURCES[$source];
         $season = ($validated['season'] ?? null) ?: $configuration['season'];
 
@@ -54,8 +54,8 @@ class LeagueTableController extends Controller
     public function archive(Request $request): RedirectResponse
     {
         $validated = $this->validateSnapshot($request, false);
-        $source = AppSetting::getValue('league_table_source') ?: 'lzkosz';
-        $configuration = LzkoszLeagueTableService::SOURCES[$source] ?? LzkoszLeagueTableService::SOURCES['lzkosz'];
+        $source = AppSetting::getValue('league_table_source') ?: LzkoszLeagueTableService::DEFAULT_SOURCE;
+        $configuration = LzkoszLeagueTableService::SOURCES[$source] ?? LzkoszLeagueTableService::SOURCES[LzkoszLeagueTableService::DEFAULT_SOURCE];
         $season = AppSetting::getValue('league_table_season') ?: $configuration['season'];
         $standings = LeagueStanding::query()
             ->with('opponent')
@@ -100,6 +100,16 @@ class LeagueTableController extends Controller
         });
 
         return back()->with('success', 'Tabela została zapisana jako niezależne archiwum sezonu.');
+    }
+
+    public function updateAutoRefresh(Request $request): RedirectResponse
+    {
+        $validated = $request->validate(['enabled' => ['required', 'boolean']]);
+        AppSetting::setValue('league_table_auto_refresh', $validated['enabled'] ? '1' : '0');
+
+        return back()->with('success', $validated['enabled']
+            ? 'Automatyczne odświeżanie aktywnej ligi co godzinę zostało włączone.'
+            : 'Automatyczne odświeżanie ligi zostało wyłączone.');
     }
 
     public function storeManual(Request $request): RedirectResponse

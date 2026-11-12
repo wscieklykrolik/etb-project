@@ -157,8 +157,8 @@ class ProfileController extends Controller
             ->whereIn('slug', array_keys(ClubSection::SECTIONS))
             ->orderBy('sort_order')
             ->get();
-        $leagueTableSource = AppSetting::getValue('league_table_source') ?: 'lzkosz';
-        $leagueConfiguration = LzkoszLeagueTableService::SOURCES[$leagueTableSource] ?? LzkoszLeagueTableService::SOURCES['lzkosz'];
+        $leagueTableSource = AppSetting::getValue('league_table_source') ?: LzkoszLeagueTableService::DEFAULT_SOURCE;
+        $leagueConfiguration = LzkoszLeagueTableService::SOURCES[$leagueTableSource] ?? LzkoszLeagueTableService::SOURCES[LzkoszLeagueTableService::DEFAULT_SOURCE];
         $leagueTableSeason = AppSetting::getValue('league_table_season') ?: $leagueConfiguration['season'];
         $leagueStandings = LeagueStanding::query()
             ->with('opponent')
@@ -255,6 +255,7 @@ class ProfileController extends Controller
             'leagueStandings' => $leagueStandings,
             'leagueTableSnapshots' => $leagueTableSnapshots,
             'leagueTableSource' => $leagueTableSource,
+            'leagueConfiguration' => $leagueConfiguration,
             'leagueTableSeason' => $leagueTableSeason,
             'homepageLeagueTableOptions' => $homepageLeagueTableService->availableTables(),
             'homepageLeagueTableSelection' => $homepageLeagueTableService->selection(),

@@ -247,3 +247,57 @@ it('filters public shop by product filter option and size', function () {
         ->assertSee('Koszulka filtrowana')
         ->assertDontSee('Kubek filtrowany');
 });
+
+it('shows every product image and saves the gallery order with the cover first', function () {
+    $images = ['products/przod.png', 'products/tyl.png', 'products/detal.png'];
+    $product = Product::factory()->published()->create(['images' => $images]);
+
+    $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+        'name' => $product->name,
+        'price_grosze' => $product->price_grosze,
+        'stock_qty' => $product->stock_qty,
+        'image_order' => [2, 0, 1],
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    expect($product->fresh()->images)->toBe([$images[2], $images[0], $images[1]]);
+    $this->get(route('shop.show', $product))->assertOk()
+        ->assertSeeInOrder(array_map(fn ($path) => 'src="'.MediaStorage::url($path).'"', [$images[2], $images[0], $images[1]]), false)
+        ->assertSee('Pokaż zdjęcie 3 produktu')
+        ->assertSee('Następne zdjęcie');
+    $this->get(route('admin.products.edit', $product))->assertOk()->assertSee('Zdjęcie główne');
+    $this->get(route('shop.index'))->assertOk()->assertSee('src="'.MediaStorage::url($images[2]).'"', false);
+});
+
+it('rejects incomplete duplicate and foreign image positions without changing the gallery', function (array $order) {
+    $images = ['products/pierwsze.png', 'products/drugie.png'];
+    $product = Product::factory()->create(['images' => $images]);
+
+    $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+        'name' => $product->name,
+        'price_grosze' => $product->price_grosze,
+        'stock_qty' => $product->stock_qty,
+        'image_order' => $order,
+    ])->assertSessionHasErrors();
+
+    expect($product->fresh()->images)->toBe($images);
+})->with([[[]], [[0]], [[0, 0]], [[0, 99]], [['products/obce.png', 0]]]);
+
+it('appends uploaded images after the reordered gallery', function () {
+    config(['filesystems.media_disk' => 'public']);
+    Storage::fake('public');
+    $product = Product::factory()->create(['images' => ['products/przod.png', 'products/tyl.png']]);
+    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=');
+
+    $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+        'name' => $product->name,
+        'price_grosze' => $product->price_grosze,
+        'stock_qty' => $product->stock_qty,
+        'image_order' => [1, 0],
+        'images' => [UploadedFile::fake()->createWithContent('detal.png', $png)],
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $images = $product->fresh()->images;
+    expect($images)->toHaveCount(3);
+    expect(array_slice($images, 0, 2))->toBe(['products/tyl.png', 'products/przod.png']);
+    Storage::disk('public')->assertExists($images[2]);
+});

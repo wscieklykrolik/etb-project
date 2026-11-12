@@ -101,14 +101,31 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700">Zdjęcia</label>
                 @if($product->images)
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @foreach($product->images as $img)
-                            <div class="relative">
-                                <img src="{{ \App\Support\MediaStorage::url($img) }}" alt="" class="h-16 w-16 rounded-lg border border-slate-300 object-cover">
+                    <p class="mt-1 text-xs text-slate-500">Przesuwaj zdjęcia przyciskami. Pierwsze będzie zdjęciem głównym w sklepie. Kolejność zatwierdź przyciskiem „Zapisz zmiany”. Nowe zdjęcia trafią na koniec.</p>
+                    <div class="mt-3 space-y-2" x-data="{ images: @js(collect($product->images)->values()->map(fn ($path, $index) => ['index' => $index, 'url' => \App\Support\MediaStorage::url($path)])->all()), move(index, offset) { this.images.splice(index + offset, 0, this.images.splice(index, 1)[0]); } }">
+                        <template x-for="(image, index) in images" :key="image.index">
+                            <div class="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 p-2">
+                                <input type="hidden" name="image_order[]" :value="image.index">
+                                <img :src="image.url" alt="Zdjęcie produktu" class="h-16 w-16 rounded-lg border border-slate-300 object-cover">
+                                <span class="text-xs font-semibold text-slate-700" x-text="index === 0 ? '1. Zdjęcie główne' : (index + 1) + '. Zdjęcie'"></span>
+                                <div class="ml-auto flex gap-2">
+                                    <button type="button" @click="move(index, -1)" :disabled="index === 0" :aria-label="'Przesuń zdjęcie ' + (index + 1) + ' wcześniej'" class="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100 disabled:opacity-40">↑ Wcześniej</button>
+                                    <button type="button" @click="move(index, 1)" :disabled="index === images.length - 1" :aria-label="'Przesuń zdjęcie ' + (index + 1) + ' dalej'" class="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100 disabled:opacity-40">↓ Dalej</button>
+                                </div>
                             </div>
-                        @endforeach
+                        </template>
                     </div>
+                    <noscript>
+                        <p class="mt-2 text-xs text-slate-500">Włącz JavaScript, aby zmieniać kolejność zdjęć.</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach($product->images as $image)
+                                <img src="{{ \App\Support\MediaStorage::url($image) }}" alt="Zdjęcie produktu {{ $loop->iteration }}" class="h-16 w-16 rounded-lg border border-slate-300 object-cover">
+                            @endforeach
+                        </div>
+                    </noscript>
                 @endif
+                @error('image_order') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                @error('image_order.*') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
                 <input type="file" name="images[]" multiple accept="image/*" data-max-upload-kb="0"
                        class="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:text-slate-900 hover:file:bg-slate-200">
                 @error('images.*') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror

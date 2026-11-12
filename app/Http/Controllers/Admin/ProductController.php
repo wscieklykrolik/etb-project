@@ -75,18 +75,21 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
         $filterOptions = $validated['filter_options'] ?? [];
-        unset($validated['images'], $validated['filter_options']);
+        $paths = $product->images ?? [];
+        if (array_key_exists('image_order', $validated)) {
+            $paths = array_map(fn ($index) => $paths[(int) $index], $validated['image_order']);
+        }
+        unset($validated['images'], $validated['filter_options'], $validated['image_order']);
 
         $product->update($validated);
         $product->filterOptions()->sync($filterOptions);
 
         if ($request->hasFile('images')) {
-            $paths = $product->images ?? [];
             foreach ($request->file('images') as $image) {
                 $paths[] = MediaStorage::store($image, 'products');
             }
-            $product->update(['images' => $paths]);
         }
+        $product->update(['images' => $paths]);
 
         return redirect()
             ->route('admin.products.edit', $product)

@@ -170,8 +170,8 @@ class PublicScheduleController extends Controller
 
     private function leagueConfiguration(): array
     {
-        $source = AppSetting::getValue('league_table_source') ?: 'lzkosz';
-        $configuration = LzkoszLeagueTableService::SOURCES[$source] ?? LzkoszLeagueTableService::SOURCES['lzkosz'];
+        $source = AppSetting::getValue('league_table_source') ?: LzkoszLeagueTableService::DEFAULT_SOURCE;
+        $configuration = LzkoszLeagueTableService::SOURCES[$source] ?? LzkoszLeagueTableService::SOURCES[LzkoszLeagueTableService::DEFAULT_SOURCE];
         $configuration['season'] = AppSetting::getValue('league_table_season') ?: $configuration['season'];
 
         return $configuration;

@@ -656,19 +656,37 @@
                         </div>
 
                         <div class="mb-6 grid gap-5 xl:grid-cols-2">
-                            <form method="POST" action="{{ route('admin.league-table.sync') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4" onsubmit="if (confirm('Czy chcesz uzupełnić lub zmienić oznaczenie sezonu?')) { const season = prompt('Wpisz sezon w formacie 20XX/XX lub 20XX/20XX:', this.elements.season.value); if (season === null) return false; this.elements.season.value = season.trim(); }">
+                            <form method="POST" action="{{ route('admin.league-table.sync') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4" x-data="{ source: @js(old('source', $leagueTableSource)), seasons: @js(collect(\App\Services\LzkoszLeagueTableService::SOURCES)->mapWithKeys(fn ($configuration, $source) => [$source => \App\Models\AppSetting::getValue('league_table_season_'.$source) ?: ($leagueTableSource === $source ? $leagueTableSeason : $configuration['season'])])) }">
                                 @csrf
                                 <h3 class="font-black">Pobieranie bieżącej tabeli</h3>
                                 <p class="mt-1 text-sm text-slate-600">Wybierz serwis, z którego mają pochodzić dane w tym sezonie.</p>
                                 <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-                                    <select name="source" class="rounded-lg border-slate-300 text-sm">
+                                    <select name="source" x-model="source" class="rounded-lg border-slate-300 text-sm" aria-label="Źródło tabeli">
                                         <option value="lzkosz" @selected($leagueTableSource === 'lzkosz')>ŁZKosz — dotychczasowe źródło</option>
                                         <option value="kpzkosz" @selected($leagueTableSource === 'kpzkosz')>KPZKosz — liga 89</option>
                                     </select>
-                                    <input type="hidden" name="season" value="{{ $leagueTableSeason }}">
                                     <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Pobierz tabelę</button>
                                 </div>
-                                <p class="mt-2 text-xs text-slate-500">Aktualne oznaczenie sezonu: {{ $leagueTableSeason }}</p>
+                                <label class="mt-3 block text-sm text-slate-700">Sezon
+                                    <input name="season" x-model="seasons[source]" value="{{ $leagueTableSeason }}" required pattern="20[0-9]{2}/([0-9]{2}|20[0-9]{2})" class="mt-1 block w-full rounded-lg border-slate-300 text-sm">
+                                </label>
+                                <p class="mt-2 text-xs text-slate-500">Pobranie ustawia wybrane źródło i sezon jako aktywną ligę.</p>
+                                <a href="{{ $leagueConfiguration['url'] }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-block text-xs font-bold text-slate-700 underline">Otwórz źródło aktywnej ligi</a>
+                                @if($leagueStandings->isNotEmpty())
+                                    <p class="mt-2 text-xs text-slate-500">Ostatnie pobranie: {{ $leagueStandings->max('synced_at')?->timezone('Europe/Warsaw')->format('d.m.Y H:i') }}</p>
+                                @endif
+                            </form>
+
+                            @php($autoRefreshEnabled = \App\Models\AppSetting::getValue('league_table_auto_refresh', '1') === '1')
+                            <form method="POST" action="{{ route('admin.league-table.auto-refresh.update') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                @csrf
+                                @method('PUT')
+                                <h3 class="font-black">Automatyczne odświeżanie ligi</h3>
+                                <p class="mt-1 text-sm text-slate-600">Co godzinę, o pełnej godzinie, pobierana jest ponownie tabela aktywnej ligi: {{ $leagueConfiguration['label'] }}, sezon {{ $leagueTableSeason }}.</p>
+                                <p class="mt-3 text-sm font-bold">Status: {{ $autoRefreshEnabled ? 'Włączone' : 'Wyłączone' }}</p>
+                                <input type="hidden" name="enabled" value="{{ $autoRefreshEnabled ? '0' : '1' }}">
+                                <button class="mt-4 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">{{ $autoRefreshEnabled ? 'Wyłącz automatyczne odświeżanie' : 'Włącz odświeżanie co godzinę' }}</button>
+                                <p class="mt-2 text-xs text-slate-500">Jeśli pobranie się nie powiedzie, pozostanie ostatnia poprawnie pobrana tabela.</p>
                             </form>
 
                             <form method="POST" action="{{ route('admin.league-table.homepage-preview.update') }}" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
