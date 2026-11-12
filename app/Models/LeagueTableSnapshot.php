@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeagueTableSnapshot extends Model
 {
-    protected $fillable = ['title', 'season', 'description', 'is_published', 'sort_order'];
+    protected $fillable = ['title', 'season', 'description', 'is_published', 'sort_order', 'source_label', 'source_url'];
 
     protected function casts(): array
     {

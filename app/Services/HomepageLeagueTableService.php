@@ -144,7 +144,7 @@ class HomepageLeagueTableService
     /**
      * @return array<string, mixed>
      */
-    private function normaliseRow(int $position, string $teamName, ?string $logoPath, int $points, int $games, int $wins, int $losses): array
+    private function normaliseRow(int $position, string $teamName, ?string $logoPath, ?int $points, ?int $games, ?int $wins, ?int $losses): array
     {
         return [
             'position' => $position,

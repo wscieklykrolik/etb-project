@@ -92,6 +92,7 @@ class PublicScheduleController extends Controller
             'leagueStandings' => $leagueStandings,
             'leagueTableSeason' => $this->leagueConfiguration()['season'],
             'leagueTableSourceLabel' => $this->leagueConfiguration()['label'],
+            'leagueTableSourceUrl' => $this->leagueConfiguration()['url'],
             'leagueTableSnapshots' => $this->publishedLeagueTableSnapshots(),
             'participatingUpcomingTournaments' => $participatingUpcomingTournaments,
             'participatingFinishedTournaments' => $participatingFinishedTournaments,
@@ -132,6 +133,7 @@ class PublicScheduleController extends Controller
             'leagueStandings' => $this->leagueStandings(),
             'leagueTableSeason' => $this->leagueConfiguration()['season'],
             'leagueTableSourceLabel' => $this->leagueConfiguration()['label'],
+            'leagueTableSourceUrl' => $this->leagueConfiguration()['url'],
             'leagueTableSnapshots' => $this->publishedLeagueTableSnapshots(),
         ]);
     }

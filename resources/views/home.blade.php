@@ -8,6 +8,12 @@
 
         return $path ? \App\Support\MediaStorage::url($path) : null;
     };
+
+    $previewStatistics = collect([
+        'points' => ['label' => 'Pkt', 'fields' => ['points']],
+        'games' => ['label' => 'Mecze', 'fields' => ['games']],
+        'record' => ['label' => 'Bilans', 'fields' => ['wins', 'losses']],
+    ])->filter(fn ($statistic) => collect($leagueTablePreview['rows'] ?? [])->contains(fn ($row) => collect($statistic['fields'])->every(fn ($field) => $row[$field] !== null)));
 @endphp
 
 @section('content')
@@ -97,10 +103,10 @@
                     <div class="divide-y divide-zinc-800">
                         @foreach($leagueTablePreview['rows'] as $row)
                             <div @class([
-                                'grid min-h-24 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 transition-colors sm:grid-cols-[4rem_minmax(0,1fr)_repeat(3,6rem)] sm:px-7',
+                                'grid min-h-24 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 transition-colors sm:grid-cols-[4rem_minmax(0,1fr)_repeat(var(--preview-columns),6rem)] sm:px-7',
                                 'bg-yellow-400 text-black' => $row['is_ours'],
                                 'bg-zinc-950 text-white group-hover:bg-zinc-900' => ! $row['is_ours'],
-                            ])>
+                            ]) style="--preview-columns: {{ max(1, $previewStatistics->count()) }}">
                                 <span class="text-center text-2xl font-black">{{ $row['position'] }}</span>
                                 <div class="flex min-w-0 items-center gap-4">
                                     <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-2">
@@ -112,18 +118,12 @@
                                     </div>
                                     <span class="truncate text-base font-black sm:text-lg">{{ $row['team_name'] }}</span>
                                 </div>
-                                <div class="text-right sm:text-center">
-                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Pkt</span>
-                                    <span class="text-xl font-black">{{ $row['points'] }}</span>
-                                </div>
-                                <div class="hidden text-center sm:block">
-                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Mecze</span>
-                                    <span class="text-lg font-bold">{{ $row['games'] }}</span>
-                                </div>
-                                <div class="hidden text-center sm:block">
-                                    <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">Bilans</span>
-                                    <span class="text-lg font-bold">{{ $row['wins'] }}–{{ $row['losses'] }}</span>
-                                </div>
+                                @foreach($previewStatistics as $statistic)
+                                    <div @class(['text-right sm:text-center', 'hidden sm:block' => ! $loop->first])>
+                                        <span class="block text-[10px] font-black uppercase tracking-widest opacity-60">{{ $statistic['label'] }}</span>
+                                        <span class="text-xl font-black">{{ collect($statistic['fields'])->map(fn ($field) => $row[$field] ?? '—')->implode('–') }}</span>
+                                    </div>
+                                @endforeach
                             </div>
                         @endforeach
                     </div>

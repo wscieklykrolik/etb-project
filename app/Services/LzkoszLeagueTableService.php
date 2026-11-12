@@ -25,11 +25,17 @@ class LzkoszLeagueTableService
     public const SOURCES = [
         'lzkosz' => ['label' => 'ŁZKosz', 'league_id' => 215, 'season' => '2025/2026', 'url' => self::SOURCE_URL, 'base_url' => 'https://lzkosz.pl/'],
         'kpzkosz' => ['label' => 'KPZKosz', 'league_id' => 89, 'season' => '2026/2027', 'url' => 'https://www.kpzkosz.com/liga/89/tabela.html', 'base_url' => 'https://www.kpzkosz.com/'],
+        'sofascore' => ['label' => 'Sofascore', 'league_id' => 39654, 'season' => '2026/2027', 'url' => 'https://www.sofascore.com/pl/basketball/tournament/poland/3-liga-mezczyzn-kujawsko-pomorska-lodzka/39654#id:107625', 'base_url' => 'https://www.sofascore.com/'],
     ];
 
     public function sync(string $source = self::DEFAULT_SOURCE, ?string $season = null): int
     {
         $configuration = self::SOURCES[$source] ?? self::SOURCES[self::DEFAULT_SOURCE];
+        if ($source === 'sofascore') {
+            $rows = app(SofascoreLeagueTableService::class)->fetch();
+
+            return DB::transaction(fn () => $this->storeRows($rows, (int) $configuration['league_id'], $season ?: $configuration['season']));
+        }
         $response = Http::timeout(15)->get($configuration['url']);
 
         if (! $response->successful()) {
@@ -138,6 +144,7 @@ class LzkoszLeagueTableService
                     'points_against' => $row['points_against'],
                     'points_difference' => $row['points_difference'],
                     'ratio' => $row['ratio'],
+                    'last_five' => $row['last_five'] ?? null,
                     'source_team_name' => $row['team_name'],
                     'source_team_url' => $row['team_url'],
                     'synced_at' => $syncedAt,

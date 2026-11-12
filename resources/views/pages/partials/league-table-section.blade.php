@@ -21,9 +21,12 @@
                     <h3 class="mb-4 text-xl font-black text-white">Sezon {{ $leagueTableSeason }}</h3>
                 @endif
                 @include('pages.partials.league-table-grid', ['rows' => $leagueStandings])
+                @if($leagueStandings->contains(fn ($row) => !empty($row->last_five)))
+                    <p class="mt-3 text-xs text-zinc-400">Forma: <span class="font-bold text-emerald-300">Z — zwycięstwo</span>, <span class="font-bold text-red-300">P — porażka</span>. Od najstarszego do najnowszego meczu.</p>
+                @endif
                 <p class="mt-4 text-xs text-zinc-500">
                     Ostatnia synchronizacja: {{ $leagueStandings->max('synced_at')?->format('d.m.Y H:i') ?? 'brak danych' }}.
-                    Źródło: {{ $leagueTableSourceLabel }}.
+                    Źródło: <a href="{{ $leagueTableSourceUrl }}" target="_blank" rel="noopener noreferrer" class="font-bold text-yellow-400 underline hover:text-white">{{ $leagueTableSourceLabel }}</a>.
                 </p>
             </article>
         @endif
@@ -37,6 +40,9 @@
                     @endif
                 </div>
                 @include('pages.partials.league-table-grid', ['rows' => $snapshot->rows])
+                @if($snapshot->source_url)
+                    <p class="mt-4 text-xs text-zinc-500">Źródło: <a href="{{ $snapshot->source_url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-yellow-400 underline hover:text-white">{{ $snapshot->source_label }}</a>. Tabela archiwalna.</p>
+                @endif
             </article>
         @endforeach
 

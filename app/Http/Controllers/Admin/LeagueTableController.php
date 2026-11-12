@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\LeagueTableSourceException;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\LeagueStanding;
@@ -22,7 +23,7 @@ class LeagueTableController extends Controller
     public function sync(Request $request, LzkoszLeagueTableService $leagueTableService): RedirectResponse
     {
         $validated = $request->validate([
-            'source' => ['nullable', 'in:lzkosz,kpzkosz'],
+            'source' => ['nullable', 'in:'.implode(',', array_keys(LzkoszLeagueTableService::SOURCES))],
             'season' => ['nullable', 'regex:/^20\d{2}\/(?:\d{2}|20\d{2})$/'],
         ], [
             'season.regex' => 'Sezon wpisz w formacie 20XX/XX albo 20XX/20XX.',
@@ -39,7 +40,7 @@ class LeagueTableController extends Controller
 
             return redirect()
                 ->route('profile.edit')
-                ->with('error', 'Nie udało się pobrać tabeli z wybranego serwisu. Spróbuj ponownie za chwilę.');
+                ->with('error', $exception instanceof LeagueTableSourceException ? $exception->getMessage() : 'Nie udało się pobrać tabeli z wybranego serwisu. Spróbuj ponownie za chwilę.');
         }
 
         AppSetting::setValue('league_table_source', $source);
@@ -68,13 +69,15 @@ class LeagueTableController extends Controller
             return back()->with('error', 'Nie ma bieżącej tabeli, którą można zapisać w archiwum.');
         }
 
-        DB::transaction(function () use ($validated, $standings, $season): void {
+        DB::transaction(function () use ($validated, $standings, $season, $configuration): void {
             $snapshot = LeagueTableSnapshot::query()->create([
                 'title' => $validated['title'],
-                'season' => $validated['season'] ?: $season,
+                'season' => ($validated['season'] ?? null) ?: $season,
                 'description' => $validated['description'] ?? null,
                 'is_published' => $validated['is_published'] ?? false,
                 'sort_order' => $validated['sort_order'] ?? 0,
+                'source_label' => $configuration['label'],
+                'source_url' => $configuration['url'],
             ]);
 
             foreach ($standings as $index => $standing) {
@@ -94,6 +97,7 @@ class LeagueTableController extends Controller
                     'points_against' => $standing->points_against,
                     'points_difference' => $standing->points_difference,
                     'ratio' => $standing->ratio,
+                    'last_five' => $standing->last_five,
                     'sort_order' => $index,
                 ]);
             }
@@ -135,6 +139,18 @@ class LeagueTableController extends Controller
     {
         $validated = $this->validateSnapshot($request, true);
         $rows = $this->parseManualRows($validated['rows'] ?? '');
+        $previousRows = $snapshot->rows->keyBy('team_name');
+        foreach ($rows as &$row) {
+            $previous = $previousRows->get($row['team_name']);
+            if ($previous && $previous->games === $row['games'] && $previous->wins === $row['wins'] && $previous->losses === $row['losses']) {
+                $row['last_five'] = $previous->last_five;
+            }
+            if ($previous && $previous->points_for === $row['points_for'] && $previous->points_against === $row['points_against']) {
+                $row['ratio'] = $previous->ratio;
+                $row['points_difference'] = $previous->points_difference;
+            }
+        }
+        unset($row);
 
         DB::transaction(function () use ($snapshot, $validated, $rows): void {
             $snapshot->update([
@@ -238,29 +254,30 @@ class LeagueTableController extends Controller
 
             [$teamName, $points, $games, $wins, $losses, $homeWins, $homeLosses, $awayWins, $awayLosses, $pointsFor, $pointsAgainst] = $cells;
             foreach (array_slice($cells, 1) as $cell) {
-                if (filter_var($cell, FILTER_VALIDATE_INT) === false) {
+                if ($cell !== '' && filter_var($cell, FILTER_VALIDATE_INT) === false) {
                     throw ValidationException::withMessages(['rows' => 'Wiersz '.($lineNumber + 1).' zawiera wartość, która nie jest liczbą całkowitą.']);
                 }
             }
 
             $opponent = Opponent::query()->whereRaw('LOWER(name) = ?', [Str::lower($teamName)])->first();
-            $difference = (int) $pointsFor - (int) $pointsAgainst;
+            $nullableInteger = fn ($value) => $value === '' ? null : (int) $value;
+            $difference = $pointsFor === '' || $pointsAgainst === '' ? null : (int) $pointsFor - (int) $pointsAgainst;
             $rows[] = [
                 'position' => count($rows) + 1,
                 'team_name' => $teamName,
                 'logo_path' => $opponent?->logo_path,
-                'points' => (int) $points,
-                'games' => (int) $games,
-                'wins' => (int) $wins,
-                'losses' => (int) $losses,
-                'home_wins' => (int) $homeWins,
-                'home_losses' => (int) $homeLosses,
-                'away_wins' => (int) $awayWins,
-                'away_losses' => (int) $awayLosses,
-                'points_for' => (int) $pointsFor,
-                'points_against' => (int) $pointsAgainst,
+                'points' => $nullableInteger($points),
+                'games' => $nullableInteger($games),
+                'wins' => $nullableInteger($wins),
+                'losses' => $nullableInteger($losses),
+                'home_wins' => $nullableInteger($homeWins),
+                'home_losses' => $nullableInteger($homeLosses),
+                'away_wins' => $nullableInteger($awayWins),
+                'away_losses' => $nullableInteger($awayLosses),
+                'points_for' => $nullableInteger($pointsFor),
+                'points_against' => $nullableInteger($pointsAgainst),
                 'points_difference' => $difference,
-                'ratio' => (int) $pointsAgainst === 0 ? 0 : (int) $pointsFor / (int) $pointsAgainst,
+                'ratio' => $pointsFor === '' || $pointsAgainst === '' ? null : ((int) $pointsAgainst === 0 ? 0 : (int) $pointsFor / (int) $pointsAgainst),
                 'sort_order' => count($rows),
             ];
         }

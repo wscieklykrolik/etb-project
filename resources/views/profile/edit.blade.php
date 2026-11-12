@@ -662,8 +662,9 @@
                                 <p class="mt-1 text-sm text-slate-600">Wybierz serwis, z którego mają pochodzić dane w tym sezonie.</p>
                                 <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
                                     <select name="source" x-model="source" class="rounded-lg border-slate-300 text-sm" aria-label="Źródło tabeli">
-                                        <option value="lzkosz" @selected($leagueTableSource === 'lzkosz')>ŁZKosz — dotychczasowe źródło</option>
-                                        <option value="kpzkosz" @selected($leagueTableSource === 'kpzkosz')>KPZKosz — liga 89</option>
+                                        @foreach(\App\Services\LzkoszLeagueTableService::SOURCES as $sourceKey => $sourceConfiguration)
+                                            <option value="{{ $sourceKey }}" @selected($leagueTableSource === $sourceKey)>{{ $sourceConfiguration['label'] }} — liga {{ $sourceConfiguration['league_id'] }}</option>
+                                        @endforeach
                                     </select>
                                     <button class="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-black text-black hover:bg-yellow-300">Pobierz tabelę</button>
                                 </div>
@@ -746,7 +747,15 @@
                                             </div>
                                             <div>
                                                 <h3 class="font-black">{{ $standing->opponent->name }}</h3>
-                                                <p class="text-sm text-slate-600">{{ $standing->points }} pkt · {{ $standing->wins }}-{{ $standing->losses }} · kosze {{ $standing->points_for }}-{{ $standing->points_against }}</p>
+                                                <p class="text-sm text-slate-600">
+                                                    @if($standing->points !== null)<span>{{ $standing->points }} pkt</span>@endif
+                                                    @if($standing->wins !== null && $standing->losses !== null)<span> · bilans {{ $standing->wins }}-{{ $standing->losses }}</span>@endif
+                                                    @if($standing->points_for !== null && $standing->points_against !== null)<span> · kosze {{ $standing->points_for }}-{{ $standing->points_against }}</span>@endif
+                                                    @if($standing->points_difference !== null)<span> · różnica {{ $standing->points_difference > 0 ? '+' : '' }}{{ $standing->points_difference }}</span>@endif
+                                                </p>
+                                                @if($standing->last_five)
+                                                    <div class="mt-2 w-fit rounded-lg bg-slate-950 p-2">@include('pages.partials.league-team-form', ['results' => $standing->last_five])</div>
+                                                @endif
                                                 @if ($standing->source_team_url)
                                                     <a href="{{ $standing->source_team_url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-yellow-700 hover:text-yellow-900">Profil w serwisie ligi</a>
                                                 @endif

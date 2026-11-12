@@ -27,6 +27,7 @@ class LeagueStanding extends Model
         'points_against',
         'points_difference',
         'ratio',
+        'last_five',
         'source_team_name',
         'source_team_url',
         'synced_at',
@@ -37,6 +38,7 @@ class LeagueStanding extends Model
         return [
             'synced_at' => 'datetime',
             'ratio' => 'decimal:4',
+            'last_five' => 'array',
         ];
     }
 

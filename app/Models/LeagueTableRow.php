@@ -10,12 +10,12 @@ class LeagueTableRow extends Model
     protected $fillable = [
         'position', 'team_name', 'logo_path', 'points', 'games', 'wins', 'losses',
         'home_wins', 'home_losses', 'away_wins', 'away_losses', 'points_for',
-        'points_against', 'points_difference', 'ratio', 'sort_order',
+        'points_against', 'points_difference', 'ratio', 'sort_order', 'last_five',
     ];
 
     protected function casts(): array
     {
-        return ['ratio' => 'decimal:4'];
+        return ['ratio' => 'decimal:4', 'last_five' => 'array'];
     }
 
     public function snapshot(): BelongsTo
