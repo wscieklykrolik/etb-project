@@ -1,4 +1,4 @@
-gitgotimport forms from '@tailwindcss/forms';
+import forms from '@tailwindcss/forms';
 import legacyTheme from './resources/css/tailwind-legacy-theme.js';
 
 /** @type {import('tailwindcss').Config} */
