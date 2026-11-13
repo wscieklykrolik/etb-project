@@ -18,7 +18,7 @@
     <p class="mb-4 text-xs font-black uppercase tracking-[0.2em] {{ $labelClasses }}">{{ $match->statusLabel() }}</p>
 
     <h3 class="sr-only">{{ $publicTeamName }} kontra {{ $match->opponent_name }}</h3>
-    <x-match-teams :match="$match" class="{{ $titleClasses }}" />
+    <x-match-teams :match="$match" :show-result="true" class="{{ $titleClasses }}" />
     <p class="mt-4 text-sm font-semibold {{ $metaClasses }}">{{ $match->is_home ? 'Domowy' : 'Wyjazdowy' }} · {{ $match->location }}</p>
     <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -26,12 +26,7 @@
             <p class="mt-1 {{ $isFeatured ? 'text-3xl' : 'text-2xl' }} font-black {{ $timeClasses }}">{{ $match->timeLabel() }}</p>
         </div>
 
-        @if ($match->hasResult())
-            <div class="text-right">
-                <p class="text-3xl font-black {{ $match->isWin() ? 'text-emerald-400' : 'text-red-400' }}">{{ $match->our_score }}:{{ $match->opponent_score }}</p>
-                <p class="text-xs font-bold uppercase tracking-widest {{ $match->isWin() ? 'text-emerald-400' : 'text-red-400' }}">{{ $match->isWin() ? 'Zwycięstwo' : 'Porażka' }}</p>
-            </div>
-        @elseif ($match->ticketSalesActive())
+        @if (! $match->hasResult() && $match->ticketSalesActive())
             <span class="rounded text-sm font-black transition {{ $ticketClasses }}">Kup bilety</span>
         @endif
     </div>

@@ -27,3 +27,25 @@ it('renders ETB first with its logo for home and away matches', function (bool $
             ->assertSeeInOrder(['data-team="etb"', 'logos/etb.png', 'data-team="opponent"', 'logos/rywal.png'], false);
     }
 })->with([true, false]);
+
+it('shows the score between the teams on public match cards', function (int $ourScore, int $opponentScore, string $result) {
+    TeamMatch::factory()->create([
+        'status' => TeamMatch::STATUS_FINISHED,
+        'match_date' => now()->subDay(),
+        'our_score' => $ourScore,
+        'opponent_score' => $opponentScore,
+        'publish_at' => null,
+    ]);
+
+    $score = "{$ourScore}:{$opponentScore}";
+
+    foreach ([route('home'), route('schedule')] as $url) {
+        $this->get($url)
+            ->assertOk()
+            ->assertSeeInOrder(['data-team="etb"', $score, $result, 'data-team="opponent"'], false)
+            ->assertDontSee('aria-label="kontra"', false);
+    }
+})->with([
+    [102, 95, 'Zwycięstwo'],
+    [87, 106, 'Porażka'],
+]);

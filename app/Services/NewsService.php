@@ -19,7 +19,7 @@ class NewsService
     {
         $data = $this->normalizeData($data);
 
-        if ($mainImage && $data['type'] === News::TYPE_ARTICLE) {
+        if ($mainImage && $data['type'] !== News::TYPE_GALLERY) {
             $data['main_image_path'] = MediaStorage::store($mainImage, 'news/main');
         }
 
@@ -45,17 +45,14 @@ class NewsService
         $data = $this->normalizeData($data);
         $deleteAfterUpdate = [];
 
-        if (($removeMainImage || $data['type'] !== News::TYPE_ARTICLE) && $news->main_image_path) {
-            $deleteAfterUpdate[] = $news->main_image_path;
+        if ($mainImage && $data['type'] !== News::TYPE_GALLERY) {
+            $data['main_image_path'] = MediaStorage::store($mainImage, 'news/main');
+        } elseif ($removeMainImage || $data['type'] !== $news->type || $data['type'] === News::TYPE_GALLERY) {
             $data['main_image_path'] = null;
         }
 
-        if ($mainImage && $data['type'] === News::TYPE_ARTICLE) {
-            $data['main_image_path'] = MediaStorage::store($mainImage, 'news/main');
-
-            if ($news->main_image_path) {
-                $deleteAfterUpdate[] = $news->main_image_path;
-            }
+        if ($news->main_image_path && array_key_exists('main_image_path', $data)) {
+            $deleteAfterUpdate[] = $news->main_image_path;
         }
 
         $news->update($data);

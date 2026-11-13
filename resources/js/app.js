@@ -328,6 +328,38 @@ window.newsEditor = function newsEditor(config = {}) {
     };
 };
 
+window.newsFields = function newsFields(type) {
+    return {
+        type,
+        coverPreview: null,
+        pasteCover(event) {
+            if (this.type !== 'video') return;
+
+            const image = Array.from(event.clipboardData?.files ?? [])
+                .find((file) => file.type.startsWith('image/'));
+            if (!image) return;
+
+            event.preventDefault();
+            const transfer = new DataTransfer();
+            transfer.items.add(image);
+            this.$refs.mainImage.files = transfer.files;
+            this.previewCover();
+        },
+        previewCover() {
+            this.destroy();
+            const file = this.$refs.mainImage.files[0];
+            this.coverPreview = file?.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+        },
+        clearCover() {
+            this.$refs.mainImage.value = '';
+            this.previewCover();
+        },
+        destroy() {
+            if (this.coverPreview) URL.revokeObjectURL(this.coverPreview);
+        },
+    };
+};
+
 window.newsGallery = function newsGallery() {
     return {
         selectedImages: [],

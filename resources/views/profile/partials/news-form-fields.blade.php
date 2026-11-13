@@ -9,7 +9,7 @@
 <input type="hidden" name="_news_form" value="{{ $formKey }}">
 <input type="hidden" name="save_as_draft" value="0">
 
-<div class="space-y-4" x-data="{ type: @js($selectedType) }">
+<div class="space-y-4" x-data="newsFields(@js($selectedType))" @paste="pasteCover($event)">
     <div>
         <p class="text-sm font-black text-gray-800">Typ aktualności</p>
         <div class="mt-2 grid gap-3 md:grid-cols-3">
@@ -80,17 +80,26 @@
             <input name="is_visible" type="checkbox" value="1" class="rounded border-gray-300 text-yellow-500" @checked($field('is_visible', ($item?->is_draft ? true : ($item?->is_visible ?? true))))>
             <span class="text-sm font-medium text-gray-700">Widoczne publicznie</span>
         </label>
-
-        <label class="block" x-show="type === 'article'">
-            <span class="text-sm font-medium text-gray-700">Zdjęcie główne</span>
-            <input name="main_image" type="file" accept="image/*" class="mt-1 w-full rounded border border-gray-300 bg-white text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold">
-        </label>
     </div>
 
     <label class="block" x-show="type === 'video'">
         <span class="text-sm font-medium text-gray-700">Link do filmu YouTube</span>
         <input name="video_url" type="url" :required="type === 'video'" value="{{ $field('video_url', $item?->video_url) }}" placeholder="https://www.youtube.com/watch?v=..." class="mt-1 w-full rounded border-gray-300">
     </label>
+
+    <div x-show="type === 'article' || type === 'video'" x-cloak :tabindex="type === 'video' ? 0 : null" :class="type === 'video' && 'rounded-lg border border-gray-200 bg-gray-50 p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-500'">
+        <label class="block">
+            <span class="text-sm font-medium text-gray-700" x-text="type === 'video' ? 'Okładka filmu (opcjonalna)' : 'Zdjęcie główne'"></span>
+            <span x-show="type === 'video'" class="mt-1 block text-sm text-gray-600">Wybierz plik lub kliknij w obszar okładki i wklej obraz ze schowka (Ctrl+V). Okładka pojawi się na stronie głównej i w aktualnościach.</span>
+            <input x-ref="mainImage" @change="previewCover()" :disabled="type === 'gallery'" name="main_image" type="file" accept="image/*" class="mt-2 w-full rounded border border-gray-300 bg-white text-sm file:mr-4 file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-semibold">
+        </label>
+        <template x-if="type === 'video' && coverPreview">
+            <div class="mt-3">
+                <img :src="coverPreview" alt="Podgląd wybranej okładki filmu" class="aspect-video w-full max-w-xs rounded bg-zinc-900 object-cover">
+                <button type="button" @click="clearCover()" class="mt-2 text-sm font-semibold text-red-700">Usuń wybrany plik</button>
+            </div>
+        </template>
+    </div>
 
     <div x-data="newsGallery()" x-show="type === 'article' || type === 'gallery'">
     <label class="block">
@@ -111,18 +120,18 @@
     @if ($item?->main_image_path)
         <div
             x-data="{ removed: @js((bool) $field('remove_main_image', false)) }"
-            x-show="type === 'article'"
+            x-show="type === @js($item->type) && type !== 'gallery'"
             class="rounded border border-gray-200 p-3"
             :class="removed ? 'border-red-200 bg-red-50' : 'bg-white'"
         >
-            <p class="mb-3 text-sm font-black text-gray-800">Obecne zdjęcie główne</p>
+            <p class="mb-3 text-sm font-black text-gray-800">{{ $item->type === \App\Models\News::TYPE_VIDEO ? 'Obecna okładka filmu' : 'Obecne zdjęcie główne' }}</p>
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
-                <img src="{{ \App\Support\MediaStorage::url($item->main_image_path) }}" alt="Zdjęcie główne" class="h-32 w-48 shrink-0 rounded object-cover" :class="removed && 'opacity-40'">
+                <img src="{{ \App\Support\MediaStorage::url($item->main_image_path) }}" alt="{{ $item->type === \App\Models\News::TYPE_VIDEO ? 'Okładka filmu' : 'Zdjęcie główne' }}" class="h-32 w-48 shrink-0 rounded object-cover" :class="removed && 'opacity-40'">
                 <div class="min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-500">Zapisana ścieżka</p>
                     <code class="mt-1 block break-all rounded bg-gray-100 px-2 py-1.5 text-xs text-gray-700">{{ $item->main_image_path }}</code>
                     <input type="checkbox" name="remove_main_image" value="1" x-model="removed" class="sr-only">
-                    <button type="button" @click="removed = ! removed" class="mt-3 text-sm font-semibold" :class="removed ? 'text-gray-700' : 'text-red-700'" x-text="removed ? 'Cofnij usunięcie' : 'Usuń zdjęcie główne'"></button>
+                    <button type="button" @click="removed = ! removed" class="mt-3 text-sm font-semibold" :class="removed ? 'text-gray-700' : 'text-red-700'" x-text="removed ? 'Cofnij usunięcie' : (type === 'video' ? 'Usuń okładkę' : 'Usuń zdjęcie główne')"></button>
                     <p x-show="removed" x-cloak class="mt-1 text-xs font-medium text-red-700">Zdjęcie zostanie usunięte po zapisaniu zmian.</p>
                 </div>
             </div>

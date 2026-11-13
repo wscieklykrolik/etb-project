@@ -1,4 +1,4 @@
-@props(['match'])
+@props(['match', 'showResult' => false])
 
 @php
     $ourLogoUrl = \App\Support\MediaStorage::url($match->home_logo)
@@ -14,7 +14,14 @@
         </div>
         <span class="break-words text-base font-black">{{ $publicTeamName }}</span>
     </div>
-    <span class="pt-5 text-lg font-black" aria-label="kontra">–</span>
+    @if ($showResult && $match->hasResult())
+        <div class="flex h-16 flex-col items-center justify-center {{ $match->isWin() ? 'text-emerald-400' : 'text-red-400' }}">
+            <span class="whitespace-nowrap text-xl font-black leading-none tabular-nums sm:text-2xl">{{ $match->our_score }}:{{ $match->opponent_score }}</span>
+            <span class="mt-1 text-[0.625rem] font-bold uppercase tracking-wide">{{ $match->isWin() ? 'Zwycięstwo' : 'Porażka' }}</span>
+        </div>
+    @else
+        <span class="pt-5 text-lg font-black" aria-label="kontra">–</span>
+    @endif
     <div class="flex min-w-0 flex-col items-center gap-2 text-center" data-team="opponent">
         <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-white p-2">
             @if ($opponentLogo)

@@ -103,6 +103,54 @@ it('blocks youtube videos until marketing cookies are accepted', function () {
     $response->assertSee('Wywiad po meczu');
 });
 
+it('manages a video cover shown only in news previews', function () {
+    $disk = Storage::fake('public');
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+    $data = [
+        'type' => News::TYPE_VIDEO,
+        'title' => 'Wywiad z okładką',
+        'excerpt' => 'Rozmowa po ostatnim meczu.',
+        'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'is_visible' => '1',
+    ];
+
+    $this->actingAs($admin)->post(route('news.store'), [
+        ...$data,
+        'main_image' => uploadedTestImage('cover.png'),
+    ])->assertSessionHasNoErrors();
+
+    $news = News::query()->sole();
+    $cover = $news->main_image_path;
+    $disk->assertExists($cover);
+
+    $this->get(route('home'))->assertOk()->assertSee($cover);
+    $this->get(route('news.index'))->assertOk()->assertSee($cover);
+    $this->get(route('news.show', $news))->assertOk()
+        ->assertDontSee($cover)
+        ->assertSee('data-cookie-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"', false);
+    $this->get(route('news.edit', $news))->assertOk()->assertSee('Obecna okładka filmu');
+
+    $this->put(route('news.update', $news), $data)->assertSessionHasNoErrors();
+    expect($news->fresh()->main_image_path)->toBe($cover);
+
+    $this->put(route('news.update', $news), [
+        ...$data,
+        'main_image' => uploadedTestImage('replacement.png'),
+    ])->assertSessionHasNoErrors();
+
+    $replacement = $news->fresh()->main_image_path;
+    $disk->assertExists($replacement);
+    $disk->assertMissing($cover);
+
+    $this->put(route('news.update', $news), [
+        ...$data,
+        'remove_main_image' => '1',
+    ])->assertSessionHasNoErrors();
+
+    expect($news->fresh()->main_image_path)->toBeNull();
+    $disk->assertMissing($replacement);
+});
+
 it('keeps scheduled galleries hidden until their publication time', function () {
     $author = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
